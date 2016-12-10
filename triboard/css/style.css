@@ -1,0 +1,128 @@
+h1
+{
+	text-align: center;
+}
+
+body
+{
+  	background: #f9f9f9;
+  	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  	font-weight: 100;
+  	font-size: 2.2vw;
+  	margin: 0px 0px;
+}
+
+.board
+{
+	margin: 10px 10px;
+}
+
+.cell
+{
+	//transition-delay: 0.1s;
+	transition-duration: 0.75s;
+	shape-rendering: crispEdges;
+	//-webkit-backface-visibility: hidden;
+	-webkit-tap-highlight-color:rgba(0,0,0,0.0);
+}
+
+.cell--blue
+{
+	fill: blue;
+}
+
+.cell--red
+{
+	fill: #e80000;
+}
+
+.cell--green
+{
+	fill: green;
+}
+
+.cell--empty
+{
+	fill: lightgray;
+	transition-duration: 0s;
+}
+
+.cell--wall
+{
+	fill: #646464;
+}
+
+.cell--help
+{
+    fill: blue;
+    fill-opacity: 0.25;
+}
+
+.cell--help
+{
+    transition-duration: 1s;
+}
+
+.scores
+{
+	background-color: #222;
+	text-align: center;
+	width: 100%;
+}
+
+.score, .score--is-current
+{
+	position: relative;
+	margin: 1.0% 2.5%;
+	padding: 0.6% 1%;
+	display: inline-block;
+	width: 12vw;
+	border-radius: 0.75vw;
+} 
+
+.score--blue
+{
+	background-color: lightblue;
+	color: #00009b;
+}
+
+.score--red
+{
+	background-color: #ffaaaa;
+	color: #c40000;
+}
+
+.score--green
+{
+	background-color: lightgreen;
+	color: #006600;
+}
+
+.score
+{
+	border: 0.35vw solid #222;
+}
+
+.score--is-current
+{
+	border: 0.35vw solid white;
+}
+
+.help-button
+{
+	background-color: #222;
+	//font-family: 'Zapf Dingbats';
+    border: none;
+    color: #c0c0c0;
+    margin: 10px 1.2%;
+    text-align: center;
+    display: inline-block;
+    font-size: 2.7vw;
+    font-weight: bold;
+    outline: none;
+}
+
+.help-button:hover
+{
+    color: white;
+}
