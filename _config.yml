@@ -38,3 +38,6 @@ defaults:
       type: post
     values:
       tags: Other
+
+# The github repo that is to be used for looking up comments
+comments_repo: QuentinDuval/quentinduval.github.io
