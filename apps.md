@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Games
+title: Apps
 ---
 
 [Interval Training Timer](https://quentinduval.github.io/interval-training/index.html)
