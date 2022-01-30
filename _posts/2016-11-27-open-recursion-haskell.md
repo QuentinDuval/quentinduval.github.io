@@ -20,7 +20,7 @@ We observe that we can cut any collection [X1, X2 .. Xn] in two parts, around on
 
 As we have to do this for all i in [1..N], the recurrence relation becomes:
 
-```
+```haskell
 bstCount :: Int -> Integer
 bstCount n
   | n <= 1 = 1
@@ -37,7 +37,7 @@ Open recursion consists of avoiding direct recursion by adding an extra layer of
 
 By doing so, the recurrence formula looses its recursive nature. Here is how it would translate into Haskell:
 
-```
+```haskell
 bstCount :: (Int -> Integer) -> Int -> Integer
 bstCount rec n
   | n <= 1 = 1
@@ -46,14 +46,14 @@ bstCount rec n
 
 How can we get our recurrence relation back? By introducing a wrapper function that will give itself to the “bstCount” recurrence. Instead of having a direct recursion, we have a two-step recursion. This is best explained by example:
 
-```
+```haskell
 bstCountNaive :: Int -> Integer
 bstCountNaive = bstCount bstCountNaive
 ```
 
 By simple renaming, we can see that it can be expressed as: x = f x. So the naive recursive algorithm we had earlier is effectively the fixed point of the open recurrence relation. Which can be written in Haskell as:
 
-```
+```haskell
 import Data.Function(fix)
  
 bstCountNaive :: Int -> Integer
@@ -69,7 +69,7 @@ We can now exploit this open recursion to insert some memoization in the middle 
 
 So instead of triggering a recursion, we search the sub-solution result into our memoization vector, which translates into the following Haskell code:
 
-```
+```haskell
 memoBstCount :: Int -> Integer
 memoBstCount n = Vector.last memo
   where
