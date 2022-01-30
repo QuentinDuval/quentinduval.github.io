@@ -95,7 +95,6 @@ Our next move should be to evaluate our expression, given some values for the va
 To perform the evaluation itself, we will create a new interpreter. We will call this function “eval”. Again, the function just has to follow the recursive structure of its input:
 
 ```
-
 type Env = Map.Map String Int
 
 eval :: Env -> Expr -> Int
