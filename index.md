@@ -1,5 +1,9 @@
-Here you can say lots of fun things about your site.
+Welcome to the website of Quentin Duval, software developer since 2010, and currently research engineer in Artificial Intelligence since mid-2020.
 
-Maybe say a some things about yourself.
+[Google scholar profile](https://scholar.google.com/citations?user=XTaVGqYAAAAJ)
 
-Or maybe what you plan to blog about.
+[Git Hub](https://github.com/QuentinDuval)
+
+[New blog](/blog.md)
+
+[Old blog](https://deque.blog/)
