@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Catamorph your DSL (Deep Dive)"
+description: ""
+tags: Functional-Programming
+---
+
 ## Catamorph your DSL: Deep Dive
 
 This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).

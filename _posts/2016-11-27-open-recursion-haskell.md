@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Open Recursion (Haskell)"
+description: ""
+tags: Functional-Programming
+---
+
 ## Open Recursion (Haskell)
 
 There is a large class of problems that we can solve by nice mathematical recurrence relations.

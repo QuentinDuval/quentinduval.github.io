@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Catamorph your DSL (Introduction)"
+description: ""
+tags: Functional-Programming
+---
+
 ## Catamorph your DSL (Introduction)
 
 I recently had the pleasure to go to a Haskell workshop on Domain Specific Languages (DSL). The goal was to teach us the basics on how to build a DSL.

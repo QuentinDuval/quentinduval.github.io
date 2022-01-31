@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Open Recursion (Performance)"
+description: ""
+tags: Functional-Programming
+---
+
 ## Open Recursion (Performance)
 
 In the two previous posts, we used open recursion to provide efficient solutions to dynamic programming problems, keeping the following aspects decoupled:
