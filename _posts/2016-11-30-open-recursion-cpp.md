@@ -2,7 +2,7 @@
 layout: post
 title: "Open Recursion (C++)"
 description: ""
-tags: Functional-Programming
+tags: [Functional-Programming, C++]
 ---
 
 

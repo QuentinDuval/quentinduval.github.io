@@ -2,7 +2,7 @@
 layout: post
 title: "Open Recursion (Haskell)"
 description: ""
-tags: Functional-Programming
+tags: [Functional-Programming, Haskell]
 ---
 
 ## Open Recursion (Haskell)
