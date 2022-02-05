@@ -13,8 +13,8 @@ linkedin_username: "quentin-duval-53ba6576"
 #youtube_username: username
 #googleplus_username: +username
 
-# theme: "minima"
-theme: cayman
+theme: "minima"
+# theme: cayman
 
 rss: rss
 
