@@ -13,10 +13,8 @@ linkedin_username: "quentin-duval-53ba6576"
 #youtube_username: username
 #googleplus_username: +username
 
-#########################################################################################
-######### Nothing below needs to be changed (unless you know what you're doing) #########
-#########################################################################################
-theme: "minima"
+# theme: "minima"
+theme: cayman
 
 rss: rss
 
