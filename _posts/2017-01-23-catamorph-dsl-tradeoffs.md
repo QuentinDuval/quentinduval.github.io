@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, Haskell]
 ---
 
-## Catamorph your DSL: Trade-offs
-
 This post is a third of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).
 
 Our first post introduced an Arithmetic DSL that allowed to build expression composed of operations like addition and multiplication integer constants and integers variables. We built several interpreters on top of it, to print, evaluate or optimize our arithmetic expressions. But then we faced an issue: our AST manipulation function could not be composed efficiently.
@@ -15,7 +13,7 @@ Our second post introduced the notion of Catamorphism as a way to solve the comp
 
 We have seen some of the benefits of using Catamorphism. Today’s post will discuss the trade-offs associated with it.
 
-### Complexity through un-familiarity
+# Complexity through un-familiarity
 
 The first obvious drawback to the introduction of catamorphism is the increase in complexity they bring.
 
@@ -29,7 +27,7 @@ If on the contrary, we consider simplicity as defined by Rich Hickey, that means
 * The algebra function is only concerned about the transformation
 * Efficient composition favours modular and testable code
 
-### Post walk does not fit all recursions
+# Post walk does not fit all recursions
 
 Catamorphisms do not fit all of the recursions you might want to perform on your expression. They only deal with one recursion pattern, depth first search post-order traversal, in exchange of what they provide their benefits.
 
@@ -41,7 +39,7 @@ The laziness of Haskell might help to reduce this overhead in some particular ca
 
 This should not neither be surprising nor considered a drawback though. Although map (std::transform in C++) is more specialized than fold (a.k.a. reduce or std::accumulate), we use extensively. Using a more specialized algorithm declares our intent more effectively. The next developer might even thank you.
 
-### Termination guaranty
+# Termination guaranty
 
 One nice thing about catamorphisms is that this recursion scheme is guaranteed to terminate for non-pathological cases (pathological cases include passing to cata a non terminating algebra or an infinite expression to traverse).
 
@@ -51,7 +49,7 @@ On the other side, it also sets some strict limits to what we can express with t
 
 For example, a LISP interpreter might need to be able to express things like a server loop. This is one limitation to keep in mind when choosing a recursion scheme.
 
-### Missing tail recursion
+# Missing tail recursion
 
 Another limitation of Catamorphisms is that this recursion scheme is not tail recursive. In particular, the implementation we provided will consume one additional layer of stack at each recursion.
 
@@ -89,7 +87,7 @@ data ExprR r
 
 In the end, I do not think tail recursion is a real drawback of catamorphisms. Having extracted and isolated the recursion allows us to make sure we have an efficient of data that does not need to be tail recursive. Ensuring the same level of quality would be much harder if all recursion where done manually.
 
-### Conclusion and what’s next
+# Conclusion and what’s next
 
 Through this post, we discussed some of the tradeoffs related to the use of the catamorphism recursion scheme.
 

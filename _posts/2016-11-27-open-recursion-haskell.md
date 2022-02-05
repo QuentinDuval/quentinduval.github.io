@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, Haskell]
 ---
 
-## Open Recursion (Haskell)
-
 There is a large class of problems that we can solve by nice mathematical recurrence relations.
 
 The recurrence is usually simple to read, to reason about, and describes the solution with concision. But a naive translation of this recurrence into code will very often lead to a very inefficient algorithm.
@@ -15,7 +13,7 @@ When the sub-problems of the recurrence relation form a DAG, the usual trick is 
 
 Thankfully, with open recursion, can have the best of both worlds!
 
-### Counting Binary Search Trees
+# Counting Binary Search Trees
 
 Before introducing the technique, let us first take a nice example whose solution can be described by a simple recurrence relation: [counting binary search trees](https://www.hackerrank.com/challenges/number-of-binary-search-tree).
 
@@ -38,7 +36,7 @@ But this algorithm is terribly inefficient: we keep recomputing the same sub-sol
 
 We know the next step, which is to memoize the solutions to the sub-problems. However, as our original goal was to do it without compromising the code readability, let us first introduce open recursion.
 
-### Adding Open Recursion
+# Adding Open Recursion
 
 Open recursion consists of avoiding direct recursion by adding an extra layer of indirection. It typically means transforming our recurrence relation to take a new parameter, a function that will be called instead of recurring.
 
@@ -67,7 +65,7 @@ bstCountNaive :: Int -> Integer
 bstCountNaive = fix bstCount
 ```
 
-### Adding memoization
+# Adding memoization
 
 We can now exploit this open recursion to insert some memoization in the middle of the recursion. In our specific case, the sub-problems exhibit a simple structure:
 
@@ -87,7 +85,7 @@ How can it even work? You are witnessing here the magic of Haskell: laziness hel
 
 Following this change, at each N we now have N-1 steps to perform, each taking constant time, thanks to memoization. This gives us a quadratic complexity (the result of the sum from 1 to N).
 
-### Conclusion
+# Conclusion
 
 Using open recursion in combination with Haskell laziness has effectively let us decoupled the following aspects:
 

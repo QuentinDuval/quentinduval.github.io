@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, C++]
 ---
 
-## Open Recursion (Performance)
-
 In the two previous posts, we used open recursion to provide efficient solutions to dynamic programming problems, keeping the following aspects decoupled:
 
 * The recurrence relation: the solution to our problem

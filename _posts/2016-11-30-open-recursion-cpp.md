@@ -5,9 +5,6 @@ description: ""
 tags: [Functional-Programming, C++]
 ---
 
-
-## Open Recursion (C++)
-
 In the [previous post](2016-11-27-open-recursion-haskell.md), we explored how we could leverage open recursion to solve a dynamic programming problem, while keeping the following aspect decoupled:
 
 * The recurrence relation: the solution to our problem

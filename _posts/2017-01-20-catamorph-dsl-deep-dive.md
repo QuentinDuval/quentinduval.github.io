@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, Haskell]
 ---
 
-## Catamorph your DSL: Deep Dive
-
 This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).
 
 Our last post introduced an Arithmetic DSL that allowed to build expression composed of operations like addition and multiplication integer constants and integers variables. On top of this DSL, we built several interpreter functions:
@@ -182,7 +180,7 @@ To convince ourselves it works, we can test our function:
 "(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
 ```
 
-### Evaluation and dependencies
+### Evaluation and dependencies
 
 Let us continue our exploration of catamorphisms by rewriting our two next most straightforwards evaluators, eval and dependencies.
 

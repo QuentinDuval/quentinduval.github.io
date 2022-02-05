@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, Haskell]
 ---
 
-## Catamorph your DSL (Introduction)
-
 I recently had the pleasure to go to a Haskell workshop on Domain Specific Languages (DSL). The goal was to teach us the basics on how to build a DSL.
 
 The workshop covered a lot of ground, too much to cover here. I will instead focus on one specific notion that this workshop made me discover (and which I found pretty useful and amazing): catamorphisms.
