@@ -2,6 +2,7 @@
 layout: post
 title: "Catamorph your DSL (Deep Dive)"
 description: ""
+categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
 ---
 

@@ -2,6 +2,7 @@
 layout: post
 title: "Open Recursion (Performance)"
 description: ""
+categories: [functional-programming]
 tags: [Functional-Programming, C++]
 ---
 

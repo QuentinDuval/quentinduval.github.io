@@ -2,6 +2,7 @@
 layout: post
 title: "Catamorph your DSL (Clojure)"
 description: ""
+categories: [functional-programming]
 tags: [Functional-Programming, Clojure]
 ---
 

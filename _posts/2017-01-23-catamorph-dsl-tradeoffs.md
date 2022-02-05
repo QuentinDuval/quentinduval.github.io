@@ -2,6 +2,7 @@
 layout: post
 title: "Catamorph your DSL (Trade-offs)"
 description: ""
+categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
 ---
 
