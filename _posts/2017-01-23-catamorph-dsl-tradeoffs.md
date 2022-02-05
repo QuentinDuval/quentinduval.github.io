@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Catamorph your DSL (Deep Dive)"
+title: "Catamorph your DSL (Trade-offs)"
 description: ""
 tags: [Functional-Programming, Haskell]
 ---
