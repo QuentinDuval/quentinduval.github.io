@@ -22,14 +22,7 @@
   <script type="text/javascript"> hljs.highlightAll();</script>
   <!-- end highlight.js support -->
 
-  <!-- for mathjax support -->
-  {% if page.usemathjax %}
-  <script type="text/x-mathjax-config">
-          MathJax.Hub.Config({
-          TeX: { equationNumbers: { autoNumber: "AMS" } }
-          });
-        </script>
-  <script type="text/javascript" async
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  {% if page.use_math %}
+    {% include mathjax.html %}
   {% endif %}
 </head>
