@@ -19,7 +19,7 @@ theme: "minima"
 rss: rss
 
 # Build settings
-# markdown: kramdown
+markdown: kramdown
 
 kramdown:
   syntax_highlighter_opts:
