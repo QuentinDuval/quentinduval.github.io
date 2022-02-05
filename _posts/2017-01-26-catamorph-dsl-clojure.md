@@ -5,8 +5,6 @@ description: ""
 tags: [Functional-Programming, Clojure]
 ---
 
-## Catamorph your DSL: Clojure
-
 In the previous three posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST of our DSL from he operations we want to perform on it.
 
 We saw how it could help us compose operations before traversing the AST of our DSL, leading to more efficient composition and better testability.
@@ -22,7 +20,7 @@ In this post, we will focus on Clojure, and will:
 
 In the process, we will illustrate that the concept of Catamorphism is related to post-order depth first search traversal of trees.
 
-### Growing our arithmetic DSL
+# Growing our arithmetic DSL
 
 Our first task will be to choose a representation for our DSL.
 
@@ -74,7 +72,7 @@ To complete our arithmetic expression, and abstract away from its representation
 
 These query functions will allow us to implement the equivalent of the pattern matching logic of Haskell in our Clojure code.
 
-### Introducing Clojure Walk
+# Introducing Clojure Walk
 
 We already discussed in the previous posts that catamorphisms relate to post-order depth first search traversal of the AST of our DSL. Clojure offers a really good implementation of tree traversals in its [clojure.walk namespace](https://clojure.github.io/clojure/clojure.walk-api.html).
 
@@ -107,7 +105,7 @@ Let us see how it works by tracing the visit of all nodes along the traversal:
  
 Note that there is one big difference with the Catamorphism we had in Haskell: because we visit every single node, we will also visit the keywords :add and :mul of our DSL. This is something we will have to take this into account.
 
-### Pretty printing walk
+# Pretty printing walk
 
 Let us put the postwalk function to use by translating in Clojure our most basic interpreter, the pretty printer.
 
@@ -158,7 +156,7 @@ prn = cata algebra where
 
 Although it leverages very different means, Clojure achieves the same kind of simple, decoupled, and close-to-specification code than Haskell. Beautiful, right?
 
-### Evaluate and dependencies
+# Evaluate and dependencies
 
 We can as easily translate to Clojure our next two most straightforward interpreters, _eval_ (renamed evaluate since eval already exists in Clojure) and _dependencies_.
 
@@ -190,7 +188,7 @@ The implementation of _dependencies_, which lists all the variables of the expre
     e))
 ```
 
-### Composable optimizations
+# Composable optimizations
 
 After the appetizers, the main dish: the implementation of the arithmetic expression optimization functions.
 
@@ -231,7 +229,7 @@ It almost looks too simple to be true. Let us try it out to check if we are not 
 => "(+ 3 (* 2 y) x)"
 ```
 
-### Partial application
+# Partial application
 
 Our last remaining challenge is to implement the partial evaluation of an arithmetic expression, which we will name partial-eval to avoid naming conflicts with existing Clojure functions.
 
@@ -272,7 +270,7 @@ Interestingly, if we partially evaluate our function with a environment holding 
 => 8
 ```
 
-### Conclusion and what’s next
+# Conclusion and what’s next
 
 In a few lines of code, we managed to build an arithmetic DSL, with all the interesting features we built in Haskell. The code is about the same length, as simple and composable as in Haskell.
 
