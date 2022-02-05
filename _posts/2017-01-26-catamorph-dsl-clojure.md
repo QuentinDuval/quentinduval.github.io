@@ -2,7 +2,7 @@
 layout: post
 title: "Catamorph your DSL (Clojure)"
 description: ""
-tags: [Functional-Programming, Haskell]
+tags: [Functional-Programming, Clojure]
 ---
 
 ## Catamorph your DSL: Clojure
