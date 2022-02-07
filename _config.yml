@@ -13,6 +13,8 @@ linkedin_username: "quentin-duval-53ba6576"
 #youtube_username: username
 #googleplus_username: +username
 
+google_analytics: G-RRHHYN266B
+
 theme: "minima"
 # theme: cayman
 
@@ -32,6 +34,8 @@ plugins:
 titles_from_headings:
   strip_title: true
   collections: true
+
+permalink: /:categories/:year/:month/:day/:title:output_ext
 
 defaults:
   - scope:
