@@ -38,6 +38,8 @@ titles_from_headings:
 # permalink: /:categories/:year/:month/:day/:title:output_ext
 permalink: /:year/:month/:day/:title:output_ext
 
+show_excerpts: true
+
 defaults:
   - scope:
       path: ""
