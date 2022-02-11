@@ -31,7 +31,7 @@ However, we observed that the memoization strategy was still depending on the su
 
 Today, we will explore a general memoization strategy that does not require much knowledge about the content of the recurrence formula to memoize. In particular, it does not require prior knowledge of the sub-solution space.
 
-### Using hash map as generic memoization strategy
+## Using hash map as generic memoization strategy
 
 The simplest way to be decoupled from the sub-solutions space we need to compute, is to use a hash map. This hash map:
 
@@ -66,7 +66,7 @@ In particular, the memoization strategy does not have to care about:
 
 But by doing so, we went from a tightly packed vector to a more memory consuming and less local data structure. Surely there is a price to pay.
 
-### Performance implications
+## Performance implications
 
 Rich Hickey said that nowadays “Programmers know the benefits of everything and the tradeoffs of nothing”. So we must ask ourselves: did our successive decoupling refinement had an impact on performance?
 
@@ -100,7 +100,7 @@ Sure enough this implementation is faster than our “Eager vector” implementa
 
 (All of my benchmarks were performed on Clang with -02)
 
-### No benefits without trade-offs
+## No benefits without trade-offs
 
 Open-recursion is a nice technique that allows to provide quick and easily readable solution to dynamic programming problems. It is also a nice cheat: I used it repeatedly in Hackerrank or TopCoder to get a fast working implementation of my algorithms.
 
@@ -115,7 +115,7 @@ Does it means that the different techniques we saw are useless? On the contrary,
 
 These rules are obviously not covering all cases, but they served me well until now.
 
-### Conclusion
+## Conclusion
 
 This post concludes the series focused on open recursion technique, which I think is a really nice cheat for solving dynamic programming problems.
 

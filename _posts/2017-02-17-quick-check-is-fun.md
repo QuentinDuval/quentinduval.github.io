@@ -21,7 +21,7 @@ This post is dedicated to do justice to QuickCheck by exploring some of those mo
 
 _Note: This post is built on top of our [previous post]({% link _posts/2017-02-14-quick-check-experiments.md %}). The experiments we will conduct with QuickCheck will feature the same arithmetic DSL. You might want to read this previous post first._
 
-# Generating random valid code
+## Generating random valid code
 
 Generating random stuff is always quite a bit of fun. Why not break the boredom of doing serious test, by leveraging our generators to do stupid random things?
 
@@ -78,7 +78,7 @@ Did you know that 64, the square of 8, negated and added to the sum of numbers f
 
 _Note: if your company pays you by the line, you know have a way to create an incredible amount of valid code in a very short amount of time._
 
-# Ending the infix VS prefix debate
+## Ending the infix VS prefix debate
 
 Since we are already on the LISP subject, we can take this opportunity to solve the long lasting developer debate. Which is better, infix or prefix notation?
 
@@ -90,7 +90,7 @@ Since we have arithmetic expressions generators at hand, we can devise a fair ex
 
 Because every developer’s life goal is to golf his code, the winner will be the format that results in the shortest string representation in average.
 
-#### A first infix pretty printer
+### A first infix pretty printer
 
 Let us start by creating our `prnInfix` pretty printer. We need to be careful with the parentheses. We would not want our pretty printer to modify the meaning of our arithmetic expressions.
 
@@ -131,7 +131,7 @@ prnInfix e
 
 Quite disappointing to say the least. With that much noise induced by unnecessary parentheses, the infix notation clearly stands no chance. We will need to improve on our heuristic to have an entertaining fight.
 
-#### Improving the infix pretty printer
+### Improving the infix pretty printer
 
 To witness a fair fight, we need our `prnInfix` to use much less parentheses. We note that a multiplication only needs to add parentheses around sub-expressions that correspond to additions.
 
@@ -179,7 +179,7 @@ prnInfix e
 
 Our infix pretty printer is now fairly equipped for a fair contest.
 
-#### Game, set and match
+### Game, set and match
 
 Our challengers are ready. The crowd is waiting. We only need to implement our contest. Here is how the game will be structured:
 
@@ -219,7 +219,7 @@ runContest 100
 
 We would not want to conclude too fast and declare that prefix notation completely owns the infix notation. Instead, we hope the reader will come to this same conclusion by himself/herself.
 
-# This madness is over
+## This madness is over
 
 We are done: these random stupid experiments are over (for now). I cannot know if you found such experiments funny or even remotely enjoyable.
 

@@ -17,7 +17,7 @@ In today’s post, we will complete the implementation of our RapidCheck module,
 
 This post will present two different strategies to implement this shrinking process. The first attempt will show the simplest solution that might come into mind. Although it will achieve the desired shrinking, we will explain in what sense it is badly designed. Identifying these defects will lead us to a second, much better solution to the problem.
 
-# Motivation
+## Motivation
 
 In our first post, we went over the process of building the basic blocks of our RapidCheck implementation. One of our success criteria was for our implementation to successfully find a counter example to following invalid property:
 
@@ -50,7 +50,7 @@ rapidCheck prop_gcd_bad
            counterExample = ["1","0"]}
 ```
 
-# Meaning of shrinking
+## Meaning of shrinking
 
 Our goal is to provide simpler counter examples to the user of the RapidCheck module, ideally a minimal test case. But what do we mean by “simpler” or “minimal”?
 
@@ -58,7 +58,7 @@ The general notion has to do with information. We want to remove noise from the 
 
 We can therefore understand shrinking as the process of removing information from our arguments until we get to the point where all the information contained in these arguments is necessary for the test case to fail.
 
-# Enhancing Arbitrary
+## Enhancing Arbitrary
 
 The first step toward being able to provide simpler counter examples is to figure out a way to reduce the amount of information of each of the arguments that lead to the property to fail.
 
@@ -84,7 +84,7 @@ class Arbitrary a where
 * If the test case is already minimal, we can return an empty list
 * The default implementation helps for types that do not support shrinking
 
-# The shrink tree
+## The shrink tree
 
 To find the simplest counter arguments, several sequential calls to shrink might be needed. These recursive applications of shrink build a tree, whose root is the initial value that led to a counter example.
 
@@ -92,7 +92,7 @@ We will assume that this tree is built such that the children are ordered in suc
 
 If this assumption holds, we can therefore explore the tree by finding the first children that makes the property fail, and dive deeper into this branch. If no children makes the property fail, the visit stops and we return our smaller counter example.
 
-# Arbitrary example
+## Arbitrary example
 
 Now that we know what is expected from the shrink function, we can enrich the Arbitrary Integer instance to provide an implementation for it. Our implementation will stay very close to the one provided in [Test.QuickCheck.Arbitrary](https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Arbitrary.html):
 
@@ -122,7 +122,7 @@ shrink (-2048)
 > [2048,0,-1024,-1536,-1792,-1920,-1984,-2016,-2032,-2040,-2044,-2046,-2047]
 ```
 
-# Plugging the shrinking in Testable
+## Plugging the shrinking in Testable
 
 We know our `Arbitrary` type class has a new member shrink. We would like this ability to shrink to be automatically used inside the `Testable` properties that are made of shrinkable arguments.
 
@@ -151,7 +151,7 @@ We now reached the point where we need to implement the forAll function to plug 
 * We will start by the simplest implementation (and make it work)
 * We will then go for a better implementation (and make it work faster)
 
-# First try: visiting the shrink tree inside forAll
+## First try: visiting the shrink tree inside forAll
 
 Our first implementation will consist in slightly adapting our `forAll` function to handle the shrinking. For reference, the current implementation of this function is listed below:
 
@@ -169,7 +169,7 @@ forAll argGen prop =
 
 We will enrich the lambda given to `overFailure` and inside this lambda, we will shrink the value arg of the initial counter example.
 
-#### `Shrinking` implementation
+### `Shrinking` implementation
 
 Our shrinking process will take a function `a -> Result` to test the property against an argument of type `a`. This a will take different value as we visit the shrink tree.
 
@@ -204,7 +204,7 @@ shrinking shrink arg runSub =
         addToCounterExample shrunk failure  -- Add child to the counter example
 ```
 
-#### Plugging `shrinking` in `forAll`
+### Plugging `shrinking` in `forAll`
 
 We want the shrunk arguments to be used in place of the original randomly generated argument, and not trigger a full random test case again. So we must use the same random generator used to initially run the sub-properties for the shrinking.
 
@@ -232,7 +232,7 @@ evalSubProp :: Testable t => (a -> t) -> StdGen -> a -> Result
 evalSubProp prop rand = (`runProp` rand) . property . prop
 ```
 
-#### Resulting behavior
+### Resulting behavior
 
 This implementation works in the sense that it will shrinking the counter example as we expect it would:
 
@@ -260,11 +260,11 @@ So we shrunk argument b twice, and this will only grow with the number of argume
 
 So this is quite a waste. And there is nothing we can do about it: it is a natural consequence of a design that integrates visiting the shrink tree inside forAll.
 
-# Second try: visiting the shrink tree outside `forAll`
+## Second try: visiting the shrink tree outside `forAll`
 
 We know from our previous design that we need to search for better counter example outside of the `forAll` function. In this second design, the `forAll` function will only be responsible to build a search tree, for the rapidCheck function to explore it.
 
-#### Result tree
+### Result tree
 
 To achieve this, we will have to modify our `Property` type to return a `Result` tree instead of a single `Result`.
 
@@ -299,7 +299,7 @@ visitResultTree (Tree failure children) =
   in maybe failure visitResultTree simplerFailure
 ```
 
-#### Building the result tree
+### Building the result tree
 
 Since a Property now returns a result tree, we need to adapt our forAll function accordingly to return a result tree instead of a single result.
 
@@ -368,7 +368,7 @@ forAll argGen shrink prop =
 
 This is it: we know have an implementation that will shrink the outer arguments of a given property first, before proceeding with the inner arguments.
 
-# Enjoying shrinking
+## Enjoying shrinking
 
 Now that our implementation works, we can play a bit with it. We will run it on our invalid property, and check that the results are satisfying:
 
@@ -397,7 +397,7 @@ We can add traces in our property to check how it behaves. The following is an e
 1         0
 ```
 
-# Conclusion
+## Conclusion
 
 In this post, we went over how we could add shrinking to provide better counter examples to invalid properties.
 

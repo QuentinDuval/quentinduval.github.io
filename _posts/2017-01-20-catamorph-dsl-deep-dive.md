@@ -23,7 +23,7 @@ The post of today will introduce the notion of Catamorphisms as a nice way to:
 * Decouple the traversal from the actions to perform
 * Get efficient composition of our interpreters back
 
-### Open type recursion
+## Open type recursion
 
 One of the first step to do in order to get to Catamorphisms is to deconstruct the recursion. Practically, it means getting rid of the recursive nature of the data structure by introducing a template.
 
@@ -66,7 +66,7 @@ type Expr = Fix ExprR
 
 Fortunately, there is a Haskell package on hackage that help you automating this, in the [data-fix package](https://hackage.haskell.org/package/data-fix-0.0.3/docs/Data-Fix.html).
 
-### Building an expression
+## Building an expression
 
 To construct an _Expr_ instance, we need to adapt our “smart constructors” (Haskell’s name for factory functions) introduced in our previous post:
 
@@ -89,13 +89,13 @@ Having introduced this layer of abstraction allows us to keep the exact same syn
 
 Although our expression type got more complex by the introduction of a template, we can still instantiate it as easily as we used to, as we do not need to know the exact constructors needed at construction.
 
-### Getting to catamorphisms
+## Getting to catamorphisms
 
 Let us start by demystifying the big word. A Catamorphism is a just a name for a recursion scheme. A kind of design pattern to decouple the traversal of a recursive data structure from the work to do inside the traversal.
 
 Our cataphormism implementation will make use of the open recursion we introduced in _ExprR_ to implement a kind of post-order depth first search traversal.
 
-#### Functor instance
+### Functor instance
 
 Let us start by the first building block of the Catamorphism, making ExprR a Functor instance. It allows to apply a function on the type parameter r for the ExprR r. The Functor basically allows us to transform the type that represents the recurrence (for example to remove the recurrence).
 
@@ -112,7 +112,7 @@ Now, if we consider a function with a prototype _ExprR a -> a_, we see that prov
 
 But we are not done yet. There is an unbound number of levels of recursions to deal with. Moreover, _fmap_ does not quite fit our recursion: we have to take into account the _Fix_ constructor wrapping each _ExprR_.
 
-#### FMAP at each level
+### FMAP at each level
 
 So we need to build a function that will apply our transformation through fmap, at each level of recursion. This function is the catamorphism function below which morphs a function _ExprF a -> a_ to a function _Expr -> a_:
 
@@ -132,7 +132,7 @@ It proceeds in three steps:
 * fmap (cataExpr algebra) recurs on the sub-trees: each sub expression becomes a a
 * The resulting ExprR a is given to the function algebra to finish the job
 
-#### Generalization to all Functors
+### Generalization to all Functors
 
 We can generalize this cataExpr function to work on any fixed point of an open recursive data structure that is an instance of Functor. It means we can replace our ExprR by a Functor instance, as follows:
 
@@ -146,7 +146,7 @@ cata algebra =
 
 This is a bit abstract, so do not worry if you do not quite get this one. Just remember that applied to our ExprR, this function will resolve to the same cataExpr function we saw earlier.
 
-### Revisiting pretty printing
+## Revisiting pretty printing
 
 To best understand how catamorphisms work, examples are key. Let us start by reworking our first interpreter, the pretty printer, in terms of cata.
 
@@ -181,7 +181,7 @@ To convince ourselves it works, we can test our function:
 "(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
 ```
 
-### Evaluation and dependencies
+## Evaluation and dependencies
 
 Let us continue our exploration of catamorphisms by rewriting our two next most straightforwards evaluators, eval and dependencies.
 
@@ -215,7 +215,7 @@ dependencies = cata algebra where
 
 In both cases, and because cata takes care of the recursion, the implementation almost reflects the specification textually!
 
-### Optimized combination of optimizations
+## Optimized combination of optimizations
 
 Let us now move on the fun part, decomposing our optimization functions bit by bit, before recombining them with great efficiency. We will adapt the optimize function we introduced in our previous post, but with two big differences:
 
@@ -274,7 +274,7 @@ We did manage to combine several actions in a single traversal. This is a quite 
 
 This ability to compose easily will allow us to build modular yet efficient software as we will see in the next section.
 
-### Partial + Optimize = Eval
+## Partial + Optimize = Eval
 
 Let us take back from where we failed in the last post. We will now build an efficient evaluation function from three different building blocks:
 
@@ -314,7 +314,7 @@ That’s it! Three steps in one traversal in case of success, and a second trave
 
 _Note: you can notice there another advantage of working with catamorphisms: pattern matching does not have to be concerned with every possible cases. Since the recursion is handled outside, algebra that transform the AST can make use of the default case._
 
-### Conclusion and what’s next
+## Conclusion and what’s next
 
 This concludes our introduction of catamorphisms in Haskell.
 

@@ -17,7 +17,7 @@ After a quick refresher on our Arithmetic DSL and what it is made of, we will us
 
 Today’s post will focus on creating the appropriate arithmetic expression generator and put them into use to unit test our code. The next post will deal with the more exotic (and less serious) usage we can make of QuickCheck.
 
-# Our arithmetic DSL
+## Our arithmetic DSL
 
 Our Arithmetic DSL is made of 4 primitives: integer constants, variables, addition and multiplication operations. In addition to these types, we introduced the notion of environment, a mean to retrieve an integer value from a variable identifier.
 
@@ -86,11 +86,11 @@ We will stop there for the refresher. If you are curious and want to know how ea
 
 We will now dive into QuickCheck and play with it on our DSL.
 
-# Generator of arithmetic expressions
+## Generator of arithmetic expressions
 
 To play with QuickCheck on our DSL, our first task will be to implement the required generators of arithmetic expressions.
 
-#### The wrong way
+### The wrong way
 
 The initial temptation is to create a new `Arbitrary` instance for our `Expression` and stick all the code inside it. We will resist this temptation.
 
@@ -100,7 +100,7 @@ For instance, our arithmetic DSL makes emerge at least one very interesting clas
 
 Each equivalence classes will likely need to a specific generator. If we move all the implementation into the arbitrary function, we loose a lot of flexibility by having fused everything together. **`Arbitrary` is better used to designate a default generator for a type.**
 
-#### A better way
+### A better way
 
 We will define functions returning `Gen Expr` generators. Using standard function will allow us to mix and match them to get appropriate generators for our equivalence classes. We can then optionally select one of these generators as our default generator by instantiating `Arbitrary Expr`.
 
@@ -160,7 +160,7 @@ genCstExpr = opsGen genCst
 
 These generators will be quite handy in the following.
 
-#### Environment generators
+### Environment generators
 
 As well as generating arbitrary arithmetic expressions, we will need to generate environment of evaluation to test our eval and partial interpreters.
 
@@ -182,11 +182,11 @@ genTotalEnv = makeEnvWith (Set.fromList varNames)
 
 _(*) QuickCheck can be quite helpful at showing us design defects in our code. We cannot create a new Arbitrary instance for our Env type because it is a type synonym of a Map, which already has one such instance defined. QuickCheck points to us the need for stronger type._
 
-# Verifying and discovering properties
+## Verifying and discovering properties
 
 Now that we have quite a few generators of expressions available, we can use them in combination with QuickCheck to verify some interesting properties on our Arithmetic expressions.
 
-#### Identifying good properties to check
+### Identifying good properties to check
 
 Before we start, we should remind ourselves that QuickCheck is no replacement for all our example based tests. QuickCheck is really great at ensuring that some invariants hold, but will not handle very specific test cases.
 
@@ -194,7 +194,7 @@ For example, checking that our eval function does output the right number cannot
 
 What we can do however is to check relations between our different interpreters. There are quite a few that should pop in our head. We selected some representative examples below.
 
-#### Optimize should not change the value of expressions
+### Optimize should not change the value of expressions
 
 This property points at an interesting relation between the optimize function and the eval function.
 
@@ -212,7 +212,7 @@ quickCheck prop_optimize_eval
 
 _(*) The “non-optimized” qualifier is necessary. Our last test will show us some interesting twists which make this distinction important._
 
-#### Partial evaluation of constant expressions should yield a number
+### Partial evaluation of constant expressions should yield a number
 
 In the post describing our Arithmetic DSL, we pointed out that eval could be implemented in terms of partial evaluation. If the result of a partial evaluation is a constant term, we just had to unwrap it and get the value of the expression.
 
@@ -230,7 +230,7 @@ prop_partial_constant =
 
 The `sized` function is a quite helpful QuickCheck helper that allows us to inject the size of the input into our generator `genCstExpr`.
 
-#### Dependencies should return the variables needed for evaluation
+### Dependencies should return the variables needed for evaluation
 
 This property points out at an interesting relation between our evaluation functions and the dependencies. If each variable identifier returned by dependencies appears in the environment, partial should be able to fully reduce an expression to a constant term.
 
@@ -279,7 +279,7 @@ We discovered that our partial function was in fact able to evaluate expressions
 
 Using QuickCheck, we can quickly encounter many similar experiences. **QuickCheck is quite impressive at proving us wrong**. Doing so, it participates rather effectively at increasing the knowledge on our own code.
 
-#### Optimize does not necessarily preserve the dependencies
+### Optimize does not necessarily preserve the dependencies
 
 From the previous experiment, we can deduce that our optimize function does not systematically preserves the dependencies of an expression.
 
@@ -298,7 +298,7 @@ quickCheck (expectFailure prop_optimize_preserves_dependencies)
 
 Going back to our first test, we now understand why the distinction “non-optimised” in the property definition was quite an important one.
 
-# Conclusion and what's next?
+## Conclusion and what's next?
 
 We took as example our Arithmetic DSL we build in earlier posts, and used QuickCheck to build some generators and check some properties on it.
 

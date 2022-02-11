@@ -18,7 +18,7 @@ In particular, we explained in details and implemented the following concepts fr
 
 In this post, we will add the support for generators of functions, which is critical to test properties expressed as higher order functions, while the next post will focus on adding the support for argument shrinking, which is critical to provide better counter examples for failing properties.
 
-# Motivating Example
+## Motivating Example
 
 In a functional language such as Haskell, we often modularize and factorize our code through the use of Higher Order Functions. Testing these functions with generative testing requires QuickCheck to support the generation of functions.
 
@@ -60,7 +60,7 @@ You might feel quite disappointed by this counter example. The “function” st
 
 There is a [brilliant presentation](https://www.youtube.com/watch?v=CH8UQJiv9Q4) you can have a look at to better understand how the real QuickCheck manages to provide useful outputs for counter examples on functions.
 
-# Toward generating functions
+## Toward generating functions
 
 How can we even generate functions? Functions can operate on a potentially infinite number of values, and it seems hard to conceive a way to generate such a complex structure.
 
@@ -81,7 +81,7 @@ promote f =
     runGen (f a) rand
 ```
 
-# Generators perturbation
+## Generators perturbation
 
 The `promote` helper requires us to give it a function: `a -> Gen b`. Finding a way to instantiate such a function is the focus of this section.
 
@@ -111,13 +111,13 @@ instance
     arbitrary = promote (coarbitrary arbitrary)
 ```
 
-# Implementing perturbations
+## Implementing perturbations
 
 We saw that generating a function requires each of the argument of the function to implement the `CoArbitrary` type class.
 
 We know that for a type a to be an instance of `CoArbitrary` it needs to be able to perturb generators of any other types. Let us now look at how we can implement such a perturbation.
 
-#### General pattern
+### General pattern
 
 To influence a generator `Gen`, we can act on its `StdGen` parameter. This impact on the random generation process needs to be linked with the value of the type implementing `CoArbitrary`.
 
@@ -132,7 +132,7 @@ instance CoArbitrary Integer where
 
 This is the general pattern. We can use it to define any `CoArbitrary` instances: the only difference will be the implementation of the `perturb` function.
 
-#### Implementing perturb
+### Implementing perturb
 
 The implementation of `perturb` is critical to have good statistically properties. Matching the function prototype alone is not enough.
 
@@ -165,7 +165,7 @@ perturb n rand0 =
 
 Although we must be careful, we are not limited: there are in practice many different valid implementations possible.
 
-#### Leveraging
+### Leveraging
 
 We can use the pattern we saw above in combination with our implementation of `perturb` to easily build more instances of `CoArbitrary`. Since we have a way to build a perturbation from an integer, we can use it as an intermediary step.
 
@@ -182,7 +182,7 @@ The bottom line is that we do not need to re-invent the wheel each time we want 
 
 In particular, QuickCheck offers a lot of helpers for building both `Arbitrary` and `CoArbitrary` in its [Test.QuickCheck.Arbitrary](https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Arbitrary.html) module. This is a good place to look before starting implementing a new instance of either of those typeclasses.
 
-# Showable functions
+## Showable functions
 
 We now have everything we need to run our tests cases… except for one small but important detail. Our code will not compile, due to the requirements associated with the `Testable` typeclass:
 
@@ -201,7 +201,7 @@ The problem with this approach is that we get “function” inside our counter 
 
 QuickCheck offers the [Test.QuickCheck.Function](https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Function.html) to deal with this issue. It requires to transform the declaration of properties to use `Fun a b` instead of `a -> b`. In exchange for this small change in syntax, it is both able to show and shrink functions, improving our user experience by that much.
 
-# Conclusion and what's next
+## Conclusion and what's next
 
 In this post, we went over how we could generate functions to test properties expressed as higher order functions.
 

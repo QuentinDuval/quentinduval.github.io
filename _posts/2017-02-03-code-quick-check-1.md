@@ -18,7 +18,7 @@ Our goal will be to reproduce something close to the features described in this 
 
 We will name our own generative testing framework RapidCheck to avoid confusion when referring to the real QuickCheck.
 
-# Introduction
+## Introduction
 
 QuickCheck is a framework that allows to test properties that we think should hold on our functions. It is pretty versatile and can be used in many different contexts:
 
@@ -30,7 +30,7 @@ QuickCheck is not a proof system and is not a replacement for example based test
 
 Romeu Moura did a [great talk](https://www.youtube.com/watch?v=5pwv3cuo3Qk) explaining what property-based testing is and is not about. I encourage you to have a look at it.
 
-# Our goal for today
+## Our goal for today
 
 Our goal for today will be to implement a subset of our RapidCheck that supports checking some basic properties. We will keep the topic of testing higher order function for our next post.
 
@@ -61,7 +61,7 @@ How does the `rapidCheck` function knows how to test these properties? How does 
 
 We will use the same vocabulary used inside the original publication of QuickCheck. Our implementation will differ on several aspects from the one of the publication, in the spirit of simplifying things a bit.
 
-# Selecting our outputs
+## Selecting our outputs
 
 Let us start by addressing the simplest of our needs: returning useful results as output to the tests. Needless to say, because Property Based Testing is based on generating random inputs, returning “Test Failed” is not really helpful. The output should at the very least contain enough information to replay the failing scenario.
 
@@ -105,7 +105,7 @@ instance Monoid Result where
 
 Note that our implementation is left biased: it will report the leftmost failure if both test cases fail. Applied to a list of several test cases, it will therefore report the first error found in the list.
 
-# Generating random inputs
+## Generating random inputs
 
 In order to be able to test properties over our functions, RapidCheck needs to be able to generate some random values. We model a generator of random input of type `a` by the type `Gen` parameterized on the type it generates.
 
@@ -126,7 +126,7 @@ Note that the function wrapped in Gen is pure. Calling it twice with the same ra
 
 This might seem awkward, but we have to remember that our goal is to output reproducible test cases for the API user. Being able to replay a failing scenario deterministically is an important feature. A pure function is the safest way for us to guaranty this property.
 
-# Property
+## Property
 
 The goal of our RapidCheck library is to check to properties on our code. Properties are predicates we can run generative test against, to verify if they hold. We identify several characteristics of a Property:
 
@@ -152,11 +152,11 @@ This `Property` type might seem incomplete. In particular, there is no mention o
 
 Not if we think of a `Property` as the result of a construction process that integrates the generation of the random inputs together with the predicate we want to verify. The actual “construction process” of a Property is the subject of the next section.
 
-# Testable inputs
+## Testable inputs
 
 The purpose of this section is to define the inputs of our rapidCheck function. Before we go further, let us go through an inventory phase, in which we will review what we already know and express on paper what we really want.
 
-#### Inventory
+### Inventory
 
 Our ultimate goal is to test any property expressed as a function that returns something we could interpret as a Result. From now on, we will refer to such function as testable function. In particular, any function returning a Bool or a Result (like our prop_gcd function) should qualify.
 
@@ -171,7 +171,7 @@ We also have a nice target abstraction for our testable functions, the type `Pro
 
 For this transformation to make sense, the generator wrapped by the `Property` should represent the combined effect of the generators of each of the arguments of the original function.
 
-#### Our problem
+### Our problem
 
 Our problem is that there are theoretically no limits to the number of arguments this function could take. We could try to take a shortcut and provide overloads until we reached a maximum number of arguments, but we can do better.
 
@@ -186,7 +186,7 @@ class Testable a where
 
 Our goal is identify a base case of known Testable instances, and implement an induction step to grow this set of instances.
 
-#### Base case
+### Base case
 
 Based on our inventory, we know that functions with no arguments (constants) that return a result or a boolean are convertible to a property.
 
@@ -211,7 +211,7 @@ instance Testable Bool where
                         else Failure { seed = 0, counterExample = []}
 ```
 
-#### Induction step
+### Induction step
 
 The inputs of our induction step are an instance of a `Testable` function, named `testable` and a printable argument implementing `Arbitrary`. Our desired output is a testable instance for the function taking the additional argument as parameter.
 
@@ -244,7 +244,7 @@ forAll = undefined
 
 We just pushed the problem a bit further down the road. But the forAll really needs its next section for it alone.
 
-# Implementing forAll
+## Implementing forAll
 
 Before diving into the implementation of the forAll function, let us note that it is clearly more general than our Testable instance.
 
@@ -277,7 +277,7 @@ forAll argGen prop =
         failure { counterExample = show arg : counterExample failure }
 ```
 
-# Implementing rapidCheck
+## Implementing rapidCheck
 
 The goal of rapidCheck is to take a `Testable` instance as parameter, and try its associated `Property` with different values of seeds, in an attempt to find a counter-example.
 
@@ -312,7 +312,7 @@ rapidCheckWith attemptNb prop = do
 
 There they are, the only two functions with side effects of our RapidCheck module. It is quite remarkable how far we can push side effects away from the core implementation of a module whose main purpose is to generate random inputs to find counter-examples.
 
-# Enjoying rapidCheck
+## Enjoying rapidCheck
 
 Now that we did all this work, it is time to enjoy. We will run our initial test cases and have a look at how it behaves.
 
@@ -368,7 +368,7 @@ _(*) In real code, we should avoid defining Arbitrary instances with bad statist
 
 We can also note that writing a random generator for arbitrary long integers is not that easy. Thankfully, QuickCheck integrates a great deal of already defined Arbitrary instances. Practically, we do not need to worry about writing a generator of Integer._
 
-# Conclusion and what's next
+## Conclusion and what's next
 
 In this post, we went over the basic building block of the QuickCheck library, by implementing our own Property Based Testing framework, RapidCheck.
 

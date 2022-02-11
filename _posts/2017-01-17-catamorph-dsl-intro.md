@@ -19,7 +19,7 @@ This is a vast subject that will require several posts to explore. Across the fo
 
 The goal of today’s post is to tackle the first point: introducing a small DSL which will be used across all the following posts.
 
-### A small arithmetic DSL
+## A small arithmetic DSL
 
 We will create a small DSL that resemble the DSL introduced in the Boost Variant Tutorial. This is a classic example illustrated in many other blogs like this post on Simplify C++, but it is quite instructive nevertheless.
 
@@ -46,7 +46,7 @@ data Expr
 
 You can notice in the code above that the Op constructor is recursive: an operation is itself based on sub-expression of the same Expr DSL. This is something that will be very important when introducing catamorphisms.
 
-### Creating an arithmetic expression
+## Creating an arithmetic expression
 
 To be help testing early, our first tasks will be to facilitate the creation of an expression. We will do this by introducing what is called in Haskell “smart constructors”, basically factory functions:
 
@@ -94,7 +94,7 @@ We can try our interpreter on our previous expression:
 "(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
 ```
 
-### Evaluating and arithmetic expression
+## Evaluating and arithmetic expression
 
 Our next move should be to evaluate our expression, given some values for the variables that appear in it. We will need a supplier for these variables, that we will call an environment. Four our purpose, a simple map from string to int will do.
 
@@ -133,7 +133,7 @@ Let us try this interpreter with an environment binding x to 1 and y to 2:
 
 Note that we throw an key-not-found exception when the environment does not contain the appropriate variables. We will improve on this later.
 
-### Optimizating our arithmetic expressions
+## Optimizating our arithmetic expressions
 
 We covered the basic interpreters we could define for our DSL. At this point there is not much interest in having built a DSL in the first place.
 
@@ -191,7 +191,7 @@ But is this optimize function that useful? The user might have trivially optimiz
 
 It might be true in that case, but for more complex examples of DSL or more complex expressions, it might not be as easy. Besides, the next interpreter will show us a use case in which optimization is very useful.
 
-### Partial application
+## Partial application
 
 Let us imagine we have a really complex arithmetic expression, featuring several variables, and we want to “fix” some of them? For example, we might want to replace all occurrences of “x” with the value 1.
 
@@ -236,7 +236,7 @@ Disappointed by how stupid this expression looks? Now is the time for our optimi
 
 I told you this optimize function was useful!
 
-### Partial + Optimize = Eval
+## Partial + Optimize = Eval
 
 The last example of optimization might have raised some questions in you. What if our partial evaluation was in fact total? What if we tried to optimize an expression with no variables left? How is that different from evaluating our expression?
 
@@ -275,7 +275,7 @@ Let us try this error handling on evaluations that are bound to fail:
 *** Exception: Missing vars: fromList ["x","y"]
 ```
 
-### The limits of our model
+## The limits of our model
 
 The previous section showed that we could in theory implement our eval function in terms of partial and optimize.
 
@@ -287,7 +287,7 @@ We could simply couple the two features together, together in the same function.
 
 What then should we do? When we are faced with such dilemma, the best approach is almost always to take some distance, and rethink our design.
 
-### Easy composition favors decoupling
+## Easy composition favors decoupling
 
 The problem with our design is that it makes it hard to compose several tree traversals together efficiently.
 
@@ -295,7 +295,7 @@ When composition is not efficient or not made easy, there is less incentive to d
 
 For example, if addition and multiplication were operations that required different expertise, it could make sense to have different teams working on each operation. It would be better then to split the optimization code in two as well, for example to simplify code ownership. But because it would lead to two traversals, keeping it as a single traversal would be more efficient and likely preferred.
 
-### Conclusion and what’s next?
+## Conclusion and what’s next?
 
 We built a DSL to perform arithmetic operations on both constant integer and variable integers. We did it using a simple design, in which function recursion follows the recursive structure of our data.
 

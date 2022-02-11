@@ -14,7 +14,7 @@ In the [previous post](2016-11-27-open-recursion-haskell.md), we explored how we
 
 Today we will see how to apply this trick in a more mainstream language, C++.
 
-### Open recursion in C++
+## Open recursion in C++
 
 Our first step will be to translate the recurrence formula into a naive C++ and very inefficient implementation of our solution to the [counting binary search trees problem](https://www.hackerrank.com/challenges/number-of-binary-search-tree):
 
@@ -62,7 +62,7 @@ long long best_count_naive(int n)
 
 This function still has the same terrible performance. It is time to improve our algorithm, by leveraging Dynamic Programming techniques.
 
-### Adding memoization
+## Adding memoization
 
 You know the drill: we can now exploit this open recursion to insert some memoization in the middle in the recursion.
 
@@ -91,7 +91,7 @@ In C++, the order of evaluation now has a direct impact on the correctness of ou
 
 So although we applied the same idea, we achieve less decoupling in C++ than in Haskell: the implementer of the memoization must still care about the insides of the recurrence formula. Can we do better?
 
-### Adding laziness
+## Adding laziness
 
 To get rid of the coupling to the order of evaluation, we will take some of the ideas from Haskell, and introduce laziness into our solution. We just need a helper function that will:
 
@@ -135,7 +135,7 @@ long long bst_count_lazy(int n)
 
 We now have the same level of decoupling as with our Haskell solution.
 
-### Conclusion
+## Conclusion
 
 We proved that the open recursion trick known from the Haskell world can be very easily brought to C++. Using it, we can decouple the memoization strategy of a Dynamic Programming solution from the recurrence relation.
 

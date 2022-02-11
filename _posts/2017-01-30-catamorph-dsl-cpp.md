@@ -22,7 +22,7 @@ We translated our Haskell code into Clojure, a functional language that put much
 
 This post will be focused on exploring the limits of the applicability of this concept some more, by trying to bring it into C++.
 
-# Boost to the rescue
+## Boost to the rescue
 
 We could implement our DSL in C++ with only the STL available, using Design Patterns such as the Visitors. To keep the code short and concise, we will however rely boost as well. All the code that follows will assume the following Boost header inclusions:
 
@@ -38,7 +38,7 @@ In particular, _boost::variant_ will be one of the cornerstone of the design, as
 
 The rest of the header are mostly for convenience. We could do without it, but at the expense of some more code to write.
 
-# Arithmetic expressions in C++ Boost
+## Arithmetic expressions in C++ Boost
 
 There are many ways we could represent our expression DSL in C++. We could choose to use the Visitor design pattern for example. The solution below is based instead of boost::variant for convenience.
 
@@ -93,7 +93,7 @@ struct expression
 
 *Note: this naive implementation triggers deep copies at each level of our AST. This might lead to a quadratic behaviour in the depth of our tree when playing with transformations on our AST. A production ready implementation would have to handle these aspects we voluntarily left out for simplicity. We will come back to this issue in the conclusion.*
 
-# Factory functions and accessors
+## Factory functions and accessors
 
 The trouble with constructors of class templates in C++ is that they require their explicit templates to be listed in the code. The usual trick is to define factory functions outside of the class to automatically deduce the template parameters.
 
@@ -157,13 +157,13 @@ mul_op<T> const* get_as_mul(expression_r<T> const& e)
 
 *Note: boost::variant also offers visitors to handle pattern matching as an alternative to boost::get. But as our interpreters will not need to exhaustively match all cases, sticking to boost::get ends up being less code. This is ultimately a matter of taste: we could have done the other choice instead.*
 
-# Our C++ catamorphism
+## Our C++ catamorphism
 
 Now that we have our expression_r type, we will need to write the equivalent of the catamorphism function cata of Haskell. This function will be responsible for lifting local AST transformations into operations on the whole AST.
 
 The details on how to build a catamorphism from an open recursive type were already covered in the previous post on catamorphism in Haskell. This section will only aim at translating this code into C++.
 
-## Functor Instance
+### Functor Instance
 
 The first step is to make our expression_r type an instance of a Functor. In C++, one way to do it is to implement fmap for our type:
 
@@ -191,7 +191,7 @@ auto fmap(M map, expression_r<A> const& e)
 }
 ```
 
-## Catamorphism
+### Catamorphism
 
 Next, we need to write the catamorphism function, whose goal is to apply fmap at each level of our expression, starting from the lower levels.
 
@@ -215,7 +215,7 @@ Out cata(Algebra f, expression const& ast)
 
 One noticeable drawback of this implementation is the need to provide the output type of the _cata_ function explicitly. This could probably be dealt with.
 
-# Pretty printing our expressions in C++
+## Pretty printing our expressions in C++
 
 We now have everything to start implementing our first interpreter, our expression pretty printer. It is noticeably more verbose than in both Haskell and Clojure, but not that much. I was quite surprised by the overall concision:
 
@@ -258,7 +258,7 @@ std::cout << cata<std::string>(print_alg, e) << '\n';
 
 Now, this is not the most efficient code that we could come up with. It does create quite a lot of intermediary strings. This is the subject for another time.
 
-# Eval and dependencies
+## Eval and dependencies
 
 We can as translate to C++ our next two most straightforward interpreters, *eval* and *dependencies*. The *eval* function needs an environment holding the value of the variables in the arithmetic expression. To make it simple and keep the code short, we will:
 
@@ -318,7 +318,7 @@ std::set<id> dependencies(expression const& e)
 }
 ```
 
-# Composable C++ optimisations
+## Composable C++ optimisations
 
 Until now, the main advantage of introducing Catamorphism was to specify local transformations, which the cata function could lift to operations on the whole AST of our arithmetic DSL.
 
@@ -384,7 +384,7 @@ std::cout << cata<std::string>(print_alg, o) << '\n';
 "(+ (* y 2) x 3)"
 ```
 
-# Partial evaluation
+## Partial evaluation
 
 Our last remaining challenge is to implement the partial evaluation of an arithmetic expression.
 
@@ -461,7 +461,7 @@ std::cout << eval_2(full_env, e3) << '\n';
 8
 ```
 
-# Conclusion
+## Conclusion
 
 In this post, we managed to port the Catamorphism notion in C++ to build a series of arithmetic DSL interpreters made of:
 
@@ -471,7 +471,7 @@ In this post, we managed to port the Catamorphism notion in C++ to build a serie
 
 The complete resulting code is about three times the length of the equivalent Haskell or Clojure code (320 lines give or take), which is quite good overall. But there is a catch: this implementation is unrealistically simplistic. This is the topic of the next section.
 
-#### What's the catch?
+### What's the catch?
 
 Our simplistic memory management did exhibit some problematic quadratic behaviour in terms of copy. Addressing this concern would require some manual work: C++ offers no standard support for immutable data structure with structural sharing in its standard library, so we would probably have to rely on move semantics.
 
@@ -479,7 +479,7 @@ We also had some remaining issues regarding type deduction, which would require 
 
 So I do not think that the 320 lines of C++ code do quite compare in maturity with the 120 corresponding lines in Haskell.
 
-#### On catamorphims in C++
+### On catamorphims in C++
 
 This concludes our study of the applicability of Catamorphism in C++. Overall, I felt like this design quite not as natural as it was in Haskell or Clojure. It sometimes felt like going against the idiomatic use of the language, which is not a good sign.
 
