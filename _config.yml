@@ -1,29 +1,28 @@
+theme: minimal-mistakes-jekyll
+minimal_mistakes_skin: "default" # "default" "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+
+
 title: "Deque"
 author: "Quentin Duval"
 description: "Functions In, Fictions Out"
 
+# How to join me
 twitter_username: "quduval"
 github_username: "QuentinDuval"
 linkedin_username: "quentin-duval-53ba6576"
 #email: "mymail@box.com"
-#facebook_username: username
-#flickr_username: username
-#instagram_username: username
-#pinterest_username: username
-#youtube_username: username
-#googleplus_username: +username
+
+# URL
+# url: "http://deque.net"
+baseurl: # the subpath of your site, e.g. "/blog"
+repository: "QuentinDuval/quentinduval.github.io"
+comments_repo: QuentinDuval/quentinduval.github.io
 
 google_analytics: G-RRHHYN266B
-
-theme: "minima"
-# theme: minimal-mistakes-jekyll
-# theme: cayman
-
 rss: rss
 
 # Build settings
 markdown: kramdown
-
 kramdown:
   syntax_highlighter_opts:
     disable: true
@@ -41,7 +40,10 @@ titles_from_headings:
 permalink: /:year/:month/:day/:title:output_ext
 
 show_excerpts: true
-paginate: 6
+paginate: 8
+
+include:
+  - _pages
 
 defaults:
   - scope:
@@ -49,6 +51,3 @@ defaults:
       type: post
     values:
       tags: Other
-
-# The github repo that is to be used for looking up comments
-comments_repo: QuentinDuval/quentinduval.github.io

@@ -1,6 +1,9 @@
 ---
 layout: page
-title: About
+title: About Me
+permalink: /about-me/
+comments: false
+author_profile: false
 ---
 
 <p>
