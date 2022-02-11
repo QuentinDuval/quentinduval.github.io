@@ -3,6 +3,10 @@ hr {
   margin-bottom: 20px;
 }
 
+h1{
+  color: #037c66;
+}
+
 .post-content hr {
   -webkit-font-smoothing: antialiased;
   border: 1px solid rgb(216, 216, 216);

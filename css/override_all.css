@@ -3,6 +3,15 @@ h1{
   /*color: #037c66;*/
 }
 
+.site-header{
+  /*background-color: #444;*/
+}
+
+.site-nav a:any-link{
+  /*color: #999;*/
+  color: #444;
+}
+
 .page-content{
   font-family: "Roboto",sans-serif;
   color: #444;
@@ -18,8 +27,8 @@ a:any-link{
   /*color: #09715E*/
 }
 
-.site-title{
+.site-title a:any-link{
   /* font-family: "PT Sans",sans-serif; */
   font-size: 1.5em;
-  color: #037c66;
+  /* color: #037c66; */
 }
