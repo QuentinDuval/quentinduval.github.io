@@ -30,6 +30,7 @@ kramdown:
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-paginate
 
 titles_from_headings:
   strip_title: true
@@ -39,6 +40,7 @@ titles_from_headings:
 permalink: /:year/:month/:day/:title:output_ext
 
 show_excerpts: true
+paginate: 6
 
 defaults:
   - scope:

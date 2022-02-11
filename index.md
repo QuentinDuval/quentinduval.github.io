@@ -1,3 +1,7 @@
+---
+layout: page
+---
+
 Welcome to the website of Quentin Duval, software developer since 2010, and currently research engineer in Artificial Intelligence since mid-2020.
 
 * [Google scholar profile](https://scholar.google.com/citations?user=XTaVGqYAAAAJ)
