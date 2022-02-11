@@ -1,0 +1,25 @@
+h1{
+  font-family: "PT Sans",sans-serif;
+  /*color: #037c66;*/
+}
+
+.page-content{
+  font-family: "Roboto",sans-serif;
+  color: #444;
+  font-size: 100%;
+  font-weight: 400;
+}
+
+a:any-link{
+  color: #09715E;
+}
+
+.site-nav .page-link{
+  /*color: #09715E*/
+}
+
+.site-title{
+  /* font-family: "PT Sans",sans-serif; */
+  font-size: 1.5em;
+  color: #037c66;
+}

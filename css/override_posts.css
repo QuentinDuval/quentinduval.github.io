@@ -3,15 +3,39 @@ hr {
   margin-bottom: 20px;
 }
 
+.post-content hr {
+  -webkit-font-smoothing: antialiased;
+  border: 1px solid rgb(216, 216, 216);
+  border-radius: 0px;
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-top: 0px;
+}
+
 .post-content h2{
-  margin-top: 40px;
-  font-size: 26px;
+  margin-top: 2em;
+  font-size: 1.5em;
+  color: #037c66;
+  font-family: "PT Sans",sans-serif;
 }
 
 .post-content h3{
-  margin-top: 20px;
-  margin-bottom: 10px;
-  font-size: 20px;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-size: 1.4em;
+  color: #037c66;
+  font-family: "PT Sans",sans-serif;
+}
+
+.post-content{
+  font-family: "Roboto",sans-serif;
+  color: #444;
+  font-size: 100%;
+  font-weight: 400;
+}
+
+.post-content a:any-link {
+  color: #09715E;
 }
 
 /* Post navigation links */
