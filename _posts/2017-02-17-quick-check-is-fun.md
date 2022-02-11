@@ -1,7 +1,8 @@
 ---
 layout: post
 title: "Quickcheck is fun, deal with it"
-description: "We can leverage QuickCheck's generators for many other purpose than just Property Based Testing. Do not expect anything serious in this post: we will embrace the absurd world of generating random stuff."
+description: ""
+excerpt: "QuickCheck's generators can be leveraged for other purposes than just Property Based Testing. Let's embrace the absurd world of generating random stuff!"
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
 ---

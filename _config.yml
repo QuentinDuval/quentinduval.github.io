@@ -6,11 +6,6 @@ title: "Deque"
 author: "Quentin Duval"
 description: "Functions In, Fictions Out"
 
-# How to join me
-twitter_username: "quduval"
-github_username: "QuentinDuval"
-linkedin_username: "quentin-duval-53ba6576"
-#email: "mymail@box.com"
 
 # URL
 # url: "http://deque.net"
@@ -18,8 +13,11 @@ baseurl: # the subpath of your site, e.g. "/blog"
 repository: "QuentinDuval/quentinduval.github.io"
 comments_repo: QuentinDuval/quentinduval.github.io
 
-google_analytics: G-RRHHYN266B
-rss: rss
+analytics:
+  provider: "google"
+  google:
+    tracking_id: "G-RRHHYN266B"
+    anonymize_ip: true
 
 # Build settings
 markdown: kramdown
@@ -51,3 +49,39 @@ defaults:
       type: post
     values:
       tags: Other
+
+author:
+  # name   : "Quentin Duval"
+  # avatar : "/assets/images/rg.jpg"
+  bio    : >-
+    My name is Quentin.
+
+    I am a software engineer since 2010, and currently a research engineer in the field of AI since 2020.
+    You can read more about me in the [About me](/about-me/) section.
+  location: "Montreal, Quebec"
+  links:
+    - label: "Google Scholar"
+      icon: "fas fa-fw fa-link"
+      url: https://scholar.google.com/citations?user=XTaVGqYAAAAJ
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/QuentinDuval"
+    - label: "Twitter"
+      icon: "fab fa-fw fa-twitter-square"
+      url: "https://twitter.com/quduval"
+    - label: "LinkedIn"
+      icon: "fab fa-fw fa-linkedin"
+      url: "https://www.linkedin.com/in/quentin-duval-53ba6576"
+
+
+footer:
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/QuentinDuval"
+    - label: "LinkedIn"
+      icon: "fab fa-linkedin"
+      url: "https://www.linkedin.com/in/quentin-duval-53ba6576/"
+    - label: "Twitter"
+      icon: "fab fa-fw fa-twitter-square"
+      url: "https://twitter.com/quduval"

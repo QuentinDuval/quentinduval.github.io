@@ -6,9 +6,9 @@ comments: false
 author_profile: false
 ---
 
-<p>
-Welcome to the website of Quentin Duval, software developer since 2010, and currently research engineer in Artificial Intelligence since mid-2020.
-</p>
+My name is Quentin.
+
+I am a software engineer since 2010, and currently a research engineer in the field of Artifical Intelligence since 2020.
 
 <ul>
     <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ">Google scholar profile</a></li>
