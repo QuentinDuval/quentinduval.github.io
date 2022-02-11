@@ -46,19 +46,21 @@ layout: default
     {% if site.paginate %}
       <div class="pagination">
         {% if paginator.previous_page %}
-          <a href="{{ paginator.previous_page_path }}" class="previous">
-            Previous
-          </a>
+          <li>
+            <a href="{{ paginator.previous_page_path }}" class="previous">
+              Previous
+            </a>
+          </li>
         {% else %}
-          <span class="previous">Previous</span>
+          <li><span class="previous">Previous</span></li>
         {% endif %}
-        <span class="page_number ">
-          Page: {{ paginator.page }} of {{ paginator.total_pages }}
-        </span>
+        <li>
+          <a href="#" class="disable current">{{ paginator.page }} of {{ paginator.total_pages }}</a>
+        </li>
         {% if paginator.next_page %}
-          <a href="{{ paginator.next_page_path }}" class="next">Next</a>
+          <li><a href="{{ paginator.next_page_path }}" class="next">Next</a></li>
         {% else %}
-          <span class="next ">Next</span>
+          <li><span class="next ">Next</span></li>
         {% endif %}
       </div>
     {%- endif %}

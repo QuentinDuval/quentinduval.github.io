@@ -16,6 +16,7 @@ linkedin_username: "quentin-duval-53ba6576"
 google_analytics: G-RRHHYN266B
 
 theme: "minima"
+# theme: minimal-mistakes-jekyll
 # theme: cayman
 
 rss: rss
