@@ -24,7 +24,9 @@ a:any-link{
 }
 
 .site-nav .page-link{
-  /*color: #09715E*/
+  font-family: "Robot", sans-serif;
+  color: #999;
+  font-weight: 800;
 }
 
 .site-title a:any-link{
