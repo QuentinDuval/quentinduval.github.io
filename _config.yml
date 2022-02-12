@@ -42,7 +42,7 @@ titles_from_headings:
 permalink: /:year/:month/:day/:title:output_ext
 
 show_excerpts: true
-paginate: 8
+paginate: 6
 
 include:
   - _pages
