@@ -24,7 +24,10 @@ markdown: kramdown
 kramdown:
   syntax_highlighter_opts:
     disable: true
-    
+
+search: true
+search_full_content: true
+
 plugins:
   - jekyll-feed
   - jekyll-sitemap
