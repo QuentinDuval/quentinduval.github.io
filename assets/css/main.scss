@@ -136,7 +136,7 @@ hr.post_navi_hr{
 }
 
 /* 3 columns maximum insteaad of 4 in default template */
-.grid__item {
+.archive .grid__item {
     @include breakpoint($medium) {
         width: span(4 of 12);
         margin-left: 0; /* override margin*/
@@ -156,3 +156,20 @@ hr.post_navi_hr{
         }
     }
 }
+
+
+/* To tweak in order to increase the size of the blog at the center */
+/*
+.page {
+    @include breakpoint($large) {
+        float: right;
+        width: calc(100% - $right-sidebar-width);
+        padding-right: $right-sidebar-width;
+    }
+  
+    @include breakpoint($x-large) {
+        width: calc(100% - $right-sidebar-width);
+        padding-right: $right-sidebar-width;
+    }
+}
+*/
