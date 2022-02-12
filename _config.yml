@@ -54,6 +54,9 @@ defaults:
     values:
       tags: Other
 
+twitter:
+  username: "quduval"
+
 author:
   # name   : "Quentin Duval"
   # avatar : "/assets/images/rg.jpg"
@@ -89,3 +92,17 @@ footer:
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/quduval"
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: false
+      read_time: false
+      comments: true
+      share: true
+      related: true
+      toc: true
+      toc_label: Table of content

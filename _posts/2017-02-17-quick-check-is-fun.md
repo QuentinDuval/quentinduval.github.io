@@ -5,9 +5,6 @@ description: ""
 excerpt: "QuickCheck's generators can be leveraged for other purposes than just Property Based Testing. Let's embrace the absurd world of generating random stuff!"
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
-toc: true
-toc_label: Table of content
-related: true
 ---
 
 In our [previous post]({% link _posts/2017-02-14-quick-check-experiments.md %}), we played with QuickCheck on an arithmetic DSL and used it to check and discover properties on its associated interpreters.

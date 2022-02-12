@@ -4,7 +4,6 @@ title: "Experimenting with QuickCheck on a DSL"
 description: ""
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
-author_profile: false
 ---
 
 After having spent the last three posts exploring how to implement our own QuickCheck, the goal of the next two posts will be to play with it, to test and discover properties on our code and have fun as well.
