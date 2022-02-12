@@ -21,6 +21,7 @@ analytics:
 
 # Build settings
 markdown: kramdown
+highlighter: rouge
 kramdown:
   syntax_highlighter_opts:
     disable: true

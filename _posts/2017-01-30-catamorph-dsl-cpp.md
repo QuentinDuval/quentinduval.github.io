@@ -26,7 +26,7 @@ This post will be focused on exploring the limits of the applicability of this c
 
 We could implement our DSL in C++ with only the STL available, using Design Patterns such as the Visitors. To keep the code short and concise, we will however rely boost as well. All the code that follows will assume the following Boost header inclusions:
 
-```
+```c++
 #include <boost/algorithm/string/join.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/adaptors.hpp>
@@ -51,7 +51,7 @@ The recursive expression_r implements our open recursive data type. This type is
 
 The *add_op* and *mul_op* operations are themselves factorized as a single tagged op data type. Two tags represent the two operations, *add_tag* and *mul_tag*.
 
-```
+```cpp
 using nb = int;
 using id = std::string;
 
