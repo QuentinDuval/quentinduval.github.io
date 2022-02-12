@@ -27,7 +27,7 @@ Our first task will be to choose a representation for our DSL.
 
 Clojure encourages to use simple data structures as much as possible. We will follow the philosophy of the language and represent our DSL using nested vectors, and two keywords for addition and multiplication.
 
-```
+```clj
 [:add 1 2
  [:mul 0 "x" "y"]
  [:mul 1 "y" 2]
@@ -45,7 +45,7 @@ Using simple data structures does not forbid introducing abstractions. In the sa
 
 The following code shows how to construct an arithmetic DSL from these constructors:
 
-```
+```clj
 (def expr
   (add
     (cst 1) (cst 2)
@@ -60,7 +60,7 @@ To complete our arithmetic expression, and abstract away from its representation
 * _rator_ extracts the operator of an operation (addition or multiplication)
 * _rands_ extracts the operands of an operation (addition or multiplication)
 
-```
+```clj
 (defn rator [e] (first e))
 (defn rands [e] (rest e))
 
@@ -79,7 +79,7 @@ We already discussed in the previous posts that catamorphisms relate to post-ord
 
 Our code will rely on this namespace, as well as some additional standard namespaces inclusions. You can find them below:
 
-```
+```clj
 (ns arithmetic
   (:require
     [clojure.string :as string]
@@ -92,7 +92,7 @@ In particular, _clojure.walk/postwalk_ will be of great interest to us. It visit
 
 Let us see how it works by tracing the visit of all nodes along the traversal:
 
-```
+```clj
 (walk/postwalk
   #(do (print (str % " ")) %)
   [:add 1 [:mul "x" 2]])
@@ -116,7 +116,7 @@ Let us put the postwalk function to use by translating in Clojure our most basic
 
 The code below is the full Clojure implementation:
 
-```
+```clj
 (defn print-expr [expr]
   (walk/postwalk
     (fn algebra [e]
@@ -131,7 +131,7 @@ The code below is the full Clojure implementation:
 
 Using the function results in the result we expect:
 
-```
+```clj
 (def expr
   (add
     (cst 1) (cst 2)
@@ -145,8 +145,7 @@ Using the function results in the result we expect:
 
 Except for the matching of the operation keywords, the Clojure implementation looks really much like the Haskell implementation of our previous post:
 
-```
-
+```clj
 prn :: Expr -> String
 prn = cata algebra where
   algebra (Cst n) = show n
@@ -163,7 +162,7 @@ We can as easily translate to Clojure our next two most straightforward interpre
 
 The evaluate function below needs an environment holding the value of the variables in the arithmetic expression. To make it simple, we used a Clojure hash map (which we can consult using the _get_ function).
 
-```
+```clj
 (defn evaluate [env e]
   (walk/postwalk
     (fn [e]
@@ -177,7 +176,7 @@ The evaluate function below needs an environment holding the value of the variab
 
 The implementation of _dependencies_, which lists all the variables of the expression, is also quite small and simple to follow. It makes use of Clojure standard sets to gradually accumulate all variable names from an arithmetic expression:
 
-```
+```clj
 (defn dependencies [e]
   (walk/postwalk
     (fn [e]
@@ -195,7 +194,7 @@ After the appetizers, the main dish: the implementation of the arithmetic expres
 
 To show how easy composition of tree walking functions, we will provide two separate functions to optimize the addition and the multiplication:
 
-```
+```clj
 (defn optimize-add [e]
   (if (add? e)
     (optimize-op e + 0)
@@ -213,7 +212,7 @@ These two functions make use of the optimize-op helper function that contains th
 
 Because our solution in Clojure did not have to include a mysterious Fix type to create an infinite type (as it was required in Haskell), composition of our “algebra” is the standard function composition:
 
-```
+```clj
 (defn optimize [e]
   (walk/postwalk
     (comp optimize-mul optimize-add)
@@ -222,7 +221,7 @@ Because our solution in Clojure did not have to include a mysterious Fix type to
 
 It almost looks too simple to be true. Let us try it out to check if we are not dreaming in high definition:
 
-```
+```clj
 (print-expr expr)
 => "(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
 
@@ -236,7 +235,7 @@ Our last remaining challenge is to implement the partial evaluation of an arithm
 
 To do so, we will create a replace-var function whose goal is to replace variables bound in the evaluation environment with their respective value. We can combine this function with our optimization functions to obtain a fully fledged partial application that simplifies expression in one single tree traversal.
 
-```
+```clj
 (defn replace-var
   [env x]
   (if (string? x) (get env x x) x))
@@ -250,7 +249,7 @@ To do so, we will create a replace-var function whose goal is to replace variabl
 
 Let us see if it works. We will partially apply our initial expression with “y” bound to zero:
 
-```
+```clj
 (print-expr expr)
 => "(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
 
@@ -260,7 +259,7 @@ Let us see if it works. We will partially apply our initial expression with “y
 
 Interestingly, if we partially evaluate our function with a environment holding all the variables appearing in the expression, the result is identical to a call to _evaluate_:
 
-```
+```clj
 (print-expr (optimize expr))
 => "(+ 3 (* 2 y) x)"
 

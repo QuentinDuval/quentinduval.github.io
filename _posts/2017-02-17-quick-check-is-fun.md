@@ -70,7 +70,7 @@ generate (clojureFunctionGen 30)
 
 We can check that our random generated function is valid Clojure code by firing up a Clojure REPL and play with it.
 
-```
+```clj
 (defn ptvkegely [c j m n t u y] (+ -64 m c t y n j u))
 => #'user/ptvkegely
 
