@@ -106,3 +106,5 @@ defaults:
       related: true
       toc: true
       toc_label: Table of content
+      show_date: true
+      
