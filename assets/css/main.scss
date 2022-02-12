@@ -8,7 +8,6 @@
 $link-color: red;
 */
 
-
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
 
@@ -34,6 +33,15 @@ code{
     font-family: "PT Sans", sans-serif;
     font-weight: 400;
     color: #037c66;
+}
+
+.page__content {
+    p, li, dl {
+        font-size: 0.8em;
+    }
+    code {
+        font-size: 0.8em;
+    }
 }
 
 /* Post navigation links */
