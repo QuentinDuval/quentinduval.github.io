@@ -1,22 +1,23 @@
 {% if page.previous or page.next %}
-<hr>
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
 <div class="post_navi">
   {%- if page.previous.url -%}
   <a class="post_navi-item nav_prev" href="{{ page.previous.url }}" title="{{ page.previous.title }}">
-    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span>{{ page.previous.title }}</span></div>
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">{{ page.previous.title }}</span></div>
   </a>
   {%- else -%}
   <a class="post_navi-item nav_prev" href="{{ '/archives/' | absolute_url }}" title="Blog Archive">
-    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Archives</div><div><span>Archive of all blog posts</span></div>
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Archives</div><div><span class="post_navi-title">Archive of all blog posts</span></div>
   </a>
   {%- endif -%}
   {%- if page.next.url -%}
   <a class="post_navi-item nav_next" href="{{ page.next.url }}" title="{{ page.next.title }}">
-    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span>{{ page.next.title }}</span></div>
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">{{ page.next.title }}</span></div>
   </a>
   {%- else -%}
   <a class="post_navi-item nav_next" href="{{ '/archives/' | absolute_url }}" title="Blog Archive">
-    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Archives</div><div><span>Archive of all blog posts</span></div>
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Archives</div><div><span class="post_navi-title">Archive of all blog posts</span></div>
   </a>
   {%- endif -%}
 </div>
