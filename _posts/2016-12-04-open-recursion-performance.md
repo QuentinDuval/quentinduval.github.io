@@ -14,7 +14,7 @@ In the two previous posts, we used open recursion to provide efficient solutions
 
 As a reminder, here is the open recurrence relation we based our examples upon:
 
-```
+```cpp
 template<typename Recur>
 long long bst_count(Recur recur, int n)
 {
@@ -41,7 +41,7 @@ The simplest way to be decoupled from the sub-solutions space we need to compute
 
 Here is a C++ implementation of this strategy, based on open recursion
 
-```
+```cpp
 static long long lazy_map(std::unordered_map<int, long long>& memo, int n)
 {
    auto& computed = memo[n];
@@ -82,7 +82,7 @@ So there is approximately an order of magnitude performance drop at each refinem
 
 What about an implementation without open recursion, in which everything is coupled together? I tried benching the following C++ implementation:
 
-```
+```cpp
 long long bst_count_classic(int n)
 {
    if (n <= 1) return 1;

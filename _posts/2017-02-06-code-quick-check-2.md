@@ -32,7 +32,7 @@ The `prop_partition` is a valid property. It verifies that partition correctly d
 
 We expect this property to pass:
 
-```
+```hs
 prop_partition :: [Integer] -> (Integer -> Bool) -> Bool
 prop_partition xs p =
   let (lhs, rhs) = partition p xs
@@ -47,7 +47,7 @@ prop_partition xs p =
 
 The prop_distributive is an invalid property. It asserts that every single functions from integer to integer is distributive over the operator plus. We expect this property to fail, and RapidCheck to provide us with a counter example:
 
-```
+```hs
 prop_distributive :: Integer -> Integer -> (Integer -> Integer) -> Bool
 prop_distributive a b f = f (a + b) == f a + f b
 
@@ -74,7 +74,7 @@ This play with types makes use realize that we can build a generator of function
 
 We name this transformation `promote`:
 
-```
+```hs
 promote :: (a -> Gen b) -> Gen (a -> b)
 promote f =
   Gen $ \rand a ->
@@ -89,7 +89,7 @@ We can reason that implementing a function that instantiate a generator from a v
 
 By adding `Gen b`, we get the following prototype: `Gen b -> a -> Gen b`. One way to see this is as a perturbation on a random generator driven by a value of type `a`. We capture this requirement on a with the `CoArbitrary` type class:
 
-```
+```hs
 class CoArbitrary a where
   coarbitrary :: Gen b -> a -> Gen b
 ```
@@ -103,7 +103,7 @@ To sum this up, it means we can make an `Arbitrary (a -> b)` instances from the 
 
 Then we only need to provide the generator to coarbitrary to feed it to promote:
 
-```
+```hs
 instance
   (CoArbitrary a, Arbitrary b)
   => Arbitrary (a -> b)
@@ -123,7 +123,7 @@ To influence a generator `Gen`, we can act on its `StdGen` parameter. This impac
 
 Applied to the integer data type, this translates into the following code, where perturb is yet to be defined:
 
-```
+```hs
 instance CoArbitrary Integer where
   coarbitrary gen n =
     Gen $ \rand ->
@@ -146,7 +146,7 @@ This is the approach we have chosen for our `CoArbitrary Integer` instance, for 
 * The value zero is not forgotten and does impact the generator
 * The decomposition of the number into digits further drives the perturbation
 
-```
+```hs
 perturb :: (Integral n) => n -> StdGen -> StdGen
 perturb n rand0 =
   foldl
@@ -171,7 +171,7 @@ We can use the pattern we saw above in combination with our implementation of `p
 
 We can map the values of a type to an integer value to quickly get a `CoArbitrary` instance for it. We can also use perturb several times in a row:
 
-```
+```hs
 instance CoArbitrary [Int] where
   coarbitrary gen xs =
     Gen $ \rand ->
@@ -186,7 +186,7 @@ In particular, QuickCheck offers a lot of helpers for building both `Arbitrary` 
 
 We now have everything we need to run our tests cases… except for one small but important detail. Our code will not compile, due to the requirements associated with the `Testable` typeclass:
 
-```
+```hs
 instance
   (Show a, Arbitrary a,
    Testable testable)

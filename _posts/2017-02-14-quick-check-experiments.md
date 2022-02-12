@@ -23,7 +23,7 @@ Our Arithmetic DSL is made of 4 primitives: integer constants, variables, additi
 
 The following code snippet depicts all the types involved:
 
-```
+```hs
 type Id = String    -- Variable identifier
 type Env =          -- Environment of evaluation
   Map Id Int
@@ -53,7 +53,7 @@ Our arithmetic DSL comes with a five different interpreters. We listed them with
 
 The following short REPL interaction illustrate each of these interpreters:
 
-```
+```hs
 let e = add [ cst(1)
             , cst(2)
             , mul [cst(0), var("x"), var("y")]
@@ -111,7 +111,7 @@ Let us start with constants and variables:
 * Our constant generator `genCst` use the standard integer generator
 * Our variable generator `genVar` will be letters from “a” to “z”
 
-```
+```hs
 genCst :: Gen Expr
 genCst = fmap cst arbitrary
 
@@ -124,7 +124,7 @@ genVar = fmap var (elements varNames)
 
 From these, we can define another useful generator that creates expressions made of only variable or constants with equal probability. We call these simple terms (as opposed to operations which are compound terms):
 
-```
+```hs
 genSimpleTerm :: Gen Expr
 genSimpleTerm = oneof [genVar, genCst]
 ```
@@ -135,7 +135,7 @@ Our generator of operation will take as parameter a generator for simple terms a
 * Otherwise, we create an operation with m<=n sub-expressions
 * We recursively generate sub-expressions for size n/m
 
-```
+```hs
 opsGen :: Gen Expr -> Int -> Gen Expr
 opsGen simpleTermGen = go where
   go n = do
@@ -150,7 +150,7 @@ Since our operation generator can be parameterized by a simple term generator, w
 * `genExpr`: a generator of expression that may contain variables
 * `genCstExpr`: a generator of expression that contains no variable
 
-```
+```hs
 genExpr :: Int -> Gen Expr
 genExpr = opsGen genSimpleTerm
 
@@ -169,7 +169,7 @@ Again, we will likely need different generators, so we define the following func
 * `makeEnvWith` allows us to create an environment holding random values for some predefined variable identifiers
 * `genTotalEnv` creates an environment associating a value to all possible variable identifiers used in our tests
 
-```
+```hs
 makeEnvWith :: Set.Set String -> Gen Env
 makeEnvWith deps = do
   let n = Set.size deps
@@ -200,7 +200,7 @@ This property points at an interesting relation between the optimize function an
 
 Evaluating an expression should yield the same value as evaluating the optimised expression in the same environment. This should hold for every environment that contains the variables appearing in the non-optimised expression (*).
 
-```
+```hs
 prop_optimize_eval :: Expr -> Property
 prop_optimize_eval e =
   forAll genTotalEnv $ \env ->
@@ -218,7 +218,7 @@ In the post describing our Arithmetic DSL, we pointed out that eval could be imp
 
 This argument was based on the assumption that the partial evaluation is able to fully optimize a constant expression into a single constant term. Since partial is based on optimize, this property should also hold for the later.
 
-```
+```hs
 prop_optimize_constant :: Property
 prop_optimize_constant =
   forAll (sized genCstExpr) (isCst . optimize)
@@ -234,7 +234,7 @@ The `sized` function is a quite helpful QuickCheck helper that allows us to inje
 
 This property points out at an interesting relation between our evaluation functions and the dependencies. If each variable identifier returned by dependencies appears in the environment, partial should be able to fully reduce an expression to a constant term.
 
-```
+```hs
 prop_dependencies_allow_eval :: Property
 prop_dependencies_allow_eval =
   forAll (sized genExpr) $ \e ->
@@ -244,7 +244,7 @@ prop_dependencies_allow_eval =
 
 We may have the feeling the converse should also hold: if a single variable from an dependencies does not appear in the environment, partial should not be able to fully evaluate an expression.
 
-```
+```hs
 makePartialEnv :: Set.Set Id -> Gen Env
 makePartialEnv deps = do
   v <- elements (Set.toList deps)
@@ -261,7 +261,7 @@ prop_missing_dependencies_forbid_eval =
 
 But actually, our property fails:
 
-```
+```hs
 quickCheck prop_missing_dependencies_forbid_eval
 > *** Failed! Falsifiable (after 4 tests): 
 > (* g x)
@@ -285,7 +285,7 @@ From the previous experiment, we can deduce that our optimize function does not 
 
 **We can express the negation** (that it should keep the dependencies of an expression unchanged), and indicate to QuickCheck we expected the property to fail:
 
-```
+```hs
 prop_optimize_preserves_dependencies :: Property
 prop_optimize_preserves_dependencies =
   forAll (sized genExpr) $ \e ->

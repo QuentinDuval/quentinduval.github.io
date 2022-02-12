@@ -33,7 +33,7 @@ Our DSL will be named Expr and is based on several possible sub-types (Haskell c
 
 This translates into the following Haskell code:
 
-```
+```hs
 type Id = String
 data OpType = Add | Mul deriving (Show, Eq, Ord)
 
@@ -50,7 +50,7 @@ You can notice in the code above that the Op constructor is recursive: an operat
 
 To be help testing early, our first tasks will be to facilitate the creation of an expression. We will do this by introducing what is called in Haskell “smart constructors”, basically factory functions:
 
-```
+```hs
 cst = Cst
 var = Var
 add = Op Add
@@ -61,7 +61,7 @@ This makes it slightly easier to create an expression. It also helps abstracting
 
 Let us create our first expression:
 
-```
+```hs
 add [ cst(1)
     , cst(2)
     , mul [cst(0), var("x"), var("y")]
@@ -73,7 +73,7 @@ This is not as readable as we could make it by by leveraging standard type class
 
 The trick to implement an interpreter is simply to make it follow the structure of our data. We will call the printer interpreter prn and make it output a lispy representation of our DSL (to honor Clojure):
 
-```
+```hs
 prn :: Expr -> String
 prn (Cst n) = show n
 prn (Var v) = v
@@ -83,7 +83,7 @@ prn (Op Mul xs) = "(* " ++ unwords (map prn xs) ++ ")"
 
 We can try our interpreter on our previous expression:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -100,7 +100,7 @@ Our next move should be to evaluate our expression, given some values for the va
 
 To perform the evaluation itself, we will create a new interpreter. We will call this function “eval”. Again, the function just has to follow the recursive structure of its input:
 
-```
+```hs
 type Env = Map.Map String Int
 
 eval :: Env -> Expr -> Int
@@ -112,7 +112,7 @@ eval env (Op Mul xs) = product $ map (eval env) xs
 
 Let us try this interpreter with an environment binding x to 1 and y to 2:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -148,7 +148,7 @@ We will design our optimizer to perform the following improvements:
 
 The function optimize implements our interpreter and, again, follows the structure of the data. The function optimizeOp factorizes the similarities between the additional and the multiplication (both are Monoids):
 
-```
+```hs
 optimize :: Expr -> Expr
 optimize op@(Op Add ys) = optimizeOp Add (map optimize ys) 0 (+)
 optimize op@(Op Mul ys)
@@ -171,7 +171,7 @@ optimizeOp opType xs neutral combine =
 
 We can try our optimizer on our initial expression to see how it performs:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -199,7 +199,7 @@ This use case is quite common in practice. It is similar to partial application 
 
 Let us write a simple interpreter for this use case. As for the evaluation, we will need an environment holding values associated to variables. But instead of returning an integer, we will return another expression, in which known variable occurrences will be replaced by their associated value.
 
-```
+```hs
 partial :: Env -> Expr -> Expr
 partial env e@(Var v) =
   case Map.lookup v env of
@@ -211,7 +211,7 @@ partial env e = e
 
 Let us try it with our initial expression and an environment binding “y” to 0:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -226,7 +226,7 @@ Let us try it with our initial expression and an environment binding “y” to 
 
 Disappointed by how stupid this expression looks? Now is the time for our optimizer to really shine and clean that expression:
 
-```
+```hs
 > prn (partial env e)
 "(+ 1 2 (* 0 x 0) (* 1 0 2) (+ 0 x))"
 
@@ -244,7 +244,7 @@ It is not different. In fact, we could implement implement eval in terms of part
  
 We could even leverage this to provide better error messages. We only need to create another interpreter that would list all dependencies to variables inside an expression. We could call it dependencies and it would return a set of variable names.
 
-```
+```hs
 dependencies :: Expr -> Set.Set Id
 dependencies (Var v) = Set.singleton v
 dependencies (Op _ xs) = foldl1' Set.union (map dependencies xs)
@@ -259,7 +259,7 @@ eval' env e =
 
 Let us try this error handling on evaluations that are bound to fail:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]

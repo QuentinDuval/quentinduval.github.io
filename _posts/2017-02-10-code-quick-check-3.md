@@ -21,7 +21,7 @@ This post will present two different strategies to implement this shrinking proc
 
 In our first post, we went over the process of building the basic blocks of our RapidCheck implementation. One of our success criteria was for our implementation to successfully find a counter example to following invalid property:
 
-```
+```hs
 prop_gcd_bad :: Integer -> Integer -> Bool
 prop_gcd_bad a b = gcd a b > 1
 
@@ -32,7 +32,7 @@ rapidCheck prop_gcd_bad
 
 While this counter example is perfectly valid, it is unnecessarily complex. This property could have failed with much smaller numbers:
 
-```
+```hs
 gcd 1 1
 > 1
 
@@ -44,7 +44,7 @@ The goal for today is to modify the implementation of our RapidCheck implementat
 
 At the end of this post, our implementation should be able to come up with much smaller counter examples for prop_bad_gcd:
 
-```
+```hs
 rapidCheck prop_gcd_bad
 > Failure {seed = 1034882204061803680,
            counterExample = ["1","0"]}
@@ -71,7 +71,7 @@ To know where to start, we will enumerate some of the things we know and want ab
 
 To sum up, we need a way to express an optional process that is neither random nor generic, and involves non-determinism. This is exactly what the shrink function of the Arbitrary type class has to offer:
 
-```
+```hs
 type Shrinker a = a -> [a]
 
 class Arbitrary a where
@@ -100,7 +100,7 @@ Now that we know what is expected from the shrink function, we can enrich the Ar
 * Then we try zero, the simplest possible integer value
 * Finally, we proceed with a right recursive dichotomy
 
-```
+```hs
 instance Arbitrary Integer where
   arbitrary = Gen $ \rand -> fromIntegral $ fst (next rand)
   shrink n
@@ -114,7 +114,7 @@ instance Arbitrary Integer where
 
 The behavior of this Arbitrary Integer instance is better explained through examples:
 
-```
+```hs
 shrink 2048
 > [0,1024,1536,1792,1920,1984,2016,2032,2040,2044,2046,2047]
 
@@ -130,7 +130,7 @@ From our first post, we know that the `Testable` properties are defined in terms
 
 To do so, we add a shrinker argument to `forAll`, the function that implements the induction step. For now, we keep the implementation unchanged:
 
-```
+```hs
 forAll :: (Show a, Testable testable)
           => Gen a -> Shrink a -> (a -> testable) -> Property
 forAll argGen shrink prop = ...
@@ -138,7 +138,7 @@ forAll argGen shrink prop = ...
 
 We can then adapt the `Testable` induction step to call `forAll` function one more argument:
 
-```
+```hs
 instance
   (Show a, Arbitrary a, Testable testable)
   => Testable (a -> testable)
@@ -155,7 +155,7 @@ We now reached the point where we need to implement the forAll function to plug 
 
 Our first implementation will consist in slightly adapting our `forAll` function to handle the shrinking. For reference, the current implementation of this function is listed below:
 
-```
+```hs
 forAll :: (Show a, Testable testable) => Gen a -> (a -> testable) -> Property
 forAll argGen prop =
   Property $ Gen $ \rand ->             -- Create a new property that will
@@ -175,14 +175,14 @@ Our shrinking process will take a function `a -> Result` to test the property ag
 
 Our `shrinking` function will also need the root of the shrink tree and the shrink function, to get the children of a given node. We get the following prototype:
 
-```
+```hs
 shrinking :: (Show a) => Shrink a -> a -> (a -> Result) -> Result
 shrinking = undefined
 ```
 
 From a list of potential counter-example, we can write a search function that will return the first one that makes the property fail:
 
-```
+```hs
 findFailing :: [a] -> (a -> Result) -> Maybe (a, Result)
 findFailing smaller runSub =
   let results = map runSub smaller
@@ -191,7 +191,7 @@ findFailing smaller runSub =
 
 Applied to the output of shrink, the first match will provide us with the next branch of the shrink tree to explore. With that in mind, we can finish the implementation of the shrinking function:
 
-```
+```hs
 shrinking :: (Show a) => Shrink a -> a -> (a -> Result) -> Result
 shrinking shrink arg runSub =
   let children = shrink arg                 -- Get the children of the current branch
@@ -210,7 +210,7 @@ We want the shrunk arguments to be used in place of the original randomly genera
 
 Inside forAll, we can therefore add the shrinking inside the lambda given to overFailure. The shrinking uses the same runSub function (bound to the same seed) to search for a smaller counter example:
 
-```
+```hs
 forAll :: (Show a, Testable testable)
           => Gen a -> Shrink a -> (a -> testable) -> Property
 forAll argGen shrink prop =
@@ -227,7 +227,7 @@ forAll argGen shrink prop =
 
 This implementation makes use of the `evalSubProp` function, to get the (a -> Result) function required to explore the shrink tree:
 
-```
+```hs
 evalSubProp :: Testable t => (a -> t) -> StdGen -> a -> Result
 evalSubProp prop rand = (`runProp` rand) . property . prop
 ```
@@ -236,7 +236,7 @@ evalSubProp prop rand = (`runProp` rand) . property . prop
 
 This implementation works in the sense that it will shrinking the counter example as we expect it would:
 
-```
+```hs
 rapidCheck prop_gcd_bad
 > Failure {seed = 1034882204061803680,
            counterExample = ["1","0"]}
@@ -248,7 +248,7 @@ Our `forAll` is part of the induction process that builds a Property from a list
 
 To illustrate this, let us take the following invalid property:
 
-```
+```hs
 prop_gcd_bad :: Integer -> Integer -> Bool
 prop_gcd_bad a b = gcd a b > 1
 ```
@@ -268,7 +268,7 @@ We know from our previous design that we need to search for better counter examp
 
 To achieve this, we will have to modify our `Property` type to return a `Result` tree instead of a single `Result`.
 
-```
+```hs
 data Tree a = Tree
   { treeVal :: a
   , children :: [Tree a] }
@@ -279,7 +279,7 @@ newtype Property = Property { getGen :: Gen (Tree Result) }
 
 In this design, our `rapidCheck` function is responsible for navigating the tree and seeking a better counter example (in case of failure). The only modification needed in `rapidCheckImpl` is a call to `visitResultTree`:
 
-```
+```hs
 rapidCheckImpl :: Testable prop => Int -> Int -> prop -> Result
 rapidCheckImpl attemptNb startSeed prop = runAll (property prop)
   where
@@ -291,7 +291,7 @@ rapidCheckImpl attemptNb startSeed prop = runAll (property prop)
 
 Implementing the visitResultTree function is quite straightforward. We find the first children that preserves the failure, and dive deeper into it:
 
-```
+```hs
 visitResultTree :: Tree Result -> Result
 visitResultTree (Tree Success _) = Success
 visitResultTree (Tree failure children) =
@@ -307,7 +307,7 @@ Each argument inductively added by forAll to the Property will return a tree to 
 
 This collapse must be very carefully designed to prioritize the shrinking of the outer argument over the shrinking of the inner arguments. Otherwise, the outer arguments would almost never be visited and thus shrunk. This is the job of joinTree:
 
-```
+```hs
 joinTree :: Tree (Tree Result) -> Tree Result
 joinTree (Tree (Tree innerArgResult innerArgShrinks) outerArgShrinks) =
   Tree innerArgResult
@@ -321,7 +321,7 @@ The creation of the tree of tree of results involves a bit of code:
 * We enrich the sub-property result tree with the outer argument value
 * At the end, we join our tree of result tree into a result tree
 
-```
+```hs
 resultTree :: (Show a, Testable t) => Shrink a -> a -> (a -> t) -> Property
 resultTree shrinker arg prop =
   Property $ Gen $ \rand ->
@@ -338,7 +338,7 @@ This code makes use of the following helper functions:
 * `buildTree` creates a potentially infinite shrink tree from a root value
 * `addCounterExample` add a counter example across a whole result tree
 
-```
+```hs
 buildTree :: Shrink a -> a -> Tree a
 buildTree shrinker = build where
   build x = Tree x (map build (shrinker x))
@@ -356,7 +356,7 @@ To finish up the implementation, we only need to adapt our `forAll` to do the ne
 * Use `rand1` to generate the root value of the shrink tree of the outer argument
 * Use `rand2` to evaluate the next result tree of the chain
 
-```
+```hs
 forAll :: (Show a, Testable t) => Gen a -> Shrink a -> (a -> t) -> Property
 forAll argGen shrink prop =
   Property $ Gen $ \rand ->               -- Create a new property that will
@@ -372,7 +372,7 @@ This is it: we know have an implementation that will shrink the outer arguments 
 
 Now that our implementation works, we can play a bit with it. We will run it on our invalid property, and check that the results are satisfying:
 
-```
+```hs
 rapidCheck prop_gcd_bad
 > Failure {seed = 1034882204061803680,
            counterExample = ["1","0"]}

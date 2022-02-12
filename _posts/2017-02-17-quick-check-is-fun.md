@@ -37,7 +37,7 @@ You surely noticed our `prn` interpreter was pretty printing our arithmetic expr
 
 We can easily create a generator of function names which satisfy good code convention: not too short, not too long, and (most importantly) not too understandable.
 
-```
+```hs
 genName :: Gen String
 genName = do
   n <- elements [5..10]
@@ -46,7 +46,7 @@ genName = do
 
 We can assemble our function by pretty printing the arithmetic expression, print the dependencies inside brackets (for the parameters for the function), prefixed by a function name, and surround the whole with parentheses:
 
-```
+```hs
 toClojureFunction :: String -> Expr -> String
 toClojureFunction name e =
   unwords
@@ -57,7 +57,7 @@ toClojureFunction name e =
 
 We now have everything we need to generate Clojure functions containing optimized (we would not like to produce inefficient code) arithmetic expressions:
 
-```
+```hs
 clojureFunctionGen :: Int -> Gen String
 clojureFunctionGen size =
   toClojureFunction
@@ -105,7 +105,7 @@ As a first approximation, we could use the following strategy:
 
 This lead us to the following implementation in which we use catamorphisms for concision (if you are not familiar with this recursion scheme, you can read [our series dedicated to it]({% link _posts/2017-01-17-catamorph-dsl-intro.md %})).
 
-```
+```hs
 prnInfix :: Expr -> String
 prnInfix = cata infixAlg where
 
@@ -119,7 +119,7 @@ prnInfix = cata infixAlg where
 
 We can try our implementation on a complex enough example, to see if it leads to acceptable results:
 
-```
+```hs
 let e = add [ cst(1)
             , cst(2)
             , mul [cst(0), var("x"), var("y")]
@@ -141,7 +141,7 @@ To witness a fair fight, we need our `prnInfix` to use much less parentheses. We
 
 Catamorphisms are not a powerful enough recursion scheme to do this. We need to turn to Paramorphisms, which are Catamorphisms with context information. The context information will provide us with the sub-expression we need to make the right parenthesizing choice:
 
-```
+```hs
 para :: (ExprR (a, Expr) -> a) -> Expr -> a
 para alg = alg . fmap (para alg &&& id) . unFix
 ```
@@ -152,7 +152,7 @@ Based on this construct, we can define our pretty printer to leverage the contex
 * The addition discards the additional context (and never adds parentheses)
 * The simple terms are computed the same as before
 
-```
+```hs
 prnInfix :: Expr -> String
 prnInfix = para infixAlg where
 
@@ -167,7 +167,7 @@ prnInfix = para infixAlg where
 
 We can test our new improved pretty printer and check the improvement. In our test expression, there is no unnecessary parentheses left for us to see:
 
-```
+```hs
 let e = add [ cst(1)
             , cst(2)
             , mul [cst(0), var("x"), var("y")]
@@ -195,7 +195,7 @@ A lower score means the pretty printer produced smaller string representations f
 
 To finish up, our contest function will take as parameter the complexity of the arithmetic expressions to pretty print:
 
-```
+```hs
 data ContestResult = ContestResult {
     prefixScore :: Int ,
     infixScore  :: Int }
@@ -210,7 +210,7 @@ runContest size = do
 
 The results shows the quite stunning performance of the prefix notation, winner by quite a large margin:
 
-```
+```hs
 runContest 30
 > ContestResult {prefixScore = 31951, infixScore = 42293}
 

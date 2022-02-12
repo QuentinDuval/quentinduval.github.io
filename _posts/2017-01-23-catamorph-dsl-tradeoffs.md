@@ -58,7 +58,7 @@ This problem can however be mitigated by using _continuation passing style_ in o
 
 Here is one implementation of catamorphism using continuation passing style:
 
-```
+```hs
 import Control.Monad.Cont
 
 cataCps :: (Traversable f) => (f a -> a) -> Fix f -> a
@@ -74,7 +74,7 @@ The Control.Monad.Cont monad will get rid of the stack consumption, by chaining 
 
 This is not a problem though. We can ask GHC to generate an instance for us:
 
-```
+```hs
 {-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 
 data OpType = Add | Mul deriving (Show, Eq, Ord)

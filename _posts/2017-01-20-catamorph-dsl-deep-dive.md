@@ -27,7 +27,7 @@ The post of today will introduce the notion of Catamorphisms as a nice way to:
 
 One of the first step to do in order to get to Catamorphisms is to deconstruct the recursion. Practically, it means getting rid of the recursive nature of the data structure by introducing a template.
 
-```
+```hs
 type Id = String
 data OpType = Add | Mul deriving (Show, Eq, Ord)
 
@@ -40,7 +40,7 @@ data Expr
 
 Becomes the following, where recursion on _Expr_ is replaced by the templated type _r_:
 
-```
+```hs
 type Id = String
 data OpType = Add | Mul deriving (Show, Eq, Ord)
 
@@ -57,7 +57,7 @@ Back then, open recursion allowed us to plug memoization to our recurrence formu
 
 If you read this previous post, you know the drill. Our first step is to get back our naive recurrence by computing the fix point of our recurrence. For types, this is a bit more complex (as we cannot create infinite types) and is achieved using the following trick:
 
-```
+```hs
 newtype Fix f = Fix { unFix :: f (Fix f) }
 
 -- Analog to Expr = ExprR Expr
@@ -70,7 +70,7 @@ Fortunately, there is a Haskell package on hackage that help you automating this
 
 To construct an _Expr_ instance, we need to adapt our “smart constructors” (Haskell’s name for factory functions) introduced in our previous post:
 
-```
+```hs
 cst = Fix . Cst
 var = Fix . Var
 add = Fix . Op Add
@@ -79,7 +79,7 @@ mul = Fix . Op Mul
 
 Having introduced this layer of abstraction allows us to keep the exact same syntax as before to construct our expressions:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -101,7 +101,7 @@ Let us start by the first building block of the Catamorphism, making ExprR a Fun
 
 DerivingFunctor could have generated the Functor instance for us as follows, but doing manually is really instructive:
 
-```
+```hs
 instance Functor ExprR where
   fmap _ (Cst c) = Cst c
   fmap _ (Var v) = Var v
@@ -116,7 +116,7 @@ But we are not done yet. There is an unbound number of levels of recursions to d
 
 So we need to build a function that will apply our transformation through fmap, at each level of recursion. This function is the catamorphism function below which morphs a function _ExprF a -> a_ to a function _Expr -> a_:
 
-```
+```hs
 cataExpr :: (ExprR a -> a) -> Expr -> a
 cataExpr algebra =
   algebra
@@ -136,7 +136,7 @@ It proceeds in three steps:
 
 We can generalize this cataExpr function to work on any fixed point of an open recursive data structure that is an instance of Functor. It means we can replace our ExprR by a Functor instance, as follows:
 
-```
+```hs
 cata :: Functor f => (f a -> a) -> Fix f -> a
 cata algebra =
   algebra
@@ -159,7 +159,7 @@ One cool thing about using this recursion scheme is that we can reason locally: 
 
 This translates almost directly into the following code. We can observe that algebra function is only concerned about implementing the local transformations listed above. The cata function takes entirely care of the recursion:
 
-```
+```hs
 prn :: Expr -> String
 prn = cata algebra where
   algebra (Cst n) = show n
@@ -170,7 +170,7 @@ prn = cata algebra where
 
 To convince ourselves it works, we can test our function:
 
-```
+```hs
 > let e = add [ cst(1)
               , cst(2)
               , mul [cst(0), var("x"), var("y")]
@@ -191,7 +191,7 @@ Our eval function is based on an algebra function that only has to deal with int
 * Addition is a simple call to sum on the sub-expression results
 * Multiplication is a call to product on the sub-expression results
 
-```
+```hs
 eval :: Env -> Expr -> Int
 eval env = cata algebra where
   algebra (Cst n) = n
@@ -205,7 +205,7 @@ The dependencies function is based on an algebra function that is only concerned
 * Variables terms have only one dependency: the variable itself
 * Operations have for dependencies the total dependencies of their sub-expressions
 
-```
+```hs
 dependencies :: Expr -> Set.Set Id
 dependencies = cata algebra where
   algebra (Cst _) = Set.empty
@@ -223,7 +223,7 @@ We extracted the algebra from the recursion: to actually run the optimizations, 
 
 Optimizations for Add and Mul are separated: this is to reflect possible real situations in which two teams (and two sets of functions) are specialized and focused on dealing one complex optimization each.
 
-```
+```hs
 optimizeAdd :: ExprR Expr -> Expr
 optimizeAdd op@(Op Add _) = optimizeOp op 0 (+)
 optimizeAdd e = Fix e
@@ -253,7 +253,7 @@ We introduce below the means to compose our algebras:
 * _comp_ combines two algebra by function composition with _unFix_
 * _compAll_ combines several algebra by reducing with comp over them
 
-```
+```hs
 type Algebra f = f (Fix f) -> Fix f
 
 comp :: Algebra f -> Algebra f -> Algebra f
@@ -265,7 +265,7 @@ compAll fs = foldr1 comp fs
 
 Using these composition functions, we can write an efficient optimize function:
 
-```
+```hs
 optimize :: Expr -> Expr
 optimize = cata (optimizeMul `comp` optimizeAdd)
 ```
@@ -284,7 +284,7 @@ Let us take back from where we failed in the last post. We will now build an eff
 
 Our partial evaluation algebra function will be named replaceKnownVars. It replaces variables bound in its environment argument by their value:
 
-```
+```hs
 replaceKnownVars :: Env -> ExprR Expr -> Expr
 replaceKnownVars env = go where
   go e@(Var v) =
@@ -299,7 +299,7 @@ To finish up the work, we just need to assemble the pieces together:
 * _partial_ combines the replacement of known variables with the optimization steps
 * _eval_ runs a partial evaluation, checks whether the expression was reduced to a constant and reports an error with remaining dependencies if it was not
 
-```
+```hs
 partial :: Env -> Expr -> Expr
 partial env = cata (compAll [optimizeMul, optimizeAdd, replaceKnownVars env])
 

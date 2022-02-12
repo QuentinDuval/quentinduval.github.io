@@ -18,7 +18,7 @@ Today we will see how to apply this trick in a more mainstream language, C++.
 
 Our first step will be to translate the recurrence formula into a naive C++ and very inefficient implementation of our solution to the [counting binary search trees problem](https://www.hackerrank.com/challenges/number-of-binary-search-tree):
 
-```
+```cpp
 long long bst_count(int n)
 {
     if (n <= 1) return 1;
@@ -37,7 +37,7 @@ Adding open recursion results in a pretty simple change for our C++ implementati
 
 Following this recipe leads to the following C++ implementation:
 
-```
+```cpp
 template<typename Recur>
 long long bst_count(Recur recur, int n)
 {
@@ -52,7 +52,7 @@ long long bst_count(Recur recur, int n)
 
 Similar to what we did in Haskell, we can get back back the naive algorithm by introducing a wrapper function handling the two step recursion:
 
-```
+```cpp
 long long best_count_naive(int n)
 {
    auto recur = [](int k) { return best_count_naive(k); };
@@ -68,7 +68,7 @@ You know the drill: we can now exploit this open recursion to insert some memoiz
 
 We will use the same memoization strategy we used previously: indexing into a vector to seek the results of our previously computed sub-solutions.
 
-```
+```cpp
 long long bst_count_memo(int n)
 {
     std::vector<long long> memo_table(n+1);
@@ -80,7 +80,7 @@ long long bst_count_memo(int n)
 
 Even if we ignore the integer overflow issue (let us imagine we use a unbounded integer representation), there is still a big difference between this C++ implementation and the corresponding implementation in Haskell:
 
-```
+```haskell
 memoBstCount :: Int -> Integer
 memoBstCount n = Vector.last memo
   where
@@ -101,7 +101,7 @@ To get rid of the coupling to the order of evaluation, we will take some of the 
 
 This gives us to the following C++ implementation:
 
-```
+```cpp
 static long long lazy_impl(std::vector<long long>& memo, int n)
 {
     if (memo[n]) return memo[n];
@@ -120,7 +120,7 @@ You might wonder if we could have used a lambda instead of introducing a functio
 
 The following would indeed not compile:
 
-```
+```cpp
 long long bst_count_lazy(int n)
 {
     std::vector<long long> memo(n+1);

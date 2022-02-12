@@ -26,7 +26,7 @@ This post will be focused on exploring the limits of the applicability of this c
 
 We could implement our DSL in C++ with only the STL available, using Design Patterns such as the Visitors. To keep the code short and concise, we will however rely boost as well. All the code that follows will assume the following Boost header inclusions:
 
-```c++
+```cpp
 #include <boost/algorithm/string/join.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/adaptors.hpp>
@@ -83,7 +83,7 @@ To get our recursive expression, we will use the same trick as we used in Haskel
 
 As in Haskell, C++ is not able to create infinite types. The Fix wrapper type of Haskell needed to circumvent this limitation is replaced by the boost::recursive_wrapper. The overall design is the same:
 
-```
+```cpp
 struct expression
    : boost::recursive_wrapper<expression_r<expression>>
 {
@@ -99,7 +99,7 @@ The trouble with constructors of class templates in C++ is that they require the
 
 We will define some factory functions to help us write code more easily. These functions are somehow similar to the “smart constructors” of Haskell:
 
-```
+```cpp
 expression cst(int i) { return expression(i); };
 
 expression var(id id) { return expression(id); };
@@ -117,7 +117,7 @@ expression mul(std::vector<expression> const& rands)
 
 Having introduced this layer of “named constructors” allows us create expression more succinctly and to better declare our intent:
 
-```
+```cpp
 expression e = add({
     cst(1),
     cst(2),
@@ -129,7 +129,7 @@ expression e = add({
 
 Similarly, to “pattern match” on our boost::variant, we will introduce some helper accessors functions. Indeed, the trouble with boost::get is that it requires explicit templates to be listed in the code. Dedicated and correctly named functions will simplify the pattern matching greatly by removing noisy templates from our code:
 
-```
+```cpp
 template <typename T>
 int const* get_as_cst(expression_r<T> const& e)
 {
@@ -172,7 +172,7 @@ Constants and variable matches are left unchanged by this transformation
 For operations, we recursively apply the transformation on the sub-expressions
 We use boost::ranges to make the code more succinct:
 
-```
+```cpp
 template<typename A, typename M>
 auto fmap(M map, expression_r<A> const& e)
 {
@@ -202,7 +202,7 @@ The details behind the inner workings of this function are provided in a previou
 
 Some of the types listed below are deduced automatically. We left them in the code to show what is going on under the cover:
 
-```
+```cpp
 template<typename Out, typename Algebra>
 Out cata(Algebra f, expression const& ast)
 {
@@ -222,7 +222,7 @@ We now have everything to start implementing our first interpreter, our expressi
 * *print_alg* handles pattern matching and the two trivial cases
 * *print_op* handles the operations by joining the sub-expression strings, prepends the operation and wraps the whole with parentheses
 
-```
+```cpp
 template<typename Tag>
 std::string print_op(op<Tag, std::string> const& e, std::string const& op_repr)
 {
@@ -241,7 +241,7 @@ std::string print_alg(expression_r<std::string> const& e)
 
 At call site, the code is not that verbose either. The main drawback is the need to specify the output type of the catamorphism (std::string in this case):
 
-```
+```cpp
 expression e = add({
   cst(1),
   cst(2),
@@ -267,7 +267,7 @@ We can as translate to C++ our next two most straightforward interpreters, *eval
 
 In addition, and to compensate for the absence of currying in Haskell, our eval function returns a lambda:
 
-```
+```cpp
 using env = std::map<id, nb>;
 
 auto eval_alg(env const& env)
@@ -294,7 +294,7 @@ int eval(env const& env, expression const& expr)
 
 The *dependencies* functions lists all the variables of the expression. It sub-expressions are transformed to a set of variable identifiers, which are combined (set union) while climbing up the AST.
 
-```
+```cpp
 template<typename Tag>
 std::set<id> join_sets(op<Tag, std::set<id>> const& op)
 {
@@ -334,7 +334,7 @@ This allows us to concentrate on the real value added by Catamorphisms, composab
 
 This leads to the following code:
 
-```
+```cpp
 expression opt_add_alg(expression_r<expression> const& e)
 {
    if (auto* op = get_as_add(e))
@@ -361,7 +361,7 @@ expression optimize_alg(expression_r<expression> const& e)
 
 Note that how the *optimize_alg* function is able to combine the two algebra by composing them. The call to get allows to unwrap the expression of the first algebra, before calling the second algebra. We can give it a try:
 
-```
+```cpp
 expression e = add({
   cst(1),
   cst(2),
@@ -390,7 +390,7 @@ Our last remaining challenge is to implement the partial evaluation of an arithm
 
 The partial_eval_alg simply replaces variables bound in the evaluation environment with their respective value. As for our evaluation function, our partial evaluation returns a lambda to compensate for the lack of currying in C++.
 
-```
+```cpp
 auto partial_eval_alg(env const& env)
 {
    return [&env] (expression_r<expression> const& e) -> expression
@@ -408,7 +408,7 @@ auto partial_eval_alg(env const& env)
 
 We can combine this function with our optimization functions to obtain a fully fledged partial application that simplifies expression in one single tree traversal.
 
-```
+```cpp
 expression partial_eval(env const& env, expression const& e)
 {
    return cata<expression>(
@@ -426,7 +426,7 @@ We can also re-implement our evaluation function in terms of our partial evaluat
 
 This leads to the following evaluation function, which handles errors much nicer than our previous one:
 
-```
+```cpp
 int eval_2(env const& env, expression const& e)
 {
   auto reduced = partial_eval(env, e);
@@ -437,7 +437,7 @@ int eval_2(env const& env, expression const& e)
 
 We can give it a try to convince ourselves that it works:
 
-```
+```cpp
 expression e = add({
   cst(1),
   cst(2),

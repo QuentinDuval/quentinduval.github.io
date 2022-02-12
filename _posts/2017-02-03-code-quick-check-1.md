@@ -38,7 +38,7 @@ More practically, we give ourselves the goal to test the two following propertie
 
 The `prop_gcd` is a valid property. Multiplying the Greatest Common Divisor of a and b with the Lowest Common Multiple of a and b should be equal to the produce of a and b. We expect this test to pass.
 
-```
+```hs
 prop_gcd :: Integer -> Integer -> Bool
 prop_gcd a b = a * b == gcd a b * lcm a b
 
@@ -48,7 +48,7 @@ rapidCheck prop_gcd
 
 The `prop_gcd_bad` is an invalid property. The Greatest Common Divisor of two numbers might be equal to 1 if these numbers are coprime. We expect this test to fail (with high probability) and we expect RapidCheck to provide us a counterexample.
 
-```
+```hs
 prop_gcd_bad :: Integer -> Integer -> Bool
 prop_gcd_bad a b = gcd a b > 1
 
@@ -72,7 +72,7 @@ We will select two useful pieces of information in case of failure:
 
 This translates into the following Result type:
 
-```
+```hs
 data Result
   = Success                     -- In case of success, no additional information
   | Failure {
@@ -83,7 +83,7 @@ data Result
 
 To help dealing with the Failure case more easily, we create the following helper function `overFailure`. It takes a function, applies it on the Result if it is a Failure, and returns the updated value.
 
-```
+```hs
 overFailure :: Result -> (Result -> Result) -> Result
 overFailure Success _ = Success
 overFailure failure f = f failure
@@ -96,7 +96,7 @@ For Result, we will select a meaning that will make it easier for us to collapse
 * `mempty`: running no test case always results in Success
 * `mappend`: if at least one test case fails, the whole test fails
 
-```
+```hs
 instance Monoid Result where
   mempty = Success
   mappend lhs@Failure{} _ = lhs
@@ -113,7 +113,7 @@ This `Gen` a is a wrapper around a function that takes a pseudo-random generator
 
 We also provide an typeclass (a kind of interface) named `Arbitrary` for types for which a standard generator is defined.
 
-```
+```hs
 newtype Gen a = Gen {
   runGen :: StdGen -> a
 }
@@ -135,7 +135,7 @@ The goal of our RapidCheck library is to check to properties on our code. Proper
 
 Presented differently, a Property is a computation that return a Result through a pseudo-random generation process. It means we can model a property as a wrapper around `Gen Result`:
 
-```
+```hs
 newtype Property = Property {
   getGen :: Gen Result
 }
@@ -143,7 +143,7 @@ newtype Property = Property {
 
 To avoid systematic unwrapping of the `Property`, we provide the following helper function `runProp`. It just calls the generator function with the provided pseudo random generator `StdGen`.
 
-```
+```hs
 runProp :: Property -> StdGen -> Result
 runProp prop rand = runGen (getGen prop) rand
 ```
@@ -160,7 +160,7 @@ The purpose of this section is to define the inputs of our rapidCheck function. 
 
 Our ultimate goal is to test any property expressed as a function that returns something we could interpret as a Result. From now on, we will refer to such function as testable function. In particular, any function returning a Bool or a Result (like our prop_gcd function) should qualify.
 
-```
+```hs
 prop_gcd :: Integer -> Integer -> Bool
 prop_gcd a b = a * b == gcd a b * lcm a b
 ```
@@ -179,7 +179,7 @@ The solution is to break down our problem and think in terms of mathematical ind
 
 We define `Testable` as the typeclass that represents the functions that can be transformed into a Property (our testable function, or alternatively, something we can generate a Result from):
 
-```
+```hs
 class Testable a where
   property :: a -> Property
 ```
@@ -192,7 +192,7 @@ Based on our inventory, we know that functions with no arguments (constants) tha
 
 These constants do not have any random inputs influencing them. As a consequence, a `Property` obtained from one such function should always produce the same consistent result. This is expressed in the code below:
 
-```
+```hs
 -- Property is trivially convertible to Property
 instance Testable Property where
   property = id
@@ -217,7 +217,7 @@ The inputs of our induction step are an instance of a `Testable` function, named
 
 Let us write this desire, with the implementation left undefined:
 
-```
+```hs
 instance
   (Show a, Arbitrary a,        -- Given a type `a` supporting random generation
    Testable testable)          -- And an already existing testable function
@@ -230,7 +230,7 @@ Now, let us assume the existence of a function named `forAll` that takes a gener
 
 Then we could define our instance as follows, by providing the generator of our argument a to the `forAll` function:
 
-```
+```hs
 instance
   (Show a, Arbitrary a,
    Testable testable)
@@ -265,7 +265,7 @@ The `Property` created by `forAll` is a wrapper around a generator: it takes as 
 
 You can find the full implementation below:
 
-```
+```hs
 forAll :: (Show a, Testable testable) => Gen a -> (a -> testable) -> Property
 forAll argGen prop =
   Property $ Gen $ \rand ->             -- Create a new property that will
@@ -286,7 +286,7 @@ We will first define a function `rapidCheckImpl` that takes as parameter a start
 * `runOne` will trigger one such attempt, with a seed provided as parameter. Upon failure, it will complete the error report with the seed.
 * `runAll` will run all attempts and exploit the Monoid instance for Result to collapse these results together
 
-```
+```hs
 rapidCheckImpl :: Testable prop => Int -> Int -> prop -> Result
 rapidCheckImpl attemptNb startSeed prop = runAll (property prop)
   where
@@ -300,7 +300,7 @@ We can note that, once again, this function is side effect free. It will return 
 
 We finally introduce the functions `rapidCheck` to get the non-determinism needed to solve our problem. This function produces a side-effect to get the initial seed to feed `rapidCheckImpl`. We also add `rapidCheckWith`, as a variation of `rapidCheck` that accept the maximum number of attempts as parameter.
 
-```
+```hs
 rapidCheck :: Testable prop => prop -> IO Result
 rapidCheck = rapidCheckWith 100
 
@@ -323,7 +323,7 @@ Both of our test cases takes two integers and returns a boolean. We know from th
 
 Because we generated a Int, the random generator will not cover all the spectrum of values an Integer could have. We will ignore this here (*), as the only reason why we use an Integer was to avoid overflows:
 
-```
+```hs
 instance Arbitrary Integer where
   arbitrary = Gen $ \rand ->
     fromIntegral (fst (next rand))
@@ -331,7 +331,7 @@ instance Arbitrary Integer where
 
 We expect our first test case to pass as it verifies a valid property of our GCD:
 
-```
+```hs
 prop_gcd :: Integer -> Integer -> Bool
 prop_gcd a b = a * b == gcd a b * lcm a b
 
@@ -341,7 +341,7 @@ rapidCheck prop_gcd
 
 Our second test case should fail with high probability. RapidCheck should be able to exhibit a counter example based on two coprime numbers. And it does:
 
-```
+```hs
 prop_gcd_bad :: Integer -> Integer -> Bool
 prop_gcd_bad a b = gcd a b > 1
 
@@ -352,7 +352,7 @@ rapidCheck prop_gcd_bad
 
 Note that if we had used Int instead of Integer, RapidCheck should be able to find a counter example to our valid prop_gcd properties. Because an Int has not an infinite precision, we expect RapidCheck to find integer overflow issues. And it does:
 
-```
+```hs
 instance Arbitrary Int where
   arbitrary = Gen $ \rand -> fst (next rand)
 
