@@ -21,6 +21,14 @@ a:any-link{
     text-decoration: none;
 }
 
+/* for the code blocks */
+pre {
+    font-size: 0.8em;
+    line-height: 1.42857143;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 .archive__item-title {
     font-family: "PT Sans", sans-serif;
     font-weight: 400;
