@@ -98,6 +98,7 @@ defaults:
       path: ""
       type: posts
     values:
+      author: "Quentin Duval"
       layout: post
       read_time: false
       comments: true

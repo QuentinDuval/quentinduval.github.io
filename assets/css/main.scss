@@ -163,6 +163,27 @@ li.sidebar__item::before{
     // text-align: -webkit-match-parent;
 }
 
+/* Share icons at top of article */
+.share-light{
+    color: silver;
+}
+
+.share-light-twitter:hover{
+    color: #55acee;
+}
+
+.share-light-facebook:hover{
+    color: #3b5998;
+}
+
+.share-light-linkedin:hover{
+    color: #007bb5;
+}
+
+.share-light-reddit:hover{
+    color: #ff4500;
+}
+
 /* 3 columns maximum insteaad of 4 in default template */
 .archive .grid__item {
     @include breakpoint($medium) {
