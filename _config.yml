@@ -86,20 +86,19 @@ footer:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/QuentinDuval"
-    - label: "LinkedIn"
-      icon: "fab fa-linkedin"
-      url: "https://www.linkedin.com/in/quentin-duval-53ba6576/"
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/quduval"
+    - label: "LinkedIn"
+      icon: "fab fa-linkedin"
+      url: "https://www.linkedin.com/in/quentin-duval-53ba6576/"
 
 defaults:
   - scope:
       path: ""
       type: posts
     values:
-      layout: single
-      author_profile: false
+      layout: post
       read_time: false
       comments: true
       share: true
@@ -107,4 +106,8 @@ defaults:
       toc: true
       toc_label: Table of content
       show_date: true
-      
+      sidebar:
+        title: ""
+        # nav: sidebar-post
+        recent_posts: true
+      author_profile: false
