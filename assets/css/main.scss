@@ -135,6 +135,10 @@ hr.post_navi_hr{
     border-bottom: 1px solid #CCC;
 }
 
+p.archive__item-excerpt{
+    margin-bottom: 1em;
+}
+
 /* 3 columns maximum insteaad of 4 in default template */
 .archive .grid__item {
     @include breakpoint($medium) {
