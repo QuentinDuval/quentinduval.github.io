@@ -191,6 +191,10 @@ li.sidebar__item::before{
     color: #ff4500;
 }
 
+.share-light-hacker-news:hover{
+    color: #ff6600;
+}
+
 /* 3 columns maximum insteaad of 4 in default template */
 .archive .grid__item {
     @include breakpoint($medium) {
