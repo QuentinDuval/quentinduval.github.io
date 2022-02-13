@@ -104,6 +104,7 @@ defaults:
       comments: true
       share: true
       related: true
+      # classes: wide
       toc: true
       toc_label: Table of content
       show_date: true
