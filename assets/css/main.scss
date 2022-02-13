@@ -139,6 +139,30 @@ p.archive__item-excerpt{
     margin-bottom: 1em;
 }
 
+/* Proper formatting with >> prefix of sidebar links */
+.sidebar__item{
+    margin-bottom: 0.3em;
+}
+
+.sidebar__item a:any-link{
+    color: #2f7d95;
+    // color: #09715E;
+}
+
+li.sidebar__item{
+    list-style-position: outside;
+    // line-height: 130%;
+    padding: 1px 0 1px 14px;
+}
+
+li.sidebar__item::before{
+    content: "\00BB";
+    color: #2f7d95;
+    margin-right: 5px;
+    margin-left: -14px;
+    // text-align: -webkit-match-parent;
+}
+
 /* 3 columns maximum insteaad of 4 in default template */
 .archive .grid__item {
     @include breakpoint($medium) {
