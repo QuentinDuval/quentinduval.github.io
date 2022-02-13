@@ -35,4 +35,6 @@
   </p>
 {% endif %}
 
-{% include social-share-light.html %}
+{% if document.share_light %}
+  {% include social-share-light.html %}
+{% endif %}

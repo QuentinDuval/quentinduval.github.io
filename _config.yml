@@ -107,6 +107,7 @@ defaults:
       toc: true
       toc_label: Table of content
       show_date: true
+      share_light: true
       sidebar:
         title: ""
         # nav: sidebar-post
