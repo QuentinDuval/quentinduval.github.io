@@ -1,3 +1,5 @@
+encoding: UTF-8
+
 theme: minimal-mistakes-jekyll
 minimal_mistakes_skin: "default" # "default" "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
