@@ -2,7 +2,7 @@
 layout: post
 title: "Building a Clojurescript game"
 description: ""
-excerpt: "Let us implement a board game in ClojureScript, a functional programming language transpiling to JS, from the game rules to graphics to AI."
+excerpt: "Let us implement a board game in ClojureScript, a functional programming language transpiling to JS, from the game rules to graphics to AI (part 1)."
 categories: [functional-programming]
 tags: [Functional-Programming, Clojure]
 ---
