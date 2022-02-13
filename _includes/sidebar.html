@@ -13,6 +13,9 @@
       {% if s.text %}{{ s.text | markdownify }}{% endif %}
       {% if s.nav %}{% include nav_list nav=s.nav %}{% endif %}
     {% endfor %}
+    {% if page.sidebar.bio %}
+      {% include sidebar_bio.html %}
+    {% endif %}
     {% if page.sidebar.recent_posts %}
       {% include sidebar_recent_posts.html %}
     {% endif %}
