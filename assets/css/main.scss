@@ -164,6 +164,13 @@ li.sidebar__item::before{
 }
 
 /* Share icons at top of article */
+#share-buttons-light-prompt{font-size: 0.8em;}
+#share-buttons-light{font-size: 0.8em;}
+#share-buttons-light {display: inline-block; vertical-align: middle; }
+#share-buttons-light:after {content: ""; display: block; clear: both;}
+#share-buttons-light > div {position: relative; text-align: left; height: 1em; width: 1.5em; float: left; text-align: center;}
+#share-buttons-light > div:hover {cursor: pointer;}
+
 .share-light{
     color: silver;
 }
