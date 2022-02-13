@@ -110,4 +110,6 @@ defaults:
         title: ""
         # nav: sidebar-post
         recent_posts: true
+        categories: true
+        contact_info: true
       author_profile: false

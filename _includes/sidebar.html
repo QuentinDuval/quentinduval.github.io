@@ -11,7 +11,13 @@
       {% if s.nav %}{% include nav_list nav=s.nav %}{% endif %}
     {% endfor %}
     {% if page.sidebar.recent_posts %}
-      {% include sidebar_posts.html %}
+      {% include sidebar_recent_posts.html %}
+    {% endif %}
+    {% if page.sidebar.categories %}
+      {% include sidebar_categories.html %}
+    {% endif %}
+    {% if page.sidebar.contact_info %}
+      {% include sidebar_contact_info.html %}
     {% endif %}
     {% if page.author_profile or layout.author_profile %}
       {% include author-profile.html %}

@@ -9,4 +9,6 @@ classes: wide
 sidebar:
     title: ""
     recent_posts: true
+    categories: true
+    contact_info: true
 ---

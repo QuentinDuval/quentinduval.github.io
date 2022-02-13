@@ -1,0 +1,13 @@
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                {% for category in site.categories %}
+                    {% capture category_name %}{{ category | first }}{% endcapture %}
+                    <li><a href="{{site.baseurl}}/categories/#{{category_name}}">{{category_name}}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+</nav>

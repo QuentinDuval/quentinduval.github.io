@@ -1,38 +1,3 @@
-<!--Future idea to search on the side bar-->
-<!--
-<button class="search__toggle" type="button">
-    <span class="visually-hidden">Toggle search</span>
-    <i class="fas fa-search"></i>
-</button>
--->
-
-<nav class="nav__list">
-    <ul class="nav__items">
-        <li>
-            <span class="nav__sub-title">Recent posts</span>
-            <ul>
-                {% for post in site.posts limit:4 %}
-                    <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-                {% endfor %}
-            </ul>
-        </li>
-    </ul>
-</nav>
-
-<nav class="nav__list">
-    <ul class="nav__items">
-        <li>
-            <span class="nav__sub-title">Categories</span>
-            <ul>
-                {% for category in site.categories %}
-                    {% capture category_name %}{{ category | first }}{% endcapture %}
-                    <li><a href="{{site.baseurl}}/categories/#{{category_name}}">{{category_name}}</a></li>
-                {% endfor %}
-            </ul>
-        </li>
-    </ul>
-</nav>
-
 <nav class="nav__list">
     <ul class="nav__items">
         <li>
