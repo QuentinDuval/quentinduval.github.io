@@ -1,6 +1,6 @@
 main:
-  - title: "About Me"
-    url: /about-me/
+  # - title: "About Me"
+  #   url: /about-me/
   - title: "Archives"
     url: /archives/
   - title: "Categories"
