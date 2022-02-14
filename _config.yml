@@ -53,7 +53,7 @@ comments:
   provider: "disqus"
   disqus:
     # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
-    shortname: "https://https-quentinduval-github-io.disqus.com/admin/"
+    shortname: "https-quentinduval-github-io"
 
 defaults:
   - scope:
