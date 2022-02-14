@@ -21,6 +21,10 @@ a:any-link{
     text-decoration: none;
 }
 
+a:hover{
+    text-decoration: underline;
+}
+
 /* for the code blocks */
 pre {
     font-size: 0.8em;
