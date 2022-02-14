@@ -5,6 +5,7 @@ description: ""
 excerpt: "In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages."
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
+comments: true
 ---
 
 _You do **not** need to understand Monads to follow this post. This is not a Monad tutorial either, but it might help you getting some intuition on what is a Monad. Some knowledge of Haskell and C++ might help but are not pre-requisite._
