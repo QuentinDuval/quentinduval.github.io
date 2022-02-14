@@ -25,6 +25,10 @@ a:hover{
     text-decoration: underline;
 }
 
+.masthead__menu-item a:hover{
+    text-decoration: none;
+}
+
 /* for the code blocks */
 pre {
     font-size: 0.8em;
