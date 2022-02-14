@@ -71,12 +71,14 @@ hr.post_navi_hr{
 .post_navi {
     display: inline-flex;
 }
-  
+
+/*
 a.post_navi-item{
     border: 0px solid #999;
     border-radius: 5px;
     box-shadow: 0px 0px 3px #999;
 }
+*/
 
 .post_navi-label {
     font-size: 0.8em;
@@ -96,16 +98,16 @@ a.post_navi-item{
   
 .post_navi .nav_prev {
     text-align: left;
-    vertical-align: middle;
-    margin-right: 10%;
-    margin-left: 1%;
+    // vertical-align: middle;
+    // margin-right: 10%;
+    // margin-left: 1%;
 }
   
 .post_navi .nav_next {
     text-align: right;
-    vertical-align: middle;
-    margin-left: 10%;
-    margin-right: 1%;
+    // vertical-align: middle;
+    // margin-left: 10%;
+    // margin-right: 1%;
 }
   
 .post_navi .nav_prev .post_navi-arrow {
