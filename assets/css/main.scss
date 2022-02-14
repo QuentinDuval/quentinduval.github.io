@@ -171,6 +171,14 @@ li.sidebar__item::before{
     // text-align: -webkit-match-parent;
 }
 
+/* side bar on the right: hide when screen is small */
+aside.sidebar__right{
+    display: none;
+    @include breakpoint($large) {
+        display: block;
+    }
+}
+
 /* Share icons at top of article */
 #share-buttons-light-prompt{font-size: 0.8em;}
 #share-buttons-light{font-size: 0.8em;}
