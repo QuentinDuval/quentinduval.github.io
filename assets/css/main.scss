@@ -137,6 +137,12 @@ hr.post_navi_hr{
     border-bottom: 1px solid #CCC;
 }
 
+.grid__item .archive__item-excerpt {
+    // Always display the excerpt even for small screens
+    display: block;
+    font-size: $type-size-6;
+}
+
 p.archive__item-excerpt{
     margin-bottom: 1em;
 }
