@@ -13,7 +13,6 @@ description: "Functions In, Fictions Out"
 # url: "http://deque.net"
 baseurl: # the subpath of your site, e.g. "/blog"
 repository: "QuentinDuval/quentinduval.github.io"
-comments_repo: QuentinDuval/quentinduval.github.io
 
 analytics:
   provider: "google"
@@ -50,10 +49,18 @@ include:
   - _pages
 
 comments:
-  provider: "disqus"
-  disqus:
-    # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
-    shortname: "https-quentinduval-github-io"
+  # provider: "disqus"
+  # disqus:
+  #   # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
+  #   shortname: "https-quentinduval-github-io"
+  provider: "giscus"
+  giscus:
+    repo_id              : "MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==" # Shown during giscus setup at https://giscus.app
+    category_name        : "General" # Full text name of the category
+    category_id          : "DIC_kwDOBGHUMc4CBKf3" # Shown during giscus setup at https://giscus.app
+    discussion_term      : "url" # "pathname" (default), "url", "title", "og:title"
+    reactions_enabled    : 1 # '1' for enabled (default), '0' for disabled
+    theme                : "light" # "light" (default), "dark", "dark_dimmed", "transparent_dark", "preferred_color_scheme"
 
 defaults:
   - scope:
