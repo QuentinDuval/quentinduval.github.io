@@ -131,3 +131,4 @@ defaults:
         categories: true
         contact_info: true
       author_profile: false
+      show_categories: true

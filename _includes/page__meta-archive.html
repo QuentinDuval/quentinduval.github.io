@@ -1,15 +1,21 @@
 {% assign document = post | default: page %}
 <p class="page__meta">
+
   {% if document.date %}
     {% assign date = document.date %}
     <span class="page__meta-date">
       <i class="far {% if include.type == 'grid' and document.read_time and document.show_date %}fa-fw {% endif %}fa-calendar-alt" aria-hidden="true"></i>
       {% assign date_format = site.date_format | default: "%B %-d, %Y" %}
       <time datetime="{{ date | date_to_xmlschema }}">{{ date | date: date_format }}</time>
+      {% if document.show_categories and document.categories %}
+        &bull; {{ document.categories | first }}
+      {% endif %}
     </span>
   {% endif %}
 
-  {% if document.read_time and document.show_date %}<span class="page__meta-sep"></span>{% endif %}
+  {% if document.read_time and document.show_date %}
+    <span class="page__meta-sep"></span>
+  {% endif %}
 
   {% if document.read_time %}
     {% assign words_per_minute = document.words_per_minute | default: site.words_per_minute | default: 200 %}
