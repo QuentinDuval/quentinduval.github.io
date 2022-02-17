@@ -3,7 +3,7 @@ layout: post
 title: "Hexagonal Architecture and Free Monad: Two related design patterns?"
 description: ""
 excerpt: "In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages."
-categories: [functional-programming]
+categories: [software-design]
 tags: [Functional-Programming, Haskell]
 ---
 
