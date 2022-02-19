@@ -428,7 +428,7 @@ add (MkMoney "EUR" 1) (MkMoney "USD" 2)
 
 It is important to observe the distinguishing characteristic of Idris there: a type can refer to the other arguments that appear in the prototype of a function.
 
-_(*) Note: you can refer to my [previous article]() on building a type safe Bowling Kata for more detailed information on how to write proofs in Idris._
+_(*) Note: you can refer to my [previous article]({% link _posts/2017-07-01-idris-bowling-kata.md %}) on building a type safe Bowling Kata for more detailed information on how to write proofs in Idris._
 
 ### Runtime checks
 
