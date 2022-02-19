@@ -3,8 +3,8 @@ layout: post
 title: "Pythagorean Triples in Modern C++"
 description: ""
 excerpt: "Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community."
-categories: [functional-programming]
-tags: [Functional-Programming, C++]
+categories: [modern-cpp]
+tags: [C++]
 use_math: true
 ---
 

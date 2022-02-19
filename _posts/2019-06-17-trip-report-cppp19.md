@@ -3,8 +3,8 @@ layout: post
 title: "CPPP19 Trip report - The first edition of the first french C++ conference"
 description: ""
 excerpt: "Last Saturday marked the first occurrence of the CPPP, the first conference dedicated to C++ on the French soil, organized by Frédéric Tingaud and Joel Falcou."
-categories: [functional-programming]
-tags: [Functional-Programming, C++]
+categories: [modern-cpp]
+tags: [C++]
 ---
 
 Last Saturday marked the first occurrence of the CPPP, the first ever conference dedicated to C++ on the French soil, organized by [Frédéric Tingaud](https://twitter.com/FredTingaudDev) and [Joel Falcou](https://twitter.com/joel_f).
