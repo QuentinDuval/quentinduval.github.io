@@ -248,24 +248,18 @@ For instance, `std::is_permutation` could be selecting its implementation based 
 
 The rationale is that the default selection policy (with priorities inside the selection in case several branches are available) might not be the best choice for everyone. Providing different functions allows the user to make a conscious choice if he desires to do so.
 
-## Summary of the proposal
+## Conclusion and wishes for the STL
 
 We discussed two different implementations that offers much better algorithmic complexity than the standard implement of std::is_permutation.
 
 We choose the hash based implementation, based on the argument that it would make sense for most for all value types to support std::hash. Based on this assumption, we saw how we could improve std::is_permutation to take advantage of this.
 
-Here is a list of the different proposals of changes for the STL, that I think would make a lot of sense and improve the life of C++ developers in the process:
+To summarise, here is a list of changes in the STL, that I think would make a lot of sense and improve the life of C++ developers in the process:
 
-* Add a std::hash specialization for std::tuple
-* Add a std::hash specialization for all sequential containers
-* Add a std::hash specialization for all associative containers
-* Fix std::is_permutation to take advantage of std::hash if available
-* Provide a std::inplace_is_permutation as alternative implementation
+1. Add a `std::hash` specialization for `std::tuple`
+2. Add a `std::hash` specialization for all sequential containers
+3. Add a `std::hash` specialization for all associative containers
+4. Fix `std::is_permutation` to take advantage of `std::hash` if available
+5. Provide a `std::inplace_is_permutation` as alternative implementation
 
-In particular, I think that the first proposal, the specialization of std::hash for std::tuple, would be both feasible and really useful. It would help developers define their own std::hash for custom data types.
-
-## Final words
-
-This is it. I described a series of changes I would love to see in the STL. These were only opinions of mine, which I do not expect everyone to share.
-
-I have no doubt some C++ developers have put a lot more thoughts on thinking about the place of std::hash in the STL and might have come to other conclusion. I would be very interested in hearing about these different opinions. My best wish it that it might at least trigger some interesting discussions.
+In particular, I think that the first proposal, the specialization of `std::hash` for `std::tuple`, would be both feasible and really useful. It would help developers define their own `std::hash` for custom data types.
