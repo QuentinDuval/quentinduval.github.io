@@ -3,15 +3,13 @@ encoding: UTF-8
 theme: minimal-mistakes-jekyll
 minimal_mistakes_skin: "default" # "default" "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
-
-title: "Deque"
+title: "Double Ended Queue"
 author: "Quentin Duval"
+subtitle: "Functions In, Fictions Out"
 description: "Functions In, Fictions Out"
 
-
 # URL
-# url: "http://deque.net"
-baseurl: # the subpath of your site, e.g. "/blog"
+baseurl: '' # the subpath of your site, e.g. "/blog"
 repository: "QuentinDuval/quentinduval.github.io"
 
 analytics:
@@ -40,10 +38,11 @@ titles_from_headings:
   collections: true
 
 # permalink: /:categories/:year/:month/:day/:title:output_ext
-permalink: /:year/:month/:day/:title:output_ext
+permalink: /blog/:year/:month/:day/:title:output_ext
 
 show_excerpts: true
 paginate: 6
+paginate_path: "/blog/page:num/"
 
 include:
   - _pages
@@ -62,39 +61,31 @@ comments:
     reactions_enabled    : 1 # '1' for enabled (default), '0' for disabled
     theme                : "light" # "light" (default), "dark", "dark_dimmed", "transparent_dark", "preferred_color_scheme"
 
-defaults:
-  - scope:
-      path: ""
-      type: post
-    values:
-      tags: Other
-
 twitter:
   username: "quduval"
 
 author:
-  # name   : "Quentin Duval"
-  # avatar : "/assets/images/rg.jpg"
+  name   : "Quentin Duval"
+  avatar : "/assets/images/profile_picture_7412790.jpeg"
   bio    : >-
-    My name is Quentin.
-
-    I am a software engineer since 2010, and currently a research engineer in the field of AI since 2020.
-    You can read more about me in the [About me](/about-me/) section.
-  location: "Montreal, Quebec"
+    Software engineer since 2009, and currently an Senior Artificial Intelligence Research Engineer.
+  location: "Earth, Milky Way"
   links:
-    - label: "Google Scholar"
+    - label: "Website"
       icon: "fas fa-fw fa-link"
-      url: https://scholar.google.com/citations?user=XTaVGqYAAAAJ
+      url: "/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/QuentinDuval"
+    - label: "Google Scholar"
+      icon: "ai ai-google-scholar-square"
+      url: https://scholar.google.com/citations?user=XTaVGqYAAAAJ
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/quduval"
     - label: "LinkedIn"
       icon: "fab fa-fw fa-linkedin"
       url: "https://www.linkedin.com/in/quentin-duval-53ba6576"
-
 
 footer:
   links:
@@ -109,6 +100,11 @@ footer:
       url: "https://www.linkedin.com/in/quentin-duval-53ba6576/"
 
 defaults:
+  - scope:
+      path: ""
+      type: page
+    values:
+      masthead: 'masthead.html'
   - scope:
       path: ""
       type: posts
@@ -132,3 +128,4 @@ defaults:
         contact_info: true
       author_profile: false
       show_categories: true
+      masthead: 'masthead.html'

@@ -198,6 +198,67 @@ aside.sidebar__right{
     }
 }
 
+/*  google scholar icon */
+.ai{
+    font-family: 'Academicons';
+}
+.ai-google-scholar-square{
+    width: 1.25em;
+    text-align: center;
+    font-size: 1em;
+}
+.ai-google-scholar-square::before {
+    content: "\f0c1";
+}
+.ai-google-scholar{
+    width: 1.25em;
+    text-align: center;
+    font-size: 1em;
+}
+.ai-google-scholar::before {
+    content: "\f0c1";
+}
+
+/* Teaser images on the main web page */
+
+.grid__item .front_page__item-title {
+    margin-top: 0.5em;
+    font-size: $type-size-5;
+    font-weight: normal;
+    text-align: center;
+}
+
+.grid__item .front_page__item-teaser{
+    // When very small
+    max-height: 100px;
+    
+    @include breakpoint($small) {
+        max-height: 100px; // 200px
+    }
+
+    @include breakpoint($medium) {
+        max-height: 140px; // 120px
+    }
+}
+
+.front_page__item-teaser img{
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+    display: block;
+
+    // When too small
+    max-height: 100px;
+
+    @include breakpoint($small) {
+        max-height: 100px; // 200px
+    }
+
+    @include breakpoint($medium) {
+        max-height: 140px; // 120px
+    }
+}
+
 /* Author URLs in About */
 .about_urls li{
     list-style-type: none;

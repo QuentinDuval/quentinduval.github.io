@@ -1,18 +1,14 @@
 ---
-layout: page
-title: Apps
+layout: apps
+title: ''
 permalink: /apps/
 comments: false
-author_profile: false
+author_profile: true
+classes: wide
+masthead: false
 sidebar:
     title: ""
-    recent_posts: true
-    categories: true
-    contact_info: true
+    recent_posts: false
+    categories: false
+    contact_info: false
 ---
-
-[Interval Training Timer](https://quentinduval.github.io/interval-training/index.html)
-
-[Tribolo](https://quentinduval.github.io/tribolo/index.html)
-
-[TicTacToe](https://quentinduval.github.io/tictactoe/index.html)
