@@ -5,8 +5,6 @@ main:
     url: /archives/
   - title: "Categories"
     url: /categories/
-  - title: "Apps"
-    url: /apps/
 
 sidebar-post:
   - title: "Apps"
