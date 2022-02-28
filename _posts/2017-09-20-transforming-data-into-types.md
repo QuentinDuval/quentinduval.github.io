@@ -2,7 +2,7 @@
 layout: post
 title: "Transforming data structures into types: an introduction to dependent typing and its benefits"
 description: ""
-excerpt: ""
+excerpt: "A showcase of how dependent typing can help both to increase type-safety and reduce to zero the cost of change when introducing type-safety in legacy code."
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
 ---
