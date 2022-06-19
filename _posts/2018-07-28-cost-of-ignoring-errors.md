@@ -2,7 +2,7 @@
 layout: post
 title: "Small programming faults can overflow an entire system"
 description: ""
-excerpt: ""
+excerpt: "A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system."
 categories: [system-design]
 tags: [system-design, Java]
 ---

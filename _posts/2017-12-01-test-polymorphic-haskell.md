@@ -2,7 +2,7 @@
 layout: post
 title: "Answering r/haskell: How to unit test code that uses polymorphic interfaces?"
 description: ""
-excerpt: "Myn answer to the question asked on r/haskell on how to test code that lives in a Monad class with polymorphic functions."
+excerpt: "My answer to the question asked on r/haskell on how to test code that lives in a Monad class with polymorphic functions."
 categories: [functional-programming]
 tags: [Functional-Programming, Haskell]
 ---
