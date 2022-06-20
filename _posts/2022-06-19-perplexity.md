@@ -28,7 +28,7 @@ $P(x_N \| x_{N-1}, ..., x_1)$
 
 We call such models auto-regressive. These models are elequant for at least two reasons. The first one is that we can easily sample from them to produce a sentence (write english, code, cooking recipes, etc).
 
-The second is their formulation corresponds to a specific decomposition of the joint probability of the sequence, which follows directly from the chain rule of probability, and always holds true:
+The second is that their formulation corresponds to a specific decomposition of the joint probability of the sequence, which follows directly from the chain rule of probability, and always holds true:
 
 $P(x_1, x_2, ... , x_N) = \prod P(x_i \| x_{i-1}, ..., x_1)$
 
