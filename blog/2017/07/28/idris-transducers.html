@@ -1,0 +1,1068 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Implementing Clojure-like Transducers in Idris: definitions &amp; concepts - Double Ended Queue</title>
+<meta name="description" content="Let’s implement a small transducer-like library in Idris, for efficient and composable algorithmic transformations.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Implementing Clojure-like Transducers in Idris: definitions &amp; concepts">
+<meta property="og:url" content="/blog/2017/07/28/idris-transducers.html">
+
+
+  <meta property="og:description" content="Let’s implement a small transducer-like library in Idris, for efficient and composable algorithmic transformations.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Implementing Clojure-like Transducers in Idris: definitions &amp; concepts">
+  <meta name="twitter:description" content="Let’s implement a small transducer-like library in Idris, for efficient and composable algorithmic transformations.">
+  <meta name="twitter:url" content="/blog/2017/07/28/idris-transducers.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-07-28T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/07/28/idris-transducers.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Implementing Clojure-like Transducers in Idris: definitions &amp; concepts">
+    <meta itemprop="description" content="Let’s implement a small transducer-like library in Idris, for efficient and composable algorithmic transformations.">
+    <meta itemprop="datePublished" content="2017-07-28T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Implementing Clojure-like Transducers in Idris: definitions &amp; concepts
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-07-28T00:00:00+00:00">July 28, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html&text=Implementing+Clojure-like+Transducers+in+Idris%3A+definitions+%26+concepts&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/07/28/idris-transducers.html&title=Implementing Clojure-like Transducers in Idris: definitions & concepts"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/07/28/idris-transducers.html&t=Implementing Clojure-like Transducers in Idris: definitions & concepts">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation">Motivation</a><ul><li><a href="#lazy-vs-strict">Lazy vs Strict</a></li><li><a href="#composing-algorighms">Composing algorighms</a></li><li><a href="#why-transducers">Why transducers?</a></li></ul></li><li><a href="#step-functions--reducing-functions">Step functions &amp; Reducing functions</a><ul><li><a href="#step-functions">Step functions</a></li><li><a href="#adding-state">Adding state</a></li><li><a href="#adding-early-termination">Adding early termination</a></li><li><a href="#reducer-or-reducing-function">Reducer (or reducing function)</a></li><li><a href="#example-of-reducer">Example of reducer</a></li><li><a href="#transducer">Transducer</a></li><li><a href="#transducer-composition">Transducer composition</a></li></ul></li><li><a href="#running-the-loop">Running the loop</a><ul><li><a href="#reduce">Reduce</a></li><li><a href="#running-the-steps">Running the steps</a></li><li><a href="#transduce">Transduce</a></li></ul></li><li><a href="#building-our-own-transducer">Building our own transducer</a><ul><li><a href="#mapping">Mapping</a></li><li><a href="#filtering">Filtering</a></li><li><a href="#concat-mapping">Concat Mapping</a></li></ul></li><li><a href="#conclusion-and-whats-next">Conclusion, and what’s next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>The <a href="https://www.idris-lang.org/idris-1-0-released/">1.0.0 of Idris</a> has been released just a few months back. We will continue our series on post on Idris, by implementing a small transducer library (the Idris package is available in this <a href="https://github.com/QuentinDuval/IdrisReducers">GitHub repo</a>).</p>
+
+<p>Our goal in this post will be to provide Idris with a library efficient composable algorithmic transformations. This is something we quickly feel the need to when playing with Idris, due to the strict (non-lazy) nature of the language.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>Let us first start by discussing why transducers are an interesting library to introduce in Idris.</p>
+
+<h3 id="lazy-vs-strict">Lazy vs Strict</h3>
+
+<p>As mentioned in the post listing <a href="(/blog/2017/06/14/idris-improvements.html)">10 differences between Haskell and Idris</a>, Idris is strict by default, while Haskell is lazy by default. Whether or not laziness is a good default is a common subject of discussion in the Haskell community.</p>
+
+<p>On the bad side, laziness is often complained about for its tendency to introduce non obvious memory leaks or other performance defects in Haskell code. On the good side, laziness allows to separate processes that produce data, from the one transforming or consuming it (*).</p>
+
+<p><em>(*) John Hughes writes in lot more details about the benefits of laziness in terms of software modularity in its great paper <a href="https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf">Why functional programming matters</a>.</em></p>
+
+<h3 id="composing-algorighms">Composing algorighms</h3>
+
+<p>Thanks to laziness, we can easily compose <code>map</code>, <code>filter</code> and <code>folds</code> together in Haskell and not worry to much about intermediary list creation. But this is not the case in Idris.</p>
+
+<p>The following two lines of Idris code will not execute at the same speed: <code>map (+1)</code> will need to first realize the whole intermediary list before take extracts only the 10 first elements:</p>
+
+<pre><code class="language-haskell">take 10 $ map (+1) [1..20]   -- Faster
+take 10 $ map (+1) [1..1000] -- Slower
+</code></pre>
+
+<p>In Idris, we need to implement ways to emulate laziness in order to get back the efficient composition of algorithm which is native in Haskell.</p>
+
+<h3 id="why-transducers">Why transducers?</h3>
+
+<p>Transducers are one way to implement efficient composition of algorithms. Transducers comes from the Clojure world and have been built with efficiency and reuse in mind:</p>
+
+<ul>
+  <li>They eliminate intermediary sequence or containers when composing algorithms</li>
+  <li>They decouple the transformation from the data source and destination</li>
+</ul>
+
+<p>This makes transducers a great tool to build generic pipe-lines of algorithmic transformation, reusable in quite different contexts, and which can be composed very efficiently.</p>
+
+<h2 id="step-functions--reducing-functions">Step functions &amp; Reducing functions</h2>
+
+<p>We will start with some definitions and define their associated types. The vocabulary is directly inspired from Clojure, with some minor twists. Defining this vocabulary will guide us through the main concepts of pipelines of data transformation.</p>
+
+<h3 id="step-functions">Step functions</h3>
+
+<p>A stateless <strong>step function</strong> is a function whose purpose is to be used in a left <code>fold</code> (also known as <code>reduce</code> in Clojure or <code>std::accumulate</code> in C++).</p>
+
+<p>It combines an element coming from a data source (a container for instance) with some intermediary result, to compute the next intermediary result. Put differently, a step function represents a task to be performed in one iteration of a pure loop (without states and side-effects).</p>
+
+<ul>
+  <li>We call <strong>accumulator</strong> (or acc) the result being computed</li>
+  <li>We call <strong>element</strong> (or elem) an element of the data source to read</li>
+</ul>
+
+<p>We can define a type alias that will help us formalise this concept in the code:</p>
+
+<pre><code class="language-haskell">StatelessStep : (acc, elem: Type) -&gt; Type     -- List of type parameters for the alias
+StatelessStep acc elem = acc -&gt; elem -&gt; acc   -- Define the alias to the step function
+</code></pre>
+
+<p>For instance, the type alias <code>StatelessStep Int String</code> represents a step function that consumes strings to produce a result of type integer. It could be a function that sums the length of strings (in a fold):</p>
+
+<pre><code class="language-haskell">sumLength : StatelessStep Int String
+sumLength res str = res + fromNat (length str)
+
+foldl sumLength 0 ["abc", "de", "", "fghij"]
+&gt; 10
+</code></pre>
+
+<h3 id="adding-state">Adding state</h3>
+
+<p>A <strong>stateful step function</strong> is a step function that needs some additional state to do its job properly. For instance, splitting a collection into chunks of equal size requires some kind of state: elements have to be kept in store until the completion of a chunk.</p>
+
+<p>Because we are in a pure language, we will avoid relying on side-effects to track the state of our step function. Instead, we will rely on the <code>State</code> Monad:</p>
+
+<pre><code class="language-haskell">Step : (state, acc, elem: Type) -&gt; Type
+Step state acc elem = acc -&gt; elem -&gt; State state acc
+</code></pre>
+
+<p>For instance, the type alias <code>Step Bool Int String</code> represents a step function that consumes strings to produce a result of type integer, and maintains a state of type boolean. It could be a function that sums the length of strings, ignoring one of every two strings it encounters:</p>
+
+<pre><code class="language-haskell">sumLengthOfEveryOddStrings : Step Bool Int String
+sumLengthOfEveryOddStrings totalLength str = do
+  doSum &lt;- get                        -- Get the state (should we sum the length?)
+  modify not                          -- Modify the state (alternate True and False)
+  pure $ if doSum
+    then sumLength totalLength str    -- Sum the length in case of True
+    else totalLength                  -- Otherwise return the length unchanged
+</code></pre>
+
+<h3 id="adding-early-termination">Adding early termination</h3>
+
+<p>We will also want to express early termination for algorithms such as take that do not need to consume the whole data source. To do so, we will enhance our stateful step function to return a result decorated by a status:</p>
+
+<pre><code class="language-haskell">data Status a = Done a | Continue a
+
+Step : (state, acc, elem: Type) -&gt; Type
+Step state acc elem = acc -&gt; elem -&gt; State state (Status acc)
+</code></pre>
+
+<ul>
+  <li>The step can return <code>Done</code> to indicate early termination of the loop</li>
+  <li>The step can otherwise return <code>Continue</code> to proceed with the rest of the loop</li>
+</ul>
+
+<p>For instance, the type alias <code>Step () Int String</code> represents a step function that consumes strings to produce a result of type integer, and maintains no state. It could be a function that sums the length of strings, stopping when the sum exceeds a given value:</p>
+
+<pre><code class="language-haskell">sumLengthUntil : Int -&gt; Step () Int String
+sumLengthUntil maxValue totalLength str =
+  pure $ if totalLength &lt;= maxValue
+    then Continue (sumLength totalLength str)
+    else Done totalLength
+</code></pre>
+
+<p><em>Note: this ability to return early combines especially well with state (for instance to build functions such as take or drop). But we just saw that it also makes sense without state.</em></p>
+
+<h3 id="reducer-or-reducing-function">Reducer (or reducing function)</h3>
+
+<p>A <strong>reducer</strong> (or <strong>reducing function</strong>) is what we get when we bundle a stateful step function with its state. The following Idris code creates a type <code>Reducer</code> that contains a field state and two functions <code>runStep</code> and <code>complete</code>:</p>
+
+<pre><code class="language-haskell">record Reducer st acc elem where  -- Defines a reducer in terms of
+  constructor MkReducer           
+  state : st                      -- * A piece of state
+  runStep : Step st acc elem      -- * A (stateful) step function
+  complete : st -&gt; acc -&gt; acc     -- * A completion function
+</code></pre>
+
+<p>The <code>runStep</code> function is doing the heavy lifting. It takes as input the current state, the current value of the accumulator, and an element. It returns the a new accumulator and the state to use for the next iteration. It represents the content of a loop.</p>
+
+<p>The <code>complete</code> function is there to deal with the remaining piece of state. It represent the termination of the loop, the last thing to perform once the source of data is consumed. It allows to discharge remaining pieces of state at termination.</p>
+
+<h3 id="example-of-reducer">Example of reducer</h3>
+
+<p>Going back to our previous example, we can package our <code>sumLengthOfEveryOddStrings</code> step function (which sums the length of strings, ignoring one of every two strings it receives as input) with its state (a boolean).</p>
+
+<p>Having packaged the stateful step with its state, we get a reducer that is self sufficient. It can be plugged into reduce to execute it on an input collection:</p>
+
+<pre><code class="language-haskell">let reducer = MkReducer True sumLengthOfEveryOddStrings (const id)
+
+reduce reducer 0 ["abc", "de", "", "fg", "hij"]
+&gt; 6
+</code></pre>
+
+<p>We have not introduced the <code>reduce</code> function yet, but you can see it as a generalised <code>fold</code> which manage both state and early termination.</p>
+
+<h3 id="transducer">Transducer</h3>
+
+<p>A <strong>transducer</strong> is a transformation of reducers. It takes as input a reducer, and returns another reducer. The new reducer includes additional functionality. In the process of adding new functionality, a transducer can both:</p>
+
+<ul>
+  <li>Change the type of the state (<em>s1</em> to <em>s2</em>), usually to track some more state</li>
+  <li>Change the type of the element (<em>elem1</em> to <em>elem2</em>) being accumulated</li>
+</ul>
+
+<p>The type of the accumulator, on the other hand, cannot be modified (the result we expect from a loop is fixed). This leads to the following type alias for transducers:</p>
+
+<pre><code class="language-haskell">Transducer : (acc, s1, s2, elem2, elem1: Type) -&gt; Type
+Transducer acc s1 s2 elem2 elem1 =
+  Reducer s1 acc elem1      -- Input reducing function
+  -&gt; Reducer s2 acc elem2   -- Output reducing function
+</code></pre>
+
+<p>For instance, the type alias <code>Transducer Int () Bool String Char</code> represents a transducer that transforms:</p>
+
+<ul>
+  <li>A stateless reducer accumulating strings into a result of type integer</li>
+  <li>To a reducer accumulating characters into result of type an integer</li>
+  <li>And adding a boolean state in the output reducer</li>
+</ul>
+
+<h3 id="transducer-composition">Transducer composition</h3>
+
+<p>Because transducers are just functions from one reducer to another reducer, they can be composed together just like normal function can. Composing transducers lets us:</p>
+
+<ul>
+  <li>Gradually add features to pipe-line of data transformation</li>
+  <li>Avoid realizing intermediary containers: we only compose recipes</li>
+</ul>
+
+<p>For instance, we can compose a transducer than adds a filtering behaviour on a reducer to a transducer that maps each element to its square:</p>
+
+<pre><code class="language-haskell">filtering odd   -- Added behavior: keep only odd numbers
+mapping square  -- Added behavior: square each element
+
+-- When composed: keep only odd numbers and square them afterwards
+filtering odd . mapping square
+</code></pre>
+
+<p>Because of this, we can see transducers as pipe-lines, each each step is responsible for its own transformation, and forwards resulting elements to the next transducer in the line.</p>
+
+<p><em>Note: You may have noticed that the type alias for transducer had <code>elem1</code> and <code>elem2</code> reversed. This is because transducers compose from right to left (the direction of composition), but the data flows from left to right (the direction of pipeline).</em></p>
+
+<h2 id="running-the-loop">Running the loop</h2>
+
+<p>Reducing functions provides us with recipes to consume a stream of value and summarize it as a single result. Transducers allows us to build such recipes out of smaller recipes. But to make these recipes useful, we need to way to execute them.</p>
+
+<p>In this section, we will dive into the implementation of <code>reduce</code> and <code>transduce</code>, two function that will allow us to execute the recipe on some data. You can skip this section if you are not interested in the implementation, and jump to the next one for example of transducers.</p>
+
+<h3 id="reduce">Reduce</h3>
+
+<p>Our library provides a function named <code>reduce</code> that we used already in this post. It executes a provided reducing function (a recipe), given:</p>
+
+<ul>
+  <li>An initial value for the accumulator</li>
+  <li>A data source we can fold over to retrieve a stream of values</li>
+</ul>
+
+<p>It will consume elements of the data source, executing the recipe at each iteration, until the stream is totally consumed or until the recipe asks for early termination. Then it will call the completion function on the result before returning it.</p>
+
+<pre><code class="language-haskell">reduce : (Foldable t) =&gt; Reducer st acc elem -&gt; acc -&gt; t elem -&gt; acc
+reduce step acc =
+  uncurry (complete step)                 -- 4) Call the completion on the result
+    . (\(acc, s) =&gt; (s, unStatus acc))    -- 3) Remove the wrapping status
+    . (flip runState (state step))        -- 2) Remove the state monad
+    . runSteps (runStep step) acc         -- 1) Consume as many value as needed
+</code></pre>
+
+<p>This implementation relies on <code>runSteps</code> to run the loops until either the stream of values is totally consumed, or the reducing function asks for early termination (returning <code>Done</code>).</p>
+
+<h3 id="running-the-steps">Running the steps</h3>
+
+<p>The implementation of <code>runSteps</code> relies on <a href="https://en.wikipedia.org/wiki/Continuation-passing_style">Continuation Passing Style</a> to support the early termination.</p>
+
+<pre><code class="language-haskell">runSteps : (Foldable t) =&gt; Step st acc elem -&gt; acc -&gt; t elem -&gt; State st (Status acc)
+runSteps step acc elems =
+  foldr stepImpl (pure . id) elems (Continue acc) -- Using continuation passing style
+  where
+    stepImpl _ nextIteration (Done acc) = pure (Done acc)
+    stepImpl e nextIteration (Continue acc) = step acc e &gt;&gt;= nextIteration
+</code></pre>
+
+<ul>
+  <li><code>foldr</code> builds a chain of functions, one for each element of the source</li>
+  <li>Each of these functions represents one iteration of the loop</li>
+  <li>Each iteration and is provided with the next one: <code>nextIteration</code></li>
+  <li>If <code>nextIteration</code> is not called, the next iteration is not run and so the loop stops</li>
+</ul>
+
+<h3 id="transduce">Transduce</h3>
+
+<p>The second key function named <code>transduce</code> is only a thin but useful layer above reduce. It reduces (pun intended) verbosity for the most common use cases.</p>
+
+<p>Indeed, a lot of pipe-lines of data transformation ends up with a stateless step function (like a sum, a concatenation, etc.). In such cases, using transduce instead of reduce removes a bit of noise. Here is an example in which we sum the square of odd numbers:</p>
+
+<pre><code class="language-haskell">-- with transduce
+transduce (filtering odd . mapping square) (+) 0 [1..10]
+&gt; 165
+
+-- with reduce
+reduce (filtering odd . mapping square $ terminal (+)) 0 [1..10]
+&gt; 165
+</code></pre>
+
+<p>One other great advantage is that it allows to use the word transduce in our code, making your Idris code almost as cool as Clojure code.</p>
+
+<h2 id="building-our-own-transducer">Building our own transducer</h2>
+
+<p>It is time to build our very own transducers. We will keep it simple in this post, and focus on stateless transducers. We will also use a helper function <code>statelessTransducer</code> (available in the library) to abstract away some of the details of the construction of a transducer.</p>
+
+<p>The goal is to build an intuition for those who are foreign to the concept. The next post will deal with stateful transducer and unveil the details behind the helper functions.</p>
+
+<h3 id="mapping">Mapping</h3>
+
+<p>Mapping consists in using a function from <strong>a</strong> to <strong>b</strong> to transform an input reducer operating on element of type <strong>b</strong> to a reducer operating on elements of type <strong>a</strong> (we see the continuation passing style formulation here).</p>
+
+<p>It takes elements of type <strong>a</strong> and sends elements of type <strong>b</strong> to the next element of the pipe-line. In the code below, <code>next</code> represents the step function of the next transducers in the pipe-line, while <code>fn</code> represents the mapping function from a to b.</p>
+
+<ul>
+  <li>By applying the function <code>fn</code> on an element of type <code>a</code>, we get an element of type <code>b</code></li>
+  <li>We can give this element to next, which consumes elements of type <code>b</code></li>
+</ul>
+
+<pre><code class="language-haskell">||| Given a mapper of type (a -&gt; b), it transforms:
+||| - a step function taking values of type `b`
+||| - into one taking values of type `a`
+mapping : (a -&gt; b) -&gt; Transducer acc s s a b
+mapping fn = statelessTransducer $
+  \next, acc, a =&gt; next acc (fn a)
+</code></pre>
+
+<p>Here is an example in which we sum the length of a bunch of strings, multiplying each length by 2 along the way:</p>
+
+<pre><code class="language-haskell">transduce (mapping length . mapping (*2)) (+) 0 ["abc", "", "de"]
+&gt; 10
+</code></pre>
+
+<p>Thanks to transducers and ability to compose in terms of recipe, we get the following equivalence by construction: <code>mapping f . mapping g = mapping (g . f)</code>. Note that <code>f</code> and <code>g</code> are inverted compared to the usual <code>Functor</code> law because of the left to right flow of data.</p>
+
+<h3 id="filtering">Filtering</h3>
+
+<p>Filtering consists in transforming an input reducer operating on element of type a to a reducer operating on only those elements a that satisfy the a given predicate.</p>
+
+<p>In the code below, <code>next</code> represents the step function of the next transducers in the pipe-line, while <code>pf</code> represents the predicate function from <code>a</code> to <code>Bool</code>.</p>
+
+<p>By calling <code>next</code> on only these elements that satisfy the predicate, we effectively filter these elements from the input source data: the rest of the pipeline will not see them.</p>
+
+<pre><code class="language-haskell">||| Given a predicate of type (a -&gt; Bool), it transforms:
+||| - a step function taking values of type `a`
+||| - into one taking the values of type `a` that fulfills the predicate
+filtering : (a -&gt; Bool) -&gt; Transducer acc s s a a
+filtering pf = statelessTransducer $
+  \next, acc, a =&gt;
+    if pf a
+      then next acc a
+      else pure (Continue acc)
+</code></pre>
+
+<p>Here is an example in which we sum the length of strings that do not start with the letter ‘a’:</p>
+
+<pre><code class="language-haskell">transduce (filtering (\s =&gt; not (startsWith 'a' s)) . mapping length) (+) 0 ["abc", "de", "fgh"]
+&gt; 5
+</code></pre>
+
+<h3 id="concat-mapping">Concat Mapping</h3>
+
+<p>Concat mapping is just like mapping, to the exception that the function provided to the <code>catMapping</code> function may return several <code>b</code> for one <code>a</code>.</p>
+
+<p>In the code below, <code>next</code> represents the step function of the next transducers in the pipe-line, while <code>fn</code> represents the mapping function from a to a collection of b.</p>
+
+<p>By calling next on all the the elements output by <code>fn</code>, <code>catMapping</code> takes elements of type a from and the left, and transmits elements of type b to pipe-line on the right. The main difference with mapping is that the number of <code>bs</code> is not necessarily the same as the number of <code>as</code>.</p>
+
+<pre><code class="language-haskell">||| Given a mapper of type (a -&gt; Foldable b), it transforms:
+||| - a step function taking values of type `b`
+||| - into one taking values of type `a`
+catMapping : (Foldable t) =&gt; (a -&gt; t b) -&gt; Transducer acc s s a b
+catMapping fn = statelessTransducer $
+  \next, acc, a =&gt; runSteps next acc (fn a)
+</code></pre>
+
+<p>Here is an example in which we sum the length of strings, counting each of them twice:</p>
+
+<pre><code class="language-haskell">transduce (catMapping (replicate 2) . mapping length) (+) 0 ["abc", "", "de"]
+&gt; 10
+</code></pre>
+
+<h2 id="conclusion-and-whats-next">Conclusion, and what’s next</h2>
+
+<p>In this post, we went over basics to define transducers in Idris. We defined the concepts and our main types, detailed the main function <code>reduce</code> and <code>transduce</code>, and built very simple transducers.</p>
+
+<p>In the next post, we will see how to define more interesting transducers, such as <code>take</code>, <code>takeWhile</code>, <code>interspersing</code> or <code>groupingBy</code>. We will also look at some helper functions that helps building these transducers more easily.</p>
+
+<p>The library is available in this <a href="https://github.com/QuentinDuval/IdrisReducers">GitHub repository</a>. Any suggestions for improvements is obviously welcomed.</p>
+
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-07-28T00:00:00+00:00">July 28, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Implementing+Clojure-like+Transducers+in+Idris%3A+definitions+%26+concepts%20%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html&title=Implementing+Clojure-like+Transducers+in+Idris%3A+definitions+%26+concepts" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F07%2F28%2Fidris-transducers.html&t=Implementing Clojure-like Transducers in Idris: definitions & concepts" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/07/06/hexagonal-architecture-free-monad.html" title="Hexagonal Architecture and Free Monad: Two related design patterns?">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Hexagonal Architecture and Free Monad: Two related design patterns?</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/08/04/idris-transducers-2.html" title="Implementing Clojure-like Transducers in Idris: advanced transducers">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Implementing Clojure-like Transducers in Idris: advanced transducers</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

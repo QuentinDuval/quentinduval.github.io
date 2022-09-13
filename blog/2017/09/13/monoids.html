@@ -1,0 +1,1045 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Monoids: what they are, why they are useful, and what they teach us about software - Double Ended Queue</title>
+<meta name="description" content="Monoids are a pretty interesting concept in software development. Monoids are everywhere. Monoids are simple yet powerful. And Monoids have a lot to teach us about software, in particular about composition and building powerful abstraction.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Monoids: what they are, why they are useful, and what they teach us about software">
+<meta property="og:url" content="/blog/2017/09/13/monoids.html">
+
+
+  <meta property="og:description" content="Monoids are a pretty interesting concept in software development. Monoids are everywhere. Monoids are simple yet powerful. And Monoids have a lot to teach us about software, in particular about composition and building powerful abstraction.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Monoids: what they are, why they are useful, and what they teach us about software">
+  <meta name="twitter:description" content="Monoids are a pretty interesting concept in software development. Monoids are everywhere. Monoids are simple yet powerful. And Monoids have a lot to teach us about software, in particular about composition and building powerful abstraction.">
+  <meta name="twitter:url" content="/blog/2017/09/13/monoids.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-09-13T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/09/13/monoids.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Monoids: what they are, why they are useful, and what they teach us about software">
+    <meta itemprop="description" content="Monoids are a pretty interesting concept in software development. Monoids are everywhere. Monoids are simple yet powerful. And Monoids have a lot to teach us about software, in particular about composition and building powerful abstraction.">
+    <meta itemprop="datePublished" content="2017-09-13T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Monoids: what they are, why they are useful, and what they teach us about software
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-09-13T00:00:00+00:00">September 13, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html&text=Monoids%3A+what+they+are%2C+why+they+are+useful%2C+and+what+they+teach+us+about+software&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/09/13/monoids.html&title=Monoids: what they are, why they are useful, and what they teach us about software"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/09/13/monoids.html&t=Monoids: what they are, why they are useful, and what they teach us about software">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#what-is-a-monoid">What is a Monoid?</a><ul><li><a href="#definition-formal">Definition (formal)</a></li><li><a href="#definition-statically-typed-languages">Definition (statically typed languages)</a></li><li><a href="#classical-examples">Classical examples</a></li><li><a href="#monoids-are-everywhere">Monoids are everywhere</a></li></ul></li><li><a href="#why-monoids-are-useful">Why Monoids are useful</a><ul><li><a href="#the-closure-gives-composition-free-of-intellectual-charge">The closure gives composition free of intellectual charge</a></li><li><a href="#associativity-gives-abstraction-over-construction-details">Associativity gives abstraction over construction details</a></li></ul></li><li><a href="#a-more-involved-example-of-monoid">A more involved example of Monoid</a><ul><li><a href="#abstract-definition-of-a-shape">Abstract definition of a shape</a></li><li><a href="#shapes-and-coordinates">Shapes and coordinates</a></li><li><a href="#example-of-shapes">Example of shapes</a></li><li><a href="#intersecting-shapes-is-a-monoid">Intersecting shapes is a Monoid</a></li><li><a href="#complex-shapes-out-of-simple-shapes">Complex shapes out of simple shapes</a></li><li><a href="#building-a-vocabulary-of-shapes">Building a vocabulary of shapes</a></li><li><a href="#more-advanced-examples-of-monoids">More advanced examples of Monoids</a></li></ul></li><li><a href="#closing-thoughts-what-monoids-teach-us-about-software">Closing thoughts: what Monoids teach us about software</a><ul><li><a href="#associativity-and-ordering">Associativity and ordering</a></li><li><a href="#side-effect-and-ordering">Side effect and ordering</a></li><li><a href="#side-effect-and-composition">Side effect and composition</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>Monoids are a pretty interesting concept in software development. Monoids are everywhere. Monoids are simple yet powerful. And Monoids have a lot to teach us about software, in particular about composition and building powerful abstraction.</p>
+
+<p>This post will take you through a small tour of what Monoids are and are for.</p>
+
+<p>We will first define what Monoids are and show some first examples. We will then discuss the benefits they can bring to your code, and illustrate it through a more involved example. As closing thoughts, we will step back and think about what Monoids can teach us about programming in general.</p>
+
+<p><em>Disclaimer: Starting from the second part, we will use Haskell and C++ for our examples, but this post is written such that the knowledge of these languages is not strictly required to follow it.</em></p>
+
+<h2 id="what-is-a-monoid">What is a Monoid?</h2>
+
+<p>We here review the basics of Monoids, by going through the formal definition and some classic examples. You are encouraged to skip this section if you are already familiar with Monoids.</p>
+
+<h3 id="definition-formal">Definition (formal)</h3>
+
+<p>A Monoid can be defined as a tuple $(M, op, e)$ where:</p>
+
+<ul>
+  <li>$M$ is a set of element</li>
+  <li>$op$ is an associative binary operation on two elements of M, returning a new element of M</li>
+  <li>$e$ is an element of $M$, neutral for op on both left and right side</li>
+</ul>
+
+<p>Depending on the field of Math considered, Monoids have several definitions. This one is not the most general one, but will do for the rest of this post.</p>
+
+<h3 id="definition-statically-typed-languages">Definition (statically typed languages)</h3>
+
+<p>In a statically typed language, we can translate the notion of set into the notion of type. A Monoid consists of a type <code>T</code> and a function <code>f</code> obeying the following rules:</p>
+
+<ul>
+  <li><code>f</code> takes two instances of <code>T</code> and returns a new instance of <code>T</code></li>
+  <li><code>f</code> is associative: $\forall a, b, c$ we have $f(f(a, b), c) = f(a, f(b, c))$</li>
+  <li><code>f</code> has a neutral element <code>e</code>: $\forall a, f(e, a) = a = f(a, e)$</li>
+</ul>
+
+<p>Some language like Haskell have an explicit interface for Monoids which a type can implement. Beware though that in general <strong>the same type <code>T</code> can participate in several Monoids</strong>.</p>
+
+<h3 id="classical-examples">Classical examples</h3>
+
+<p>I listed below some of the very classic and general examples. Almost all of them are pretty easy to identify and are documented in many online resources:</p>
+
+<ul>
+  <li>Integers form a Monoid under addition with the neutral element zero</li>
+  <li>Integers form a Monoid under multiplication with the neutral element one</li>
+  <li>Sequential containers form a Monoid under concatenation (strings, vectors…)</li>
+  <li>Associative containers form a Monoid under union (maps, sets…)</li>
+</ul>
+
+<p>You can find a bunch more listed in this <a href="https://en.wikipedia.org/wiki/Monoid">Wikipedia page</a> dedicated to Monoids.</p>
+
+<h3 id="monoids-are-everywhere">Monoids are everywhere</h3>
+
+<p>Here are some less classic examples, which I listed below to show that Monoids can be found in many different domains, and in many successful libraries:</p>
+
+<ul>
+  <li><a href="https://github.com/ericniebler/range-v3">C++ range-v3</a> form a Monoid under <a href="https://github.com/ericniebler/range-v3/blob/master/include/range/v3/view/concat.hpp">view::concat</a> with the empty range as neutral element (*)</li>
+  <li>Money amounts define a Monoid under summation with the null amount as neutral element</li>
+  <li>Relative paths in a file system form a Monoid under appending</li>
+  <li>Access rights to files form a Monoid under intersection or union of rights</li>
+</ul>
+
+<p>All of these examples are pretty close to the classic ones. Access rights are related to sets, ranges are related to sequential containers, money amounts are related to numbers (or to <a href="/blog/2017/08/17/money-class-design.html">associative containers</a>).</p>
+
+<p>So an easy way to identify and recognise Monoids in your own code is simply to look at how the concept of your domain relate to the usual suspects.</p>
+
+<p><em>(*) ERRATUM: range-v3 view::concat does not strictly speaking defines a Monoid: although we can view them as Monoids from a conceptual standpoint, the types do not align. Thank you Eric Niebler for pointing out that error.</em></p>
+
+<h2 id="why-monoids-are-useful">Why Monoids are useful</h2>
+
+<p>Monoids are a great way to <strong>build complex behaviour out of simple elements</strong>, without having to introduce new concepts in your software. This section will explain why. The next section will illustrate it with code.</p>
+
+<h3 id="the-closure-gives-composition-free-of-intellectual-charge">The closure gives composition free of intellectual charge</h3>
+
+<p>Because the binary operation of a Monoid takes two values of a given type and returns a new value of the same type (<a href="https://en.wikipedia.org/wiki/Closure_(mathematics)">closure property</a>), this operation can be chained indefinitely.</p>
+
+<ul>
+  <li>We can compose simple elements into composite elements</li>
+  <li>These composite elements can be composed further, just as simple elements can</li>
+  <li>Since we stay in the same world, this process can continue for ever</li>
+</ul>
+
+<p>In addition to this, and because we are only dealing with one type, we get composition for free: we do not have to introduce new types, and therefore new concepts in our code.</p>
+
+<p>A Monoid gives us a way to build complexity out of simplicity, with no conceptual cost added.</p>
+
+<h3 id="associativity-gives-abstraction-over-construction-details">Associativity gives abstraction over construction details</h3>
+
+<p>Let us imagine for a moment that the binary operation was not associative:</p>
+
+<ul>
+  <li>The outcome of combining several elements together would depend on the order in which we combine them (the more elements we have, the larger the number of outcomes)</li>
+  <li>So to get a desired outcome, we would have to care about this composition order, all the way down to the simplest elements we combine together</li>
+  <li>We would therefore have to distinguish primitive elements (not built by combination) from composite ones, and care about how many combination took place</li>
+</ul>
+
+<p>In short, we would have to know all about the details of construction of a value. Instead, <strong>associativity abstracts away the details of construction</strong>. Given a value, we do not have to care how it was built, and whether it is a composite or not. We might not be even able to tell (*).</p>
+
+<p>This abstraction has additional benefits as well: we can split work of constructing a value to different parts of the software, or to different threads even.</p>
+
+<p><em>(*) In fact, we must not be able to tell or the abstraction is broken. Associativity requires this kind of information to be erased. This is the point of an abstraction: getting rid of unimportant details.</em></p>
+
+<h2 id="a-more-involved-example-of-monoid">A more involved example of Monoid</h2>
+
+<p>We will now illustrate how Monoids abstract away the details of creation of a value, to help us build powerful abstractions. To do so, we will create a small library to represent shapes in any number of dimensions.</p>
+
+<p>We will give the examples in Haskell first, and translate them in C++ at the end of each section.</p>
+
+<h3 id="abstract-definition-of-a-shape">Abstract definition of a shape</h3>
+
+<p>In the context of this example, we will define a shape as being a <strong>region of space</strong>, with an arbitrary number of dimension. For instance, a disk is a region of a 2D space. It contains all the points at a distance from the centre of the disk lower or equal than the radius.</p>
+
+<p>Our goal is to write a small library to define and combine such shapes together into arbitrarily complex shapes. To do so, and in order to be agnostic to sampling issues, we will use an idea I first read about from <a href="http://conal.net/">Conal Elliott</a>. We will represent <strong>shapes as functions from coordinates to a boolean</strong>, whose value indicates whether the point is part of the shape. A simple and beautiful idea.</p>
+
+<h3 id="shapes-and-coordinates">Shapes and coordinates</h3>
+
+<p>To define a shape in code, we will define a <code>Shape</code> type which wraps a function from a coordinate (any kind of coordinate, so we use a template parameter) to a boolean:</p>
+
+<pre><code class="language-haskell">newtype Shape coord = Shape {  -- A shape templated on any type of coordinate
+  isInShape :: coord -&gt; Bool   -- Contains a function from a coordinate to a boolean
+}
+</code></pre>
+
+<p>To define a shape in 2D, we define a type alias for coordinates in two dimensions. We then define a 2-dimentional shape as a type alias on a shape templated on a 2D coordinate:</p>
+
+<pre><code class="language-haskell">type Coord2D = (Double, Double)
+type Shape2D = Shape Coord2D
+</code></pre>
+
+<p>Viewing shapes as function is a pretty interesting model. Thanks to it, we can for instance pretty easily define the <strong>complement of a shape</strong>. This new shape is such that it contains all the points that were not in the previous shape (and does not include any of the points of the previous shape).</p>
+
+<p>We call the function which computes this complement <code>outside</code>. It simply negates the predicate of the input shape (note that this works in any number of dimensions, with any coordinate system):</p>
+
+<pre><code class="language-haskell">outside :: Shape coord -&gt; Shape coord
+outside s = Shape (not . isInShape s)
+</code></pre>
+
+<p>Here is the equivalent code (up to the strong typing) in C++:</p>
+
+<pre><code class="language-cpp">template&lt;class Coordinate&gt;
+using Shape = std::function&lt;bool (Coordinate const&amp;)&gt;;
+
+using Coord2D = std::pair&lt;double, double&gt;;
+using Shape2D = Shape&lt;Coord2D&gt;;
+
+template&lt;class Coordinate&gt;
+Shape&lt;Coordinate&gt; outside(Shape&lt;Coordinate&gt; const&amp; s) {
+  return [=](Coordinate const&amp; coord) {
+    return not s(coord);
+  };
+}
+</code></pre>
+
+<h3 id="example-of-shapes">Example of shapes</h3>
+
+<p>To define a shape, we only need to define a function which returns whether a coordinate is inside the shape or not. Here is how we would define a disk:</p>
+
+<pre><code class="language-haskell">disk :: Coord2D -&gt; Radius -&gt; Shape2D
+disk center radius =
+  Shape $ \coord -&gt; euclidianDistance center coord &lt;= radius
+</code></pre>
+
+<ul>
+  <li>The disk function returns a shape that wraps a lambda function</li>
+  <li>The lambda takes a coordinates and returns whether it is in the disk</li>
+  <li>To do so, it computes the euclidian distance of the coordinate to the centre</li>
+  <li>A point is in the disk if its distance to the center is inferior to the radius</li>
+</ul>
+
+<p>We can test our disk in the REPL, by asking whether a point is inside it:</p>
+
+<pre><code class="language-haskell">&gt; let c = disk (1, 1) 1
+
+&gt; isInShape c (2, 0)
+False
+
+&gt; isInShape c (2, 1)
+True
+</code></pre>
+
+<p>Here is the equivalent code (up to the strong typing) in C++:</p>
+
+<pre><code class="language-cpp">Shape2D disk(Coord2D center, double radius) {
+  return [=](Coord2D const&amp; c) {
+    return distance(center, c) &lt;= radius;
+  };
+}
+</code></pre>
+
+<p>Now that we have the basics for a shape, let us see what kind of Monoid we can find here.</p>
+
+<h3 id="intersecting-shapes-is-a-monoid">Intersecting shapes is a Monoid</h3>
+
+<p>A shape forms a Monoid under the intersection of shapes. The intersection of two shapes is defined as another shape which contains only the coordinates that are in both input shapes:</p>
+
+<pre><code class="language-haskell">intersect :: Shape coord -&gt; Shape coord -&gt; Shape coord
+intersect s1 s2 =
+  Shape $ \coord -&gt; isInShape s1 coord &amp;&amp; isInShape s2 coord
+</code></pre>
+
+<p>We can even generalize this to define the intersection of an arbitrarily large number of shapes (the resulting code is available in this <a href="https://gist.github.com/deque-blog/d66fb745ea29771cbcc898e3a156bbd8">GitHub Gist</a>).</p>
+
+<p>We also need a neutral element. In the case of the intersection, it would be the shape that covers the whole space. We can define it as a shape which always returns that a coordinate is inside it:</p>
+
+<pre><code class="language-haskell">allSpace :: Shape coord
+allSpace = Shape (const True) -- `const True` is a function which always returns True
+</code></pre>
+
+<p>Here is the equivalent code (up to the strong typing) in C++:</p>
+
+<pre><code class="language-cpp">template&lt;typename Coordinate&gt;
+Shape&lt;Coordinate&gt; allSpace() {
+  return [](Coordinate const&amp;) {
+    return true;
+  };
+}
+
+template&lt;typename Coordinate&gt;
+Shape&lt;Coordinate&gt; intersect(Shape&lt;Coordinate&gt; const&amp; lhs, Shape&lt;Coordinate&gt; const&amp; rhs) {
+  return [=](Coordinate const&amp; coord) {
+    return lhs(coord) &amp;&amp; rhs(coord);
+  };
+}
+</code></pre>
+
+<p>Finally, because the and operator is associative, our intersect function is associative as well. So we have a Monoid. Let us play with it.</p>
+
+<p><em>Note: We can define another Monoid as well for the superposition of shapes: the full code is <a href="https://gist.github.com/deque-blog/ce7279c010e340b5d500fa1f5ea410fe">provided here</a>. This intersection / union process can be generalised to any predicate (with the AND and the OR operators).</em></p>
+
+<h3 id="complex-shapes-out-of-simple-shapes">Complex shapes out of simple shapes</h3>
+
+<p>Using our intersection operation, we can build more complex shapes. We can for instance intersect a disk with a rectangle, giving us a shape like this:</p>
+
+<pre><code>    *******************
+  ***********************
+ *************************
+ *************************
+  ***********************
+    *******************
+</code></pre>
+
+<p>To build a ring-like shape, we can intersect the outside of a small disk with the interior of a big disk, both centered at the same point:</p>
+
+<pre><code class="language-haskell">ring :: Coord2D -&gt; Radius -&gt; Radius -&gt; Shape2D
+ring center smallRadius bigRadius =
+  intersect
+    (disk center bigRadius)
+    (outside (disk center smallRadius))
+</code></pre>
+
+<p>Using a small helper function, we can draw one in the console:</p>
+
+<pre><code>     ****    
+   ********  
+   ********  
+  ***    *** 
+  ***    *** 
+  ***    *** 
+  ***    *** 
+   ********  
+   ********  
+     **** 
+</code></pre>
+
+<p>Here is the equivalent code (up to the strong typing) in C++:</p>
+
+<pre><code class="language-cpp">Shape2D ring(Coord2D center, double smallRadius, double bigRadius) {
+  return intersect(
+    disk(center, bigRadius),
+    outside(disk(center, smallRadius))
+  );
+}
+</code></pre>
+
+<p>Nothing forbids us to compose these shapes even further, as the intersection gives us back a shape like any other, we can intersect a ring with a rectangle for instance. There is no limit to our crazy imagination.</p>
+
+<h3 id="building-a-vocabulary-of-shapes">Building a vocabulary of shapes</h3>
+
+<p>Since the output of a Monoid operator is also a shape, we can define complex shapes out of very simple shapes and keep on composing them. The details of construction of these new shapes are abstracted.</p>
+
+<p>We are also unable to distinguish a composite shape from a primitive shape. Composite shapes behave, look and smell exactly like primitive shapes, enriching our vocabulary of primitive shapes at a low cost.</p>
+
+<p>Finally, and thanks to the associative nature of the Monoid operator, we never have to care about the order in which these intersections take place. We can first intersect a rectangle with a disk and then a ring, or do it the other way around. It does not matter: given a shape, we never have to care how it was constructed.</p>
+
+<p><em>EDIT: as <a href="https://www.reddit.com/user/carrutstick">u/carrutstick</a> noted, the use of the “order” word in the sentence above might be misleading. It refers to the order of application of the associative binary operation, not the commutativity, that is to say intersect(intersect(rectangle, disk), ring) is the same as intersect(rectangle, intersect(disk, ring)).</em></p>
+
+<h3 id="more-advanced-examples-of-monoids">More advanced examples of Monoids</h3>
+
+<p>There are plenty more examples of Monoid we could talk about.</p>
+
+<p>I have been lucky enough to participate to a training given by <a href="http://cyrille.martraire.com/">Cyrille Martraire</a>, in which he gave us some more example on how to apply this notion to represent financial cashflows. French speakers might be interested in looking at his <a href="https://www.youtube.com/watch?v=_jr8E5GVnBA">Monoid talk at the Devoxx 2015</a>.</p>
+
+<p>If you happen to attend the CppCon 2017, you might be interested in coming our presentation on <a href="https://cppcon2017.sched.com/event/Bgsh/using-functional-programming-patterns-to-build-a-clean-and-simple-http-routing-api">How to apply Functional Programming ideas to build a HTTP router API</a>. At this occasion, <a href="https://twitter.com/jeremydemeule">Jeremy Demeule</a> and myself will be showing two more examples of Monoids.</p>
+
+<h2 id="closing-thoughts-what-monoids-teach-us-about-software">Closing thoughts: what Monoids teach us about software</h2>
+
+<p>We saw that Monoids have very good characteristics in terms of composition and abstraction, two very valuable characteristics to get in our code. By looking at how they achieve this, we can make some parallel with other good ways to achieve composition.</p>
+
+<h3 id="associativity-and-ordering">Associativity and ordering</h3>
+
+<p>As we just saw, the associativity is a pretty important property of the Monoid operation. Had the binary operation not been associative, the whole abstraction would have collapsed.</p>
+
+<ul>
+  <li>Without associativity, we have to care about the order in which we combine the elements</li>
+  <li>This ordering provokes an combinatorial explosion of the possible outcomes</li>
+</ul>
+
+<p>In fact, associativity is not as important as being ordering independent (it just so happens that associativity is sufficient to get this property for Monoids). In general, code whose outcome does not depend on its order of execution favours greater composition.</p>
+
+<h3 id="side-effect-and-ordering">Side effect and ordering</h3>
+
+<p>Let us think about the obvious kind of things that would instantaneously make us lose associativity (or alternatively, make the result of our program sensitive to ordering).</p>
+
+<p>The obvious suspect is side effects. Any side effect (an action performed by a process, visible from the rest of the program) inside the binary operation of a Monoid would instantaneously break the associative property. For instance, a adding a print statement would result in different traces being emitted depending on the order of evaluation.</p>
+
+<p>In general, any assignment to a variable aliased externally, or any IO effect, will introduce a dependency to ordering and time in our programs. It will make the program vulnerable to issues such as race conditions, but also greatly limit its composability.</p>
+
+<h3 id="side-effect-and-composition">Side effect and composition</h3>
+
+<p>In general, there is a pretty strong correlation between our ability to compose program and the amount of side-effects this program relies on to perform its job.</p>
+
+<p>If we see Monoids are a small laboratory to experiment with the consequences of side-effects on a whole program, we understand that limiting side effects to a limited scope in our software is key to build composable and leak-free abstractions.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-09-13T00:00:00+00:00">September 13, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Monoids%3A+what+they+are%2C+why+they+are+useful%2C+and+what+they+teach+us+about+software%20%2Fblog%2F2017%2F09%2F13%2Fmonoids.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html&title=Monoids%3A+what+they+are%2C+why+they+are+useful%2C+and+what+they+teach+us+about+software" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F09%2F13%2Fmonoids.html&t=Monoids: what they are, why they are useful, and what they teach us about software" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/09/04/list-monad-np-complexity.html" title="List Monad connection with Non-deterministic Polynomial time complexity">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">List Monad connection with Non-deterministic Polynomial time complexity</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/09/20/transforming-data-into-types.html" title="Transforming data structures into types: an introduction to dependent typing and its benefits">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Transforming data structures into types: an introduction to dependent typing and its benefits</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

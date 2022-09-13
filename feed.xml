@@ -1,0 +1,1506 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-09-13T11:24:21+00:00</updated><id>/feed.xml</id><title type="html">Double Ended Queue</title><subtitle>Functions In, Fictions Out</subtitle><author><name>Quentin Duval</name></author><entry><title type="html">Statistical gender bias</title><link href="/blog/2022/09/05/statistical-gender-bias.html" rel="alternate" type="text/html" title="Statistical gender bias" /><published>2022-09-05T00:00:00+00:00</published><updated>2022-09-05T00:00:00+00:00</updated><id>/blog/2022/09/05/statistical-gender-bias</id><content type="html" xml:base="/blog/2022/09/05/statistical-gender-bias.html"><![CDATA[<p>I recently stumbled on a <a href="https://www.youtube.com/watch?v=aMcjxSThD54">debate</a> where Jordan B. Peterson argues, based on a statistical argument, that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with this statistical argument.</p>
+
+<h2 id="the-argument-as-i-understood-it">The argument as I understood it</h2>
+
+<p>The host interviewing Jordan B. Peterson intially mentions around minute 5:55 that the gender pay gap in the UK is around 9% between men and women (women are payed 9% less).</p>
+
+<p>Jordan B. Peterson answers that the gap this is not due to gender bias alone. To him, gender bias is only one of the causes and does only account for a fraction of the gender pay gap (minute 7:21).</p>
+
+<p>He argues that, although there definitely a 9% pay gap between men and women, concluding this is only due to gender bias is too simplisitic. He argues that we need to perform a multi-variate analysis (with more than just 2 factors pay and gender) and look at the influence of the different factors.</p>
+
+<p>He then affirms that if we do this, we can see that the other factors (which are correlated with behing a woman) explain this pay gap and that the gender bias itself only explain a fraction of the pay gap.</p>
+
+<p>He takes the example of the agreable-ness personality trait, which encompasses being compassionate and polite. His argument is that because women are more agreeable, they are not asking for pay raise as often as men do, and are getting a lower wages in the end. He estimates this accounts for 5% of the pay gap.</p>
+
+<p>He concludes that traits such as agreable-ness are causes of the gender pay gap, perhaps more so that the gender bias itself, which he thinks is actually much less than 9%.</p>
+
+<p>Does this argument makes sense from a statistical point of view?</p>
+
+<p>Asked different, to the extreme where the multivariate analysis would show that 100% of the pay gap can be “explained” by the “agreable” trait, would that means that gender bias does not exist?</p>
+
+<h2 id="whats-wrong-with-the-argument">What’s wrong with the argument?</h2>
+
+<p>The issue with the argument lies with the multi-variate analysis itself. What kind of analysis is being done is undefined in this talk but we might presume some kind of multivariate linear regression. Whatever the analysis itself, let’s see why it cannot help conclude that gender bias is not the core issue.</p>
+
+<h3 id="explain-does-not-mean-cause">“Explain” does not mean “cause”</h3>
+
+<p>Statistical models can only tell you about correlation and not causation. In addition to that, statistically models will usually pick on the “simplest explanation” based on their expressiveness (their representational power).</p>
+
+<p>Here is one typical example that is often used in Machine Learning communities, camel and cows:</p>
+
+<ul>
+  <li>Camels are most often photographed with a desert background</li>
+  <li>Cows are most often photographed with a grass background</li>
+</ul>
+
+<p>Because it is very easy to discriminate on background colors and texture rather than shape, typical machine learning algorithms will “explain” the cow-ness or camel-ness of the photo (the observation) based on the background.</p>
+
+<p>Does that means that, even if cows are always on grass and camel always in the desert, that the background determines the animal? Of course not! But statistical techniques will unfortunately pick up on that: when you present them with a cow in the desert, most models will likely answer “camel”.</p>
+
+<h3 id="an-arbitrary-causal-model">An arbitrary causal model</h3>
+
+<p>To make claims like Jordan B. Peterson does, you need a causal model. Here is the causal model that Jordan B. Peterson proposes during the debate, consisting of two factors:</p>
+
+<ul>
+  <li>“Gender” between 0 and 1 (both included): 0 means being looking 100% masculine, and 1 means looking 100% feminine.</li>
+  <li>“Agreeable” between 0 and 1 (both included): 0 means not being agreable at all and 1 means being 100% agreable.</li>
+</ul>
+
+<p><img src="/assets/images/agreeable_causal_model.png" alt="CausalModel" /></p>
+
+<p>In short, gender influence being agreable-ness. Both factors influence the pay.</p>
+
+<p>But causal models like this cannot be tested by just observational data. You would need something like interventions to test the model: for instance modify the agreable-ness of a person and measure the influence of the pay.</p>
+
+<p>Without such intervention, this causal model has no more value than any causal model that we could propose (adding / deleting / inversing arrows, etc).</p>
+
+<p>To see why, let’s propose a different model.</p>
+
+<h3 id="radically-different-models-can-fit-the-same-data">Radically different models can fit the same data</h3>
+
+<p>Here is a different causal model than the one proposed by Jordan B. Peterson. In this causal diagram, the agreable-ness is a side effect of the gender that has no direct influence on the pay:</p>
+
+<p><img src="/assets/images/agreeable_causal_model_2.png" width="50%" /></p>
+
+<p>Now, what’s interesting is that both causal diagrams displayed until now are completely undistinguishable with just observational data. Let’s show this by plugging some numbers in those causal diagrams:</p>
+
+<p><img src="/assets/images/agreeable_causal_model.png" alt="CausalModel" /></p>
+
+<center>
+<b>Diagram 1:</b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$a = 0.2 + 0.8 g$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $p = 1 - 0.1 a - 0.1 g$
+</center>
+<p><br /></p>
+
+<p><img src="/assets/images/agreeable_causal_model_2.png" width="50%" /></p>
+
+<center>
+<b>Diagram 2:</b>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$a = 0.2 + 0.8 g$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $p = 0.98 - 0.18 g$
+</center>
+<p><br /></p>
+
+<p>Put whatever number you want as gender $g$ and we get the same values for agreeable-ness $a$ and pay $p$.</p>
+
+<p>In other words, you could learn the coefficient of one model even if the data was generated from the other model, and fit both models perfectly to the same observational data.</p>
+
+<p>Those two models are thus basically undistinguishable with just observational data… but lead to very different conclusions!</p>
+
+<h3 id="time-makes-conclusion-even-more-complex">Time makes conclusion even more complex</h3>
+
+<p>Everything we discussed so far is in the context of static models: the causal model is unchanged as time passes. But change is the only constant: things are even more complex in practice!</p>
+
+<p>We know for certainty that gender bias was huge just a few decades ago: plenty of countries did not even gave vote to women before the second world war… It is very likely that this gender bias persists through education and is behind the agreeable-ness between a trait more associated to women.</p>
+
+<p>Here is one possible way it happened: women were seen as inferior as men and educated to be agreeable to men because they were taught men were superior. And now, the prejudice against women, abolished by law, is hidden behind the numbers on the <strong>diagram 1</strong> above.</p>
+
+<p>If that’s the case, the causal diagram today may look like Jordan B. Peterson causal diagram, but the main cause of gender pay gap remains gender bias: the factor behind the arrows might just be a matter of gender biased education.</p>
+
+<h2 id="the-conclusion-is-in-the-eyes-of-the-beholder">The conclusion is in the eyes of the beholder</h2>
+
+<p>When dealing with observational data, causality is not achievable. In the absence of interventions, it is impossible to distinguish against multiple causal diagrams with just data.</p>
+
+<p>In such instances, interpretation such as the one Jordan B. Peterson draws, are not strongly supported: they might agree with the data, but agreeing with the data is not enough as other models will do as well.</p>
+
+<p>In such cases, any conclusion we make based on the data actually only shows our own preconceptions on what the causal model should be (we might be blinded by our own convictions, or prefer one conclusion to another) and does not make our conclusion valid.</p>]]></content><author><name>Quentin Duval</name></author><category term="random-rambling" /><category term="random-rambling" /><category term="maths" /><summary type="html"><![CDATA[I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let's see what's wrong with his argument.]]></summary></entry><entry><title type="html">Understanding perplexity and its relation to cross-entropy and compression</title><link href="/blog/2022/06/19/perplexity.html" rel="alternate" type="text/html" title="Understanding perplexity and its relation to cross-entropy and compression" /><published>2022-06-19T00:00:00+00:00</published><updated>2022-06-19T00:00:00+00:00</updated><id>/blog/2022/06/19/perplexity</id><content type="html" xml:base="/blog/2022/06/19/perplexity.html"><![CDATA[<p>Modern conditional and unconditional language models often report their perplexity as validation metrics.</p>
+
+<p>Let’s see what it means intuitively and how it connects to other important measures of information theory such as cross entropy or compression.</p>
+
+<h2 id="definition-of-perplexity">Definition of perplexity</h2>
+
+<p>The perplexity of a sequence of observation is defined as:</p>
+
+<p>$\displaystyle \mathcal{P} = P(x_1, x_2, … , x_N) ^ {- \frac{1}{N}}$</p>
+
+<p>Mathematically, it is the reciprocal of the probability of this sequence to appear in natural language, nornalised so that the number of elements in the sequence does not push this probability to zero as we add more terms (and consequently push the perplexity to infinity as we add more terms).</p>
+
+<h2 id="back-ground-on-language-models">Back-ground on language models</h2>
+
+<p>Language models are trained to model the probability distribution of the next word in the sentence given the previous ones:</p>
+
+<p>$P(x_N | x_{N-1}, …, x_1)$</p>
+
+<p>We call such models auto-regressive. These models are elequant for at least two reasons. The first one is that we can easily sample from them to produce a sentence (write english, code, cooking recipes, etc).</p>
+
+<p>The second is that their formulation corresponds to a specific decomposition of the joint probability of the sequence, which follows directly from the chain rule of probability, and always holds true:</p>
+
+<p>$P(x_1, x_2, … , x_N) = \prod P(x_i | x_{i-1}, …, x_1)$</p>
+
+<p>To train these model we use the standard cross entropy loss, written as so:</p>
+
+<p>$\mathcal{C} = - \frac{1}{N} \sum P(x_i | x_{i-1}, …, x_1)$</p>
+
+<p>Which we can identify as the $\log$ of the joint probability of the sequence. Elequant!</p>
+
+<h2 id="connecting-perplexity-to-cross-entropy">Connecting perplexity to cross entropy</h2>
+
+<p>As mentionned above, language models (conditional or not) are typically trained with cross entropy. Let see how perplexity is connected to this cross-entropy.</p>
+
+<p>First, recall the definition the perplexity:</p>
+
+<p>$\displaystyle \mathcal{P} = P(x_1, x_2, … , x_N) ^ {- \frac{1}{N}}$</p>
+
+<p>Now, let’s take the log of the perplexity:</p>
+
+<p>$\displaystyle \log \mathcal{P} = \log P(x_1, x_2, … , x_N) ^ {- \frac{1}{N}} = - \frac{1}{N} \log P(x_1, x_2, … , x_N)$</p>
+
+<p>Next we can decompose the joint probability of the sequence with the chain rule of probability, the same decomposition used in auto-regressive models:</p>
+
+<p>$\displaystyle \log \mathcal{P} = - \frac{1}{N} \log \prod P(x_i | x_{i-1}, …, x_1) = - \frac{1}{N} \sum \log P(x_i | x_{i-1}, …, x_1)$</p>
+
+<p>We recognize here the auto-regressive cross entropy objective. Hence the perplexity is the exponential of the cross entropy of the language model.</p>
+
+<h2 id="ok-but-what-does-it-mean">Ok, but what does it mean?</h2>
+
+<h3 id="in-terms-of-distance">In terms of distance</h3>
+
+<p>The cross-entropy of a given sequence is a mesure of how far this sequence is from the probablity distribution modelled by the language model (*).</p>
+
+<p>The bigger the cross entropy is, the further away the sequence being tested is from being generated by the language model.</p>
+
+<p>Since the exponential is monotonously increasing, the same holds for the perplexity. The higher the perplexity the worse the language model is at modelling the sequence being evaluted.</p>
+
+<p>Note that <strong>this does not directly judge the quality of the sentences being generated by the language model</strong>. This is a very important point.</p>
+
+<p>The language model could generate perfectly correct sentences, syntactically perfect and meaningful, and still get a very high perplexity. One extreme example is when the model only generates a single sentence. Its perplexity would be infinite on any other sentence.</p>
+
+<p><em>(*) In truth, the cross entropy is a measure of distance between two probability distributions, but we take this shortcut here for simplicity.</em></p>
+
+<h3 id="in-terms-of-choice">In terms of choice</h3>
+
+<p>Say there is only a single word in our language. The perplexity of the sequence containing this single word would be 1.</p>
+
+<p>$\displaystyle \mathcal{P} = P(x_1) ^ {- \frac{1}{1}} = \frac{1}{P(x_1)} = \frac{1}{1.0} = 1$</p>
+
+<p>If the vocabulary had two words equally probable the perplexity of one of those words would be 2.</p>
+
+<p>$\displaystyle \mathcal{P} = P(x_1) ^ {- \frac{1}{1}} = \frac{1}{P(x_1)} = \frac{1}{0.5} = 2$</p>
+
+<p>Intuitively, the perplexity of a sentence corresponds to the average numbers of samples the language models would have to draw per word in order to generate this sentence. Or said differently, the average of the number of choices the language would have faced at each word in order to generate this sentence.</p>
+
+<p>The higher this number, the less likely the language model would have to been to generate the given sentence. Again, note the inversion: <strong>we don’t judge the quality of generated text by the language model as much as the generality of the language model</strong>.</p>
+
+<h3 id="in-terms-of-information-content-and-compression">In terms of information content and compression</h3>
+
+<p>The cross-entropy of a given sequence is a mesure of how many bits are needed in order to encode this sentence given the probability distribution defined by the language model.</p>
+
+<p>The higher the cross entropy is (equivalently the higher the perplexity is), the less the sentence can be compressed by the language model.</p>
+
+<p>In this sense, perplexity and cross-entropy are a measure of <strong>compressibility of natural language text</strong> under the probability distribution defined by the language model.</p>
+
+<p>A perfect language model would be able to compress natural language with the least amout of bits, thanks to its perfect modelling of the joint probability distribution of language.</p>]]></content><author><name>Quentin Duval</name></author><category term="machine-learning" /><category term="machine-learning" /><category term="maths" /><summary type="html"><![CDATA[Modern conditional and unconditional language models often report their perplexity as validation metrics. Let's see what it means.]]></summary></entry><entry><title type="html">Auto-regressive language models don’t necessarily sample the most probable sentences</title><link href="/blog/2022/06/16/lm-joint-probability.html" rel="alternate" type="text/html" title="Auto-regressive language models don’t necessarily sample the most probable sentences" /><published>2022-06-16T00:00:00+00:00</published><updated>2022-06-16T00:00:00+00:00</updated><id>/blog/2022/06/16/lm-joint-probability</id><content type="html" xml:base="/blog/2022/06/16/lm-joint-probability.html"><![CDATA[<p>The year 2020 saw the coming of GPT-3. Since then, a lot of increasingly powerful language or language-image models (sur as Chinchilla or Flamingo) have been released.</p>
+
+<p>What these models have in common is the auto-regressive nature of their sequence generation process. Each word is generated by conditioning on the previous words.</p>
+
+<p>Although very powerful, these models, even if sampled in a greedy fashion (i.e. pick the next most probable word as next token), will not necessarily generate the most probable sentence or answer. Let’s see why.</p>
+
+<h2 id="back-ground-on-language-models">Back-ground on language models</h2>
+
+<p>Language models are trained to model the probability distribution of the next word in the sentence given the previous ones:</p>
+
+<p>$P(x_N | x_{N-1}, …, x_1)$</p>
+
+<p>We call such models auto-regressive. These models are elequant for at least two reasons. The first one is that we can easily sample from them to produce a sentence (write english, code, cooking recipes, etc).</p>
+
+<p>The second is that their formulation corresponds to a specific decomposition of the joint probability of the sequence, which follows directly from the chain rule of probability, and always holds true:</p>
+
+<p>$P(x_1, x_2, … , x_N) = \prod P(x_i | x_{i-1}, …, x_1)$</p>
+
+<h2 id="greedy-does-not-lead-to-most-probable">Greedy does not lead to most probable</h2>
+
+<p>Say our language model manages to perfectly match the conditional distribution of next word in the natural language.</p>
+
+<p>$P(x_N | x_{N-1}, …, x_1)$</p>
+
+<p>We now decide to generate the next sentence by repeatedly sampling the next most probable token from this distribution until the end of sequence token is reached. Why are we not guaranted to generate the most probable sentence?</p>
+
+<h3 id="lets-start-with-an-example">Let’s start with an example</h3>
+
+<p>In the example below, the prefix represents what our auto-regressive would have generated so far, and provide the next tokens with associated probabilities:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Prefix</th>
+      <th>Next token</th>
+      <th>Probability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">A</td>
+      <td>B</td>
+      <td>60%</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">A</td>
+      <td>C</td>
+      <td>40%</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">AB</td>
+      <td>A</td>
+      <td>33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">AB</td>
+      <td>B</td>
+      <td>33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">AB</td>
+      <td>C</td>
+      <td>33%</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">AC</td>
+      <td>C</td>
+      <td>100%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Say we are given the prefix “A” (which for example represents the question being asked to our language model) and we want to generate 2 tokens.</p>
+
+<p>By greedy behavior, our model will select “B” as next token (probability 60%). Then it will be cornered and have to pick a token with probability 33%. The overall probability of the answer will be 20%.</p>
+
+<p>But the most probable sentence to generate in that case is “CC” (first token with probability 40% then second with 100%) leading to an overall probability of 40%, much higher than what the greedy algorithm would have done.</p>
+
+<h3 id="but-why">But why?</h3>
+
+<p>As discussed above, the probability of a sentence of $N$ tokens can be decomposed using the chain rule of probability like so:</p>
+
+<p>$P(x_1, x_2, … , x_N) = \prod P(x_i | x_{i-1}, …, x_1)$</p>
+
+<p>In the general case, maximizing this quantity cannot be done by successfully maximizing the quantity with regard to any of the variables in isolation (even by selecting a “clever” ordering of variables with regard to which to maxinize).</p>
+
+<p>This is one of the reason why it is so important not to sample in a greedy manner. But to me, there is another intuitive reason as well…</p>
+
+<h2 id="greedy-is-boring">Greedy is boring</h2>
+
+<p>The greedy sampling of the next probable sentence is likely to select the most boring next possible word.</p>
+
+<p>Remember from information theory that the information content $\mathcal{I}$ of an event $X$ is the logarithm of the reciprocal of the probability:</p>
+
+<p>$\mathcal{I(X)} = - \log P(X)$</p>
+
+<p>A very probable event conveys a very low amount of information when it occurs. Telling you that the sun will rise and fall tomorrow is quite boring. Telling you that a comet will appear in the sky tomorrow is much more interesting. Adding the time in the sentence will add some more information and makes it even more interesting.</p>
+
+<p>In short, if you want an interesting conversation, the minimum requirement would be surprise and information content. Those are reason why greedy should be avoided.</p>
+
+<p>So should we instead generate the next word with the smallest probability? It’s obviously not a good idea either. If this next word has very low probability it is likely that adding it to the end of the sentence is not gramatically correct.</p>
+
+<p>The solution used in most paper is to sample from the distribution using a temperature in the softmax so that a reasonnable diversity is achieved, without endangering the syntactic correctness of the sentence.</p>
+
+<h2 id="links-to-similar-phenomena">Links to similar phenomena</h2>
+
+<p>For those familiar with Hidden Markov Models (HMM), this phenomena is very reminiscent of the difference between “filtering” and the “Viterbi” algorithm.</p>
+
+<p>Given a sequence of observations, the filtering algorithm will give you the most probable current state. But repeatedly “filtering” on very position in the sequence will not given you the most probable succession of states, to do so, you must use the Viterbi algorithm.</p>]]></content><author><name>Quentin Duval</name></author><category term="machine-learning" /><category term="machine-learning" /><category term="maths" /><summary type="html"><![CDATA[Have you even tried to sample greedily from a language model. It's not a good idea. Let's discuss why.]]></summary></entry><entry><title type="html">How wind affects your speed on a bike</title><link href="/blog/2022/05/24/cycling-drag-force.html" rel="alternate" type="text/html" title="How wind affects your speed on a bike" /><published>2022-05-24T00:00:00+00:00</published><updated>2022-05-24T00:00:00+00:00</updated><id>/blog/2022/05/24/cycling-drag-force</id><content type="html" xml:base="/blog/2022/05/24/cycling-drag-force.html"><![CDATA[<p>If you are into biking, you’ve probably noticed that the relative wind that slows you down seem to appear all of a sudden. Slow down a little bit and it seems okay, accelerate back 5 km/h higher, and it feels really painful.</p>
+
+<p>You probably have noticed as well that on some windy days, the way back you go almost 10 km/h faster in average, with the same amount of efforts applied.</p>
+
+<p>Let’s quicky look at the physics behind this.</p>
+
+<h2 id="the-physics">The Physics</h2>
+
+<p><strong>TLDR;</strong> The power needed to maintain a given speed is cubic in the relative speed of the wind. The energy expenditure over a given distance is quadratic in the relative speed of the wind.</p>
+
+<h3 id="the-drag-force">The drag force</h3>
+
+<p>From <a href="https://en.wikipedia.org/wiki/Drag_(physics)">Wikipedia</a>, we get the following equation for the drag force:</p>
+
+<p>$\displaystyle F = {\tfrac {1}{2}}\,\rho \,v^{2}\,C_{D}\,A$</p>
+
+<p>where we have:</p>
+
+<ul>
+  <li>$\rho$  is the density of the fluid</li>
+  <li>$v$ is the speed of the object relative to the fluid</li>
+  <li>$A$ is the cross sectional area</li>
+  <li>$C_{D}$ is the drag coefficient (which depends on the shape)</li>
+</ul>
+
+<p>So the intensity of the force is quadratric in the speed of the relative wind the cyclist is facing.</p>
+
+<h3 id="the-work">The work</h3>
+
+<p>The force applies on a given position, and we have to integrate this over the trajectory to get the total <strong>work</strong> of the force.</p>
+
+<p>$\displaystyle W = \int F(x) . dx$</p>
+
+<p>Which, if we assume a straight line trajectory, gives us:</p>
+
+<p>$\displaystyle W = F(x) . \vec{x}$</p>
+
+<p>So we can see that the work done for a given distance grows quadratically with the speed at which we travel relative to the wind.</p>
+
+<h3 id="the-power">The power</h3>
+
+<p>Then, to get the <strong>power</strong>, we have to compute at the work done over time (the derivative of the work with respect to time).</p>
+
+<p>$\displaystyle P = \frac{dW}{dt} = F . \frac{d \vec{x}}{dt} = F . \vec{v}$</p>
+
+<p>And so we see that the power is not quadratic with respect to the relative speed of the wind, but cubic instead. To go twice as fast against the wind, you need to generate 8 times the power against the wind, which is quite substantial!</p>
+
+<h2 id="consequences-if-the-drag-force-dominates">Consequences (if the drag force dominates)</h2>
+
+<p>For speeds at which the drag force dominates over the other forces (typically at high speed, the drag force is the main slowing factor), the following holds.</p>
+
+<h3 id="going-10-as-fast-requires-33-more-power">Going 10% as fast requires 33% more power</h3>
+
+<p>To accelerate from $v_1$ to $v_2 = 1.1 v_1$, the relative increase in power is given by the ratio of $P_2$ divided by $P_1$:</p>
+
+<p>$\displaystyle \frac{P_2}{P_1} = \frac{v_2^3}{v_1^3} = 1.1^3 = 1.331$</p>
+
+<p>So you need to sustain 33.1% more power to gain a mere 10% speed. We can generalize and get a feel of this cubic cost by looking at the following table:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Relative Speed Increase</th>
+      <th>Relative Power needed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>+10%</td>
+      <td>+33%</td>
+    </tr>
+    <tr>
+      <td>+20%</td>
+      <td>+73%</td>
+    </tr>
+    <tr>
+      <td>+30%</td>
+      <td>+120%</td>
+    </tr>
+    <tr>
+      <td>+40%</td>
+      <td>+174%</td>
+    </tr>
+    <tr>
+      <td>+50%</td>
+      <td>+338%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="resting-by-slowing-down-might-not-degrade-your-average-speed-so-much">Resting by slowing down might not degrade your average speed so much</h3>
+
+<p>This is the same observation as the previous section but here we consider slowing down instead of speeding up:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Relative Speed Increase</th>
+      <th>Relative Power needed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-10%</td>
+      <td>73%</td>
+    </tr>
+    <tr>
+      <td>-20%</td>
+      <td>51%</td>
+    </tr>
+    <tr>
+      <td>-30%</td>
+      <td>34%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In short, if I divide my power expenditure by 2 temporarily to catch my breath, my speed will only decrease by 20%, which is not so much. This will not show too much too significantly on my average speed if done for a short period of time.</p>
+
+<h3 id="doubling-the-power-only-means-going-26-faster">Doubling the power only means going 26% faster</h3>
+
+<p>We can obviously inverse the question: how fast could I go if I double the amount of power I can sustain? (in the limit where other forces are negligible)</p>
+
+<p>$\displaystyle \frac{P_2}{P_1} = 2 = \frac{v_2^3}{v_1^3} = \frac{f^3 v_1^3}{v_1^3} = f^3$ where $f$ is the speed increase factor</p>
+
+<p>The only real solution of $\sqrt[3]{2}$ is approximatively 1.2599 and so doubling our amount of sustainable power (by increasing our VO2 max, our muscle efficiency with respect to oxygen consumption, our strength, etc) would “only” give us 26% increase in speed.</p>
+
+<h3 id="doing-the-same-parcours-10-faster-requires-21-more-energy">Doing the same parcours 10% faster requires 21% more energy</h3>
+
+<p>Because of the work grows quadratically with the relative speed of the wind, for a fixed distance in straight line (and in the limit where we can neglect the effect of other forces than the drag force, for instance at high speed), we have:</p>
+
+<p>$\displaystyle \frac{W_2}{W_1} = \frac{v_2^2}{v_1^2} = f^2$ where $f$ is the speed increase factor</p>
+
+<p>And so if we go 10% faster, $f^2 = 1.1^2 = 1.21$, and so we spend 21% more energy in doing so.</p>
+
+<p>Another way to derivate the same result is considering that power will increase with the cube of $f$, but dividing by $f$ because we have to sustain that power for $f$ less amount of time (since we go through the distance $f$ times faster).</p>
+
+<h3 id="calories-burned-are-not-only-a-function-of-distance">Calories burned are not only a function of distance</h3>
+
+<p>The previous section showed us that merely saying “I did a 40 km bike this week-end” does not really allow to compute for the total energy expenditure (and so the real intensity of the workout).</p>
+
+<p>In fact, someone could have done twice your distance and burn as much calories as you did by going slower. How slower? Let’s compute that:</p>
+
+<p>$\displaystyle W \propto v^2 d$ where $v$ is the speed and $d$ the distance</p>
+
+<p>And so if the two persons spent equally as much energy but one person did twice the distance as the other, we have:</p>
+
+<p>$\displaystyle d_1 v_1^2 = d_2 v_2^2$ and $d_1 = 2 d_2$
+$\displaystyle \implies \frac{v_2^2}{v_1^2} = 2$</p>
+
+<p>And so the person that did travel half the distance did it $\sqrt{2} \simeq 1.44$ times faster.</p>
+
+<h3 id="aerodynanism-also-hits-the-same-dimishing-returns-but-remains-of-paramount-importance">Aerodynanism also hits the same dimishing returns but remains of paramount importance</h3>
+
+<p>The power as well as the energy are proportional to the “aerodynamism” factor $K$ as the power follows this equation:</p>
+
+<p>$P = K v^3$ and $W = K v^2$</p>
+
+<p>And so for the same speed, improving aerodynamism by 20% will decrease your power and energy expenditure by the same 20%.</p>
+
+<p>But aerodynamism also hits the same diminishing returns as increasing power when we want to increase our speed.</p>
+
+<p>For instance, for the same amount of sustained power (i.e. the same amount of energy or calories burned over a period of time) improving aerodynamism by 20% leads to going 7.7% faster:</p>
+
+<p>$P_1 = K_1 v_1^3 = P_2 = K_2 v_2^3$ where $K_2 = 0.8 K_1$</p>
+
+<p>$\displaystyle \implies \frac{v_2^3}{v_1^3} = \frac{K_1}{K_2} = \frac{1}{0.8}$
+$\displaystyle \implies \frac{v_2}{v_1} = \sqrt[3]{1.25} \simeq 1.077$</p>
+
+<p>Note that aerodynamism still remains of paramount importance, because if you want to increase your speed by 7.7%, you can either improve aerodynamism by 20% or increase your sustained power by 25%.</p>]]></content><author><name>Quentin Duval</name></author><category term="random-rambling" /><category term="random-rambling" /><category term="maths" /><summary type="html"><![CDATA[Let's look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.]]></summary></entry><entry><title type="html">COVID cases from COVID test results</title><link href="/blog/2021/07/29/covid-cases.html" rel="alternate" type="text/html" title="COVID cases from COVID test results" /><published>2021-07-29T00:00:00+00:00</published><updated>2021-07-29T00:00:00+00:00</updated><id>/blog/2021/07/29/covid-cases</id><content type="html" xml:base="/blog/2021/07/29/covid-cases.html"><![CDATA[<p>Each time the COVID positive test cases have been going up again, I’ve heard the same sentence: <em>“they largely understimate the actual number of cases, there is at least 10 times more!”</em>.</p>
+
+<p>So out of fun, I decided to create a small statistical model, to quantify how things evolve under reasonnable assumptions.</p>
+
+<p>Interestingly, under this very simple model, it becomes impossible to say “it’s at least 10 times more” in a general way: the underestimation of cases highly depends on the actual number of positive tests detected!</p>
+
+<h2 id="a-realistically-naive-statistical-model-for-covid">A realistically naive statistical model for COVID</h2>
+
+<p>Let’s try to estimate how many real cases of COVID are being a given number of positive tests at the national level. To be able to perform such evaluation, we first need to defined a model which will encode our assumptions.</p>
+
+<p>We will consider the following random variables:</p>
+
+<ul>
+  <li><strong>C</strong>: indicates whether or not a person has COVID</li>
+  <li><strong>S</strong>: indicates whether or not a person has symptoms related to COVID</li>
+  <li><strong>T</strong>: indicates whether or not the person got tested</li>
+  <li><strong>R</strong>: indicates whether or not the person got a positive test result</li>
+</ul>
+
+<p>The causal diagram of our model is as follows:</p>
+
+<p><img src="/assets/images/covid.png" alt="covid" style="width:80%;" /></p>
+
+<ul>
+  <li>The presence of symptoms <strong>S</strong> depends on whether you have COVID (50% percentage chance to have some if you have COVID <strong>C</strong> or else 10% due to some other disease)</li>
+  <li>Whether you get tested <strong>T</strong> depends on whether you have symptoms <strong>S</strong>: 50% of people with symptoms go get a test while the non-symptomatic are 1% percent likely to get a test for administrative reasons</li>
+  <li>Getting tested positive <strong>R</strong> depends on whether you got tested <strong>T</strong> (you have 0% to be positive if your not tested) and also on whether you have COVID <strong>C</strong> (with 2% false positive and 5% false negative)</li>
+</ul>
+
+<p>Our goal now will be to use this model to deduce the number of persons who do have COVID (our unknown) from the number of positive tests that are reported.</p>
+
+<h2 id="bayesian-networks">Bayesian Networks</h2>
+
+<p>The causal diagram (1) above actually defines a Bayesian network. It encodes the decomposition of the joint probability of all those random variables:</p>
+
+<p>$p(C,S,T,R) = p(R|T,C) p(T|S) p(S|C) p(C)$</p>
+
+<p>Instead of the normal joint probability decomposition that follows from the chain rule of probabilities:</p>
+
+<p>$p(C,S,T,R) = p(C|S,T,R) p(S|T,R) p(T|R) p(R)$</p>
+
+<p>Thanks to this joint probability decomposition, we will be able to simplify our calculations, as we known that some variables are either indepent or conditionally independent from each other.</p>
+
+<p>In particular, we have:</p>
+
+<p>$p(R) = \sum_T \sum_S \sum_C p(R|T,C) p(T|S) p(S|C) p(C)$</p>
+
+<p>$p(R) = \sum_T \sum_C p(R|T,C) \sum_S  p(T|S) p(S|C) p(C)$</p>
+
+<p><em>(1) Bayesian networks don’t have to be causal, but they are usually better designed as causal because it helps reduce the number of edges they have, hence simplifying the formula for the joint probability.</em></p>
+
+<h2 id="working-out-the-numbers">Working out the numbers</h2>
+
+<p>We can easily code a Python program that computes this loop and encodes the conditional probabilities that appear in the diagram above.</p>
+
+<p>Here is what we find:</p>
+
+<p><img src="/assets/images/covid_2.png" alt="covid" style="width:80%;" /></p>
+
+<ul>
+  <li>If everyone has COVID, only $24.225$% of the population will report a positive test</li>
+  <li>If noone has COVID, $0.118$% of the population will still report a positive test</li>
+</ul>
+
+<p>So as we can see, the saying <em>“the number of case is 10 times higher than the one that is reported”</em> is wrong. Depending on the actual number of COVID cases, the number of positive tests reported at the national level will either overestimate or underestimate the real count.</p>
+
+<p>Since the plot is clearly linear, we can infer from those two points that the linear formula linking $p(R)$ and $p(C)$ is:</p>
+
+<p>$p(R) = 0.24107 p(C) + 0.00118$</p>
+
+<p>And from it we can deduce at which point the reported number of cases goes from being an overestimation to being an underestimation:</p>
+
+<p>$p(R) = 0.24107 p(C) + 0.00118 = p(C)$</p>
+
+<p>$0.00118 = 0.75893 p(C) \implies p(C) \simeq 0.00155482$</p>
+
+<p>So starting from $0.15$% of the population being infected, the number of reported positive COVID cases starts to underestimate the real number of cases.</p>
+
+<h2 id="working-out-the-formula-without-computer">Working out the formula (without computer)</h2>
+
+<p>To do so, we need to go back to the joint probability distribution formula that we have written before:</p>
+
+<p>$p(R) = \sum_T \sum_C p(R|T,C) \sum_S  p(T|S) p(S|C) p(C)$</p>
+
+<p>Instead of unrolling the formula at once, let’s simplify it. We know that to get a positive test result, we first have to be tested:</p>
+
+<p>$p(R=\text{true}|T=\text{false},C) = 0$</p>
+
+<p>And since we are only interested in positive test results (because that’s what we observe), we can drastically simply the formula like so:</p>
+
+<p>$p(R=\text{true}) = \sum_C p(R=\text{true}|T=\text{true},C) \sum_S  p(T=\text{true}|S) p(S|C) p(C)$</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Case</th>
+      <th>S</th>
+      <th>C</th>
+      <th>$p(T=\text{true}|S) p(S|C) p(C)$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Symptoms and COVID</td>
+      <td>True</td>
+      <td>True</td>
+      <td>$0.5 * 0.5 * x = 0.25 x$</td>
+    </tr>
+    <tr>
+      <td>No Symptoms but COVID</td>
+      <td>False</td>
+      <td>True</td>
+      <td>$0.01 * 0.5 * x = 0.005 x$</td>
+    </tr>
+    <tr>
+      <td>Symptoms no COVID</td>
+      <td>True</td>
+      <td>False</td>
+      <td>$0.5 * 0.1 * (1 - x) = 0.05 (1 - x)$</td>
+    </tr>
+    <tr>
+      <td>No Symptoms no COVID</td>
+      <td>False</td>
+      <td>False</td>
+      <td>$0.01 * 0.9 * (1 - x) = 0.891 (1 - x)$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>So, after multilying the cases where we have COVID with 0.95 and the others with 0.02 (the false positive rate), we end up with the following formula:</p>
+
+<p>$p(R) = 0.95 * (0.25 + 0.005) x + 0.02 (0.05 + 0.009) (1 - x)$</p>
+
+<p>$p(R) = 0.24225 x + 0.00118 (1 - x) = 0.00118 + 0.24107 x$</p>
+
+<p>Thanksfully, the same formula as before ;)</p>]]></content><author><name>Quentin Duval</name></author><category term="machine-learning" /><category term="machine-learning" /><category term="maths" /><summary type="html"><![CDATA[Let's create a simple Bayesian network to visualise how reported positive tests of COVID inform us about the real number of COVID infections.]]></summary></entry><entry><title type="html">By how much is my smart watch overestimating my distance?</title><link href="/blog/2021/06/15/smart-watch-overestimation.html" rel="alternate" type="text/html" title="By how much is my smart watch overestimating my distance?" /><published>2021-06-15T00:00:00+00:00</published><updated>2021-06-15T00:00:00+00:00</updated><id>/blog/2021/06/15/smart-watch-overestimation</id><content type="html" xml:base="/blog/2021/06/15/smart-watch-overestimation.html"><![CDATA[<p>If you happens to run and own a smart watch with GPS tracking, you might have noticed that depending on the quality of the GPS, the track registered by the smart watch does not exactly match the real track you followed.</p>
+
+<p>In my case, I noticed that my (poor quality) watch does tend to oscillate around the trajectory I really followed. In particular, when I run alongside a road, it tends to report that I switched side repeatedly, as if I followed a sinusoidal track, like so:</p>
+
+<p><img src="/assets/images/sinus_track_1.png" alt="sinus_track_1" /></p>
+
+<p>After noticing that, I started to doubt the distance reported by my watch. By how much my watch has been overestimating my performance all these years?</p>
+
+<h2 id="stating-the-problem">Stating the problem</h2>
+
+<p>Looking at the GPS tracking of my watch, I can easily measure the length of the wave (noted $l$ below) and the amplitude (noted $\Delta$ below).</p>
+
+<p><img src="/assets/images/sinus_track_1.png" alt="sinus_track_1" /></p>
+
+<p>Based on these values, how much additional distance is reported by my watch? And consequently, how should I correct for reported distance and speed to find my actual performance?</p>
+
+<h2 id="the-stupid-way">The stupid way</h2>
+
+<p>Let’s approximate the pattern of oscillation by a sinusoidal function. We can note that in the case of a sinus with wave length $2l$, the same pattern of length $0.5 l$ is repeated 4 times:</p>
+
+<p><img src="/assets/images/sinus_track_2.png" alt="sinus_track_2" /></p>
+
+<p>And so we can zoom on that part and apply some basic math to see how much additional distance $dy$ is reported for a small increment $dx$:</p>
+
+<p><img src="/assets/images/sinus_track_3.png" alt="sinus_track_3" /></p>
+
+<p>Since we assumed that the GPS tracking produce a sinus of amplitude $\Delta$ and wave length $2l$, we have:</p>
+
+<p>$\displaystyle y(x) = \Delta sin \big(\frac{\pi}{l} x \big)$</p>
+
+<p>And therefore the small increment is:</p>
+
+<p>$\displaystyle \frac{dy}{dx} = \Delta \frac{\pi}{l} cos (\frac{\pi}{l} x \big)$</p>
+
+<p>To find out how much additional distance is overestimated over the segment of length $0.5 l$, we integrate this small displacement:</p>
+
+<p>$\displaystyle T = \int_0^{0.5 l} \Delta \frac{\pi}{l} cos (\frac{\pi}{l} x \big) dx = \Big[ \Delta sin \big(\frac{\pi}{l} x \big) \Big]_0^{0.5 l}$</p>
+
+<p>$\displaystyle T = \Delta sin \big(\frac{\pi}{l} \frac{l}{2} \big) = \Delta sin \frac{\pi}{2} = \Delta$</p>
+
+<p>And so for a real distance $l$, the smart watch will report me $l + 2 \Delta$ leads to an overestimation ratio equal to:</p>
+
+<p>$\displaystyle r = \frac{l + 2 \Delta}{l} = 1 + 2 \frac{\Delta}{l}$</p>
+
+<p>And I simply need to divide the reported distance (and speed!) by this ratio to get a corrected estimate of my real performance.</p>
+
+<h2 id="oh-wait-what-did-i-just-do">Oh wait… what did I just do?</h2>
+
+<p>Did you feel that we complicated our work for nothing above? Does the derivative followed by an integral sound just stupid? It’s because it is.</p>
+
+<p>As it turns out, we can derive the same result in a much simpler way. Since we now that on this portion of the curve $y(x)$ is continuous and monotonous, we know that the additional distance is $\Delta$:</p>
+
+<p><img src="/assets/images/sinus_track_2.png" alt="sinus_track_2" /></p>
+
+<p>There is simply no other way: $y$ has to go through $\Delta$ distance. We therefore find that for every $0.5 l$ actual distance, the watch adds $\Delta$ to it, leading to the same result as before:</p>
+
+<p>$\displaystyle r = \frac{0.5 l + \Delta}{0.5 l} = 1 + 2 \frac{\Delta}{l}$</p>
+
+<p>The interesting thing to notice is that this does not depend on the actual shape of the curve: as long as the segment considered is such that $y(x)$ is monotonous and continuous, we get the same result.</p>
+
+<h2 id="practical-case">Practical case</h2>
+
+<p>In my case, I noticed that the wave length was approximately 100 meters to 200 meters depending on the segments, with the amplitude being of the width of the road, so let’s say approximatively 5 meters.</p>
+
+<p>And so we have $l = 50$ (or $l = 100$ for the 200 meters case) and $\Delta = 5$, leading to:</p>
+
+<p>$\displaystyle r_{high} = 1 + 2 \frac{\Delta}{l} = 1 + 2 \frac{5}{50} = 1.2$</p>
+
+<p>$\displaystyle r_{low} = 1 + 2 \frac{\Delta}{l} = 1 + 2 \frac{5}{100} = 1.1$</p>
+
+<p>On those segments where my watch does this weird behavior, it report 10% to 20% more distance than what I really do!</p>]]></content><author><name>Quentin Duval</name></author><category term="random-rambling" /><category term="random-rambling" /><category term="maths" /><summary type="html"><![CDATA[Watching my GPS tracking data, I noticed my track is oscillating around my true trajectory. How much extra distance is it?]]></summary></entry><entry><title type="html">CPPP19 Trip report - The first edition of the first french C++ conference</title><link href="/blog/2019/06/17/trip-report-cppp19.html" rel="alternate" type="text/html" title="CPPP19 Trip report - The first edition of the first french C++ conference" /><published>2019-06-17T00:00:00+00:00</published><updated>2019-06-17T00:00:00+00:00</updated><id>/blog/2019/06/17/trip-report-cppp19</id><content type="html" xml:base="/blog/2019/06/17/trip-report-cppp19.html"><![CDATA[<p>Last Saturday marked the first occurrence of the CPPP, the first ever conference dedicated to C++ on the French soil, organized by <a href="https://twitter.com/FredTingaudDev">Frédéric Tingaud</a> and <a href="https://twitter.com/joel_f">Joel Falcou</a>.</p>
+
+<p>It was one of the lucky to be there for this very first edition, and it was quite an special moment to experience the birth of what promises to be one of the great C++ conference of tomorrow.</p>
+
+<p>In this post, I would like to share with you my trip report at CPPP 2019, talks I felt were interesting (actually, all of them were interesting, so that’s easy) and what I enjoyed from the spirit of the conference.</p>
+
+<h2 id="the-talks-and-the-speakers---the-heart-of-the-conference">The talks and the speakers - the heart of the conference</h2>
+
+<p>The conference was short (it lasted one day) but full of interesting talks and interesting speakers. Here is a short feedback on the ones I was lucky to attend, hoping that it will encourage you to see more of it when the talks will be online (and maybe come to Paris to attend next year).</p>
+
+<h3 id="emotional-code">Emotional Code</h3>
+
+<p><a href="https://twitter.com/gregcons">Kate Gregory</a> started this first edition with a keynote on Emotional Code. I believe this is the same talk she gave at the <a href="https://www.youtube.com/watch?v=uloVXmSHiSo">ACCU this year</a>.</p>
+
+<p>This talk showed some great examples of the impact of the emotional state of developers on the code they produce. It showed how we should avoid judging others solely based on the code they wrote, for we rarely know the social context in which things happened, and this social context matters a lot.</p>
+
+<p>Fear, working environments with lack of consideration, short-gun deadlines, or misguided metrics, can explain a great deal why people never dare refactoring code, wrote a piece of code without a second look, refuse to give feedback, or avoid participating in some team or company activities.</p>
+
+<p>On the contrary, inspiring figures showing great confidence in the ability to break down and accomplish a daunting task, emphatic or supporting colleagues and manager, and great team dynamic will make most of the difference between a successful project and a failed one.</p>
+
+<p>I only regret that the end of the talk seemed to focus mostly on improving ourselves as individual. I would have loved to hear more about how a group can learn to complete and accept each other’s weaknesses, or influence as a group the culture in which they are in, or just when to quit and find a better working environment. Maybe in a future talk, in which case I would be quite interested.</p>
+
+<h3 id="the-state-of-compile-time-regular-expressions">The state of compile time regular expressions</h3>
+
+<p><a href="https://twitter.com/hankadusikova">Hana Dusíková</a> gave one of the most technically impressive talk of the conference itself.</p>
+
+<p>From LL(1) parsers to non deterministic finite automatons, from constexpr functions to template meta-programming, this talk was at the same time very interesting and very rewarding. It was also very intellectually demanding: it goes fast and I wish I had a way to pause during the talk, but the good news is that we can do this on Youtube after the talks are online.</p>
+
+<p>Toward the end of the talk, the performance metrics about the many REGEX engines available as library, as well as the performance measures on constexpr function were quite interesting as well. I did not know that std::regex was so inappropriate for performance intensive tasks.</p>
+
+<h3 id="modules-what-you-should-know">Modules: what you should know</h3>
+
+<p>Gabriel Dos Reis talks bout the genesis of the Modules proposal, explains to us the state of the proposal, gives us some good practices on how to use Modules in the coming C++20, as well as some perspectives on what this proposal will change in the C++ world.</p>
+
+<p>Should we use “import” or “include” for header files in our modules? What remains to be done for build systems to cope with modules? What are the unique opportunities that modules offers for tooling (*) or improving compilation times? Why are modules one of the most important change since the apparition of classes in C++?</p>
+
+<p>This talk will give you a broad overview of these numerous topics, as well as some funny anecdotes on why and how modules originated at Microsoft.</p>
+
+<p><em>(*) Gabriel Dos Reis proposes a standardized format for the result of compilation of modules, which would allow tools to exploit it, and also to build other languages on top of it (much like .class in Java allowed to build languages like Kotlin, Clojure or Scala on top of the JVM). This was quite interesting.</em></p>
+
+<h3 id="the-anatomy-of-an-exploit">The anatomy of an exploit</h3>
+
+<p><a href="https://twitter.com/pati_gallardo">Patricia Aas</a> shows us some tricks that have been known to be used to exploit a program, by putting it in an unexpected state and trying to hack it from there.</p>
+
+<p>If you are new to secure coding practices, this talk will show you why you need to pay attention to this, and how easy it becomes to exploit a program if you did not care enough.</p>
+
+<p>Through a bunch of example and demos, it demonstrate the basics of an attack by buffer overflow, shell code, tries to give a picture of the mindset of an attacker, and explain why fuzzing is so interesting as attacker or as developer to defend against such attacks.</p>
+
+<p>And as a bonus, the slides are beautiful and the presentation both fun and joyful. It never hurts.</p>
+
+<h3 id="identifying-monoids-exploiting-compositional-structure-in-code">Identifying Monoids: Exploiting compositional structure in code</h3>
+
+<p>The last talk I attended was from <a href="https://twitter.com/ben_deane">Ben Deane</a> and concerned one of my favorite topic, functional programming and more specifically in this talk, Monoids and Foldables.</p>
+
+<p>In this talk, he shows plenty of examples of Monoids, from the basic ones (integer under addition/multiplication, or strings under concatenation) to more advanced ones:</p>
+
+<p>Program options or command line arguments (maps in general)
+Statistics: top N, min, max, mean, histograms and more
+Or more advanced data structure like HyperLogLog or Parsers
+The talk also shows some example of Foldables (data structures you can summarize to a single value – or alternatively, data structures on which you can implement an equivalent of <code>std::accumulate</code>) and how it combines well with Monoids, giving us the ability to fold a collection of monoidal values to a single value.</p>
+
+<p>The associative property of a Monoids allows us to reorder instructions (select a parenthesisation strategy) when folding them, and therefore take advantage of parallized or optimization tricks we could not afford otherwise.</p>
+
+<h3 id="bonus-adding-a-new-clang-tidy-check---live-demo">Bonus: Adding a new clang tidy check - Live Demo</h3>
+
+<p><a href="https://twitter.com/jeremydemeule">Jeremy Demeule</a> presented how to implement a new check and fix-it to Clang-Tidy, with a live demo, on a non-trivial example, from the beginning to the end.</p>
+
+<p>If you are curious on how you can automate changes on a large codebase (for instance to refactor some part of your code to use the newest C++ features) with a tooling much more powerful that simple regex, you might be interested in watching this workshop.</p>
+
+<p>Jeremy shows how to use clang-query to discover the clang AST interactively and implement your matcher, demonstrates how to generate a fix-it, and gives you a basic workflow you can follow to successfully test and deploy your checks on production.</p>
+
+<p>In summary, if you are new to clang-tidy and are interested in getting started quickly and on the right foot, this is a really good talk to start from.</p>
+
+<h2 id="final-words-on-the-spirit-of-the-conference">Final words on the spirit of the conference</h2>
+
+<p>A conference is about talks, but not only. It is also about the people there, the venue, the food, and the spirit, and everything that makes people enjoy their stay and enjoy their conversations.</p>
+
+<p>And I must say that everything on that regards was quite impressive.</p>
+
+<p>The venue was very nice and very well located. The food was quite good (thanks a lot for the vegetarian risotto). And above all, the spirit was really nice.</p>
+
+<p>I really loved the fact that the organizers had taken into consideration the attendees. A simple color coding on the badges allowed to identify those who were okay to appear on photos from those who did not, as well as allowing to identify the french speaker from the English speaker, helping everyone to chat.</p>
+
+<p>This was a nice idea that I wish could be ported to all other conferences.</p>
+
+<p>And I wish a good long life to the CPPP.</p>]]></content><author><name>Quentin Duval</name></author><category term="modern-cpp" /><category term="C++" /><summary type="html"><![CDATA[Last Saturday marked the first occurrence of the CPPP, the first conference dedicated to C++ on the French soil, organized by Frédéric Tingaud and Joel Falcou.]]></summary></entry><entry><title type="html">Pythagorean Triples in Modern C++</title><link href="/blog/2019/01/11/pythagorean-triples-cpp.html" rel="alternate" type="text/html" title="Pythagorean Triples in Modern C++" /><published>2019-01-11T00:00:00+00:00</published><updated>2019-01-11T00:00:00+00:00</updated><id>/blog/2019/01/11/pythagorean-triples-cpp</id><content type="html" xml:base="/blog/2019/01/11/pythagorean-triples-cpp.html"><![CDATA[<p>The <a href="http://ericniebler.com/2018/12/05/standard-ranges/">post of Eric Niebler on standard ranges</a> and the answer post of Aras <a href="https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/">Modern C++ lamentations</a> generated quite a lot of heat in the C++ community lately.</p>
+
+<p>The discussion it triggered was quite interesting, with amazing answers such as the <a href="http://www.elbeno.com/blog">one of Ben Deane</a>, but no answer was as intriguing to me as the answer of Sean Parent, in his blog post <a href="https://sean-parent.stlab.cc/2018/12/30/cpp-ruminations.html">Modern C++ rumination</a>. In particular, this sentence “primitive Pythagorean triples can be generated efficiently using linear algebra”.</p>
+
+<p>So let’s try and write a somehow efficient and modern C++ Pythagorean Triples generator, based on linear algebra, and using the modern multi-dimensional array C++ library <a href="https://github.com/QuantStack/xtensor">xtensor</a> (inspired from the great numpy Python library).</p>
+
+<h2 id="linear-algebra-and-pythagorean-triples">Linear algebra and Pythagorean triples</h2>
+
+<p>The connection between linear algebra and Pythagorean Triples is described in this <a href="https://en.wikipedia.org/wiki/Formulas_for_generating_Pythagorean_triples">Wikipedia article</a>, so we do not need to go into the details here.</p>
+
+<p>For the sake of this article, we just need to know that the 3 following linear transformations, represented below as three matrices, generate 3 new Pythagorean triples from a known Pythagorean triple [a, b, c]:</p>
+
+<p>$\begin{pmatrix} a_1 \\ b_1 \\ c_1 \end{pmatrix} = \begin{pmatrix} -1 &amp; 2 &amp; 2 \\ -2 &amp; 1 &amp; 2 \\ -2 &amp; 2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>$\begin{pmatrix} a_2 \\ b_2 \\ c_2 \end{pmatrix} = \begin{pmatrix} 1 &amp; 2 &amp; 2 \\ 2 &amp; 1 &amp; 2 \\ 2 &amp; 2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>$\begin{pmatrix} a_3 \\ b_3 \\ c_3 \end{pmatrix} = \begin{pmatrix} 1 &amp; -2 &amp; 2 \\ 2 &amp; -1 &amp; 2 \\ 2 &amp; -2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>For the rest of this article, we will use the following notation for matrices. A matrix will be represented as a “stack” of row vectors, where each vector is represented in square brackets. For instance, our representation of the 3 matrices above are:</p>
+
+<pre><code>    [[-1, 2, 2],        [[1, 2, 2],        [[1, -2, 2]
+A =  [-2, 1, 2],    B =  [2, 1, 2],    C =  [2, -1, 2]
+     [-2, 2, 3]]         [2, 2, 3]]         [2, -2, 3]]
+</code></pre>
+
+<p>Now, if we take the row vector V = [3, 4, 5], transpose it to make it a column vector Vt, and multiply it with the matrices A, B and C, we obtain the following new column vectors (written as row vectors to make it readable):</p>
+
+<pre><code>[15,  8, 17], [21, 20, 29], [5, 12, 13]
+</code></pre>
+
+<p>We can easily check that the triples generated are indeed valid Pythagorean triples.</p>
+
+<h2 id="pythagorean-triples-in-modern-c">Pythagorean Triples in Modern C++</h2>
+
+<p>Now that we know about linear algebra and Pythagorean triples, we can think about how to implement it. Instead of just doing it naively, we will add some some key refinements (where would be the fun otherwise?) to make our code both shorter, more elegant and more efficient as well.</p>
+
+<h3 id="stacking-matrices">Stacking matrices</h3>
+
+<p>Having a row vector V representing a Pythagorean triple, do we really need to perform 3 different matrix products with the 3 separate matrices A, B and C to get the 3 next Pythagorean triples?</p>
+
+<p>We don’t. Our first trick will be to stack the matrices A, B and C on top of each other to form one big matrix D:</p>
+
+<pre><code>    [[-1, 2, 2],
+     [-2, 1, 2],
+     [-2, 2, 3],
+     [1, 2, 2],
+D =  [2, 1, 2],
+     [2, 2, 3],
+     [1, -2, 2],
+     [2, -1, 2],
+     [2, -2, 3]]
+</code></pre>
+
+<p>Now, if multiply our column vector [3, 4, 5] with this matrix D, we get a column vector of size 9, which we can then transpose and split into 3 vectors of size 3.</p>
+
+<pre><code>                                                [[15, 8, 17]
+[15, 8, 17, 21, 20, 29, 5, 12, 13]  ----------&gt;  [21, 20, 29]
+                                      (split)    [ 5, 12, 13]]
+</code></pre>
+
+<p>Now, with one single matrix product, we can get our 3 next Pythagorean triples. While <ins>the complexity of the operation is exactly the same</ins> as doing 3 separate matrix products, the resulting code will be shorter and faster.</p>
+
+<h3 id="transforming-several-vectors-at-once">Transforming several vectors at once</h3>
+
+<p>In <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">Data Oriented Design in C++</a>, <a href="https://twitter.com/mike_acton">Mike Acton</a> said: <em>“when there is one, there are many”</em>. In short, when considering a particular operation, this operation rarely occurs only once. It often occurs many times, spread around a short time frame. In such cases, we often benefit from bulking these operations.</p>
+
+<p>For instance, and in the context of linear algebra, we will often be interested in applying the same transformation (like a rotation) to a bunch of points (like the points of a triangle) at once.</p>
+
+<p>In our case, we will be interested in generated the next Pythagorean triples for a bunch of previously computed Pythagorean triple (and not a single one in isolation):</p>
+
+<ul>
+  <li>We will multiply our matrix D with a single vector [3, 4, 5] and get three vectors back</li>
+  <li>We will then multiply our matrix D with these 3 previously computed vectors and get 9 vectors back</li>
+</ul>
+
+<p>And so on until we decide to stop generating triangles…</p>
+
+<h3 id="batching-linear-transformations">Batching linear transformations</h3>
+
+<p>So how do we bulk these linear transformations? We just concatenate our column vectors $V_1$, $V_2$ up to $V_n$ side by side as a matrix U and multiply our stacked matrix D by U.</p>
+
+<p>For instance, if we want to generate the next Pythagorean triples for the row vectors <code>[5, 12, 13]</code>, <code>[15, 8, 17]</code> and <code>[21, 20, 29]</code>, here is the matrix U we have to multiply the matrix D with:</p>
+
+<pre><code>    [[-1, 2, 2],
+     [-2, 1, 2],
+     [-2, 2, 3],
+     [1, 2, 2],        [[ 5, 15, 21]
+D =  [2, 1, 2],    U =  [12,  8, 20]
+     [2, 2, 3],         [13, 17, 29]]
+     [1, -2, 2],
+     [2, -1, 2],
+     [2, -2, 3]]
+</code></pre>
+
+<p>The result of this multiplication, correctly reshaped and transposed (cf the “stacking matrices” paragraph) will give us the expected result:</p>
+
+<pre><code>[[ 35  12  37]
+ [ 65  72  97]
+ [ 33  56  65]
+ [ 77  36  85]
+ [119 120 169]
+ [ 39  80  89]
+ [ 45  28  53]
+ [ 55  48  73]
+ [  7  24  25]]
+</code></pre>
+
+<p>We can then feed this matrix to the next iteration, multiplying them with our stacked matrix D to get the 27 next Pythagorean triples, and so on…</p>
+
+<h3 id="implementation-with-xtensor">Implementation with xtensor</h3>
+
+<p>The following function implements one iteration of the process of generating Pythagorean triples.</p>
+
+<p>It takes as input the previously generated Pythagorean triples (for instance [[3, 4, 5]]) and generates the next Pythagorean triples (for instance [[5, 12, 13], [15, 8, 17], [21, 20, 29]]). This next result can in turn be fed to the function again for the Pythagorean cycle of life to continue.</p>
+
+<pre><code class="language-cpp">#include &lt;xtensor/xtensor.hpp&gt;
+#include &lt;xtensor-blas/xlinalg.hpp&gt;
+
+xt::xarray&lt;int&gt; next_pytharogian_triples(xt::xarray&lt;int&gt; const&amp; previous_stage)
+{
+   static const xt::xarray&lt;int&gt; stacked_matrices = {
+      { –1, 2, 2 },
+      { –2, 1, 2 },
+      { –2, 2, 3 },
+      { 1, 2, 2 },
+      { 2, 1, 2 },
+      { 2, 2, 3 },
+      { 1, –2, 2 },
+      { 2, –1, 2 },
+      { 2, –2, 3 }
+   };
+
+   auto shape = previous_stage.shape();
+   xt::xarray&lt;int&gt; next_three = xt::transpose(xt::linalg::dot(stacked_matrices, xt::transpose(previous_stage)));
+   next_three.reshape({ 3 * shape[0], shape[1] });
+   return next_three;
+}
+</code></pre>
+
+<p>It makes use of the following xtensor elements:</p>
+
+<ul>
+  <li><code>stacked_matrices</code> is our matrix D, concatenation of matrices A, B and C</li>
+  <li><code>xt::linalg::dot</code> is the matrix product</li>
+  <li><code>xt::transpose</code> is the matrix transpose</li>
+  <li><code>reshape</code> decomposes the result of the multiplication by D in the results of what would have been the separate multiplication by the matrices A, B and C</li>
+</ul>
+
+<p>The code is pretty short, and quite comparable the equivalent Python numpy implementation:</p>
+
+<pre><code class="language-python">def next_pythagorean_triples(previous):
+    matrices = np.array(
+        [[–1, 2, 2],
+         [–2, 1, 2],
+         [–2, 2, 3],
+         [1, 2, 2],
+         [2, 1, 2],
+         [2, 2, 3],
+         [1, –2, 2],
+         [2, –1, 2],
+         [2, –2, 3]])
+
+    next_triples = np.transpose(matrices @ np.transpose(previous))
+    next_triples = next_triples.reshape((3 * previous.shape[0], previous.shape[1]))
+    return next_triples
+</code></pre>
+
+<p>(The <code>@</code> operator above is used for the matrix multiplication in numpy)</p>
+
+<h3 id="sticking-it-in-a-loop-or-elsewhere">Sticking it in a loop… or elsewhere</h3>
+
+<p>We can now integrate <code>next_pytharogian_triples</code> into an iterator, or a simple loop to generate as many triples as we wish. The one thing we cannot do quite yet is integrate it inside a coroutine (*) to generate an infinite stream of triples, as demonstrated below in Python:</p>
+
+<pre><code class="language-python">def pythagorean_triples():
+    current = np.array([[3, 4, 5]])                     # Initial seed
+    yield from current                                  # Yield first triple
+    while True:
+        current = next_pythagorean_triples(current)     # Next iteration
+        yield from current                              # Yield each triple
+</code></pre>
+
+<p>This creates a generator that lazily produces an infinite stream of Pytharogean triples like so:</p>
+
+<pre><code>[3 4 5]
+[15  8 17]
+[21 20 29]
+[ 5 12 13]
+[35 12 37]
+[65 72 97]
+[33 56 65]
+[77 36 85]
+...
+</code></pre>
+
+<p>We could also add some filtering (for example to only keep triples with values below 1000 if we are only interested in small triangles) and run the next iterate with the reduced set of triples:</p>
+
+<pre><code class="language-python">def pythagorean_triples(filter):
+    current = np.array([[3, 4, 5]])                     # Initial seed
+    yield from current                                  # Yield first triple
+    while current.shape[0]:                             # While work to do
+        current = next_pythagorean_triples(current)     # Next iteration
+        current = filter(current)                       # Filter desired triples
+        yield from current                              # Yield each triple
+</code></pre>
+
+<p>(*) As mentioned in <a href="https://medium.com/@jasonmeisel/ranges-code-quality-and-the-future-of-c-99adc6199608">Ranges, Code Quality, and the Future of C++</a>, coroutines might be more appropriate than ranges for lazy consumption of a stream of data. In Python, a language in which we have both, I find coroutines much easier to write and read than their range algorithm counterpart for use cases where both are usable. I suspect it will apply the same in C++.</p>
+
+<h2 id="what-about-performance">What about performance?</h2>
+
+<p>How does the linear algebra based implementation compares to a raw loop?</p>
+
+<h3 id="runtime-performance">Runtime performance</h3>
+
+<p>In Visual Studio 2017 Debug build, we can generate around 30,000 Pythagorean triples in less than 33 milliseconds. In Release build, this time goes down to 1,5 milliseconds (*). Said differently, it takes around 50 nanoseconds to generate a Pythagorean triple, which is amazingly fast!</p>
+
+<p>What happens if we do not batch our linear transformations (one separate multiplication for each input triple)? The performance drops to 638 milliseconds in Debug build (20 times slower) and 29 milliseconds in Release build (20 times slower). Batching linear operations does matter, and quite a lot!</p>
+
+<p>There are other linear algebra tricks we could have used as well, such as fast matrix exponentiation or eigenvector decomposition, which are useful if we want to get just a bunch of big Pythagorean triples really fast (and not enumerate all of them).</p>
+
+<p><em>(*) This is the time it would take for the naive raw loop algorithm to find around tens of Pythagorean triples.</em></p>
+
+<h3 id="build-times">Build times</h3>
+
+<p>In terms of build times, again in Visual Studio 2017, the Debug build takes around 2,4 seconds. The Release build takes also around 2,4 seconds.</p>
+
+<p>This can be seen as the curse of using header only libraries. But it also makes xtensor (as well as xtl and xtensor-blas used here as well) really good in term of performance (*).</p>
+
+<p><em>(*) As reference, the equivalent Python code, based on the pretty optimized numpy, takes around 2,6 milliseconds to run, almost twice the time needed for xtensor to complete the task.</em></p>]]></content><author><name>Quentin Duval</name></author><category term="modern-cpp" /><category term="C++" /><summary type="html"><![CDATA[Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community.]]></summary></entry><entry><title type="html">Distributed agreement on random order: Lamport Timestamps</title><link href="/blog/2018/09/13/distributed-agreement-on-random-order.html" rel="alternate" type="text/html" title="Distributed agreement on random order: Lamport Timestamps" /><published>2018-09-13T00:00:00+00:00</published><updated>2018-09-13T00:00:00+00:00</updated><id>/blog/2018/09/13/distributed-agreement-on-random-order</id><content type="html" xml:base="/blog/2018/09/13/distributed-agreement-on-random-order.html"><![CDATA[<p><em>If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…</em></p>
+
+<p>It is quite astonishing that some very simple algorithms are able to solve what seem to be very complicated problems. Take the ordering of events in a distributed system.</p>
+
+<p>We cannot accurately synchronize clocks between several devices. And yet, there is a simple and beautiful algorithm which allows to define a total ordering on the events occurring in these devices: <a href="https://en.wikipedia.org/wiki/Lamport_timestamps">Lamport timestamps</a>.</p>
+
+<p>Today’s post is dedicated to illustrating this algorithm through a simple (and arguably completely absurd) example, all implemented in Elixir.</p>
+
+<h2 id="ordering-events-in-a-distributed-system">Ordering events in a distributed system</h2>
+
+<p>Say we want to process a bunch of event in a distributed system which works in a multi-leader setting:</p>
+
+<ul>
+  <li>There are several nodes of the cluster on which we can process events</li>
+  <li>Event are processed and request are answered before every other leader is notified</li>
+  <li>Leaders asynchronously notify of these events to all the other nodes</li>
+</ul>
+
+<p>We would like all the nodes of the cluster to eventually agree on an total order on the events, a total order that is consistent which what actually happened in the system (i.e. that makes sense in terms of causality):</p>
+
+<ul>
+  <li>For two events E1 and E2 on the same node, if E1 was processed before E2, all nodes must agree that E1 happened before E2</li>
+  <li>For two events E1 on node N1 and E2 on node N2, if N2 had knowledge of E1 (via notification from N1) when E2 was processed, all nodes must agree that E1 happened before E2</li>
+</ul>
+
+<p>The Lamport timestamps algorithm (also known as Lamport clock) is an astonishingly simple and clever algorithm that gives us just that.</p>
+
+<h2 id="lamport-timestamp-algorithm">Lamport timestamp algorithm</h2>
+
+<p>The algorithm itself is very simple to follow. It only requires each node to maintain a counter (also known as a logical clock) and update it as follow:</p>
+
+<p><strong>Upon receiving an event E on node N:</strong></p>
+
+<ul>
+  <li>Increment the logical clock of the node <code>Clock(N)</code> by 1</li>
+  <li>Log this event E with <code>Time(E) = Clock(N)</code> and <code>Origin(E) = N</code></li>
+</ul>
+
+<p><strong>To send a replicate of an event E that occurred on node N:</strong></p>
+
+<ul>
+  <li>Send the full log of the event E with its time <code>Time(E)</code> and origin <code>Origin(E)</code></li>
+</ul>
+
+<p><strong>Upon receiving a event log replica E with Time(E) and Origin(E):</strong></p>
+
+<ul>
+  <li>Update the logical clock of the receiving node <code>Clock(N)</code> to: <code>1 + max(Clock(N), Time(E))</code></li>
+</ul>
+
+<p>After a while, all nodes will have the same event logs. At this point, to retrieve an ordered history of the events, we just need to ask any node for its log of event, and sort them by their time and then their origin.</p>
+
+<p><em>Note: For a more detailed description of the algorithm and its not-that-obvious implications in terms of ordering and capture of causality, you can refer to <a href="https://en.wikipedia.org/wiki/Lamport_timestamps">Wikipedia</a> or better, look at the <a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf">original publication</a>.</em></p>
+
+<h2 id="absurtity-begins---shuffling-a-sentence-using-lamport-timestamps">Absurtity begins - Shuffling a sentence using Lamport timestamps</h2>
+
+<p>As explained earlier, Lamport timestamps allow us to totally order a sequence of event in a distributed multi-leader system, in such a way that it respects causality. We will consider the specific case of such a system to illustrate the algorithm.</p>
+
+<h3 id="a-wasteful-way-to-shuffle">A wasteful way to shuffle</h3>
+
+<p>For the rest of this post, we will build a simplistic distributed multi-leader in-memory buzzword compliant data store, where events being processed are insertion commands. We will insert in this data store all the words of a given sentence, distributing our writes evenly among its different nodes.</p>
+
+<p>We will then demonstrate how Lamport timestamps make sure that our nodes eventually agree on the order of word insertions in the system.</p>
+
+<p>Now, if our nodes agree on an order of insertion of the words of a sentence, they agree on the order of the words of the sentence. In other words, and thanks to Lamport timestamps, the nodes of our distributed in-memory data store will eventually agree on a given random shuffling of the words of the sentence.</p>
+
+<p>If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle – and without any good random properties built-in.</p>
+
+<p>Yes, this is absurd. But also quite fun.</p>
+
+<h3 id="architecturing-the-mess">Architecturing the mess</h3>
+
+<p>To build our eccentric random shuffler, we need a bit of infrastructure. In addition to our N database replicate (which we will call workers), we will need:</p>
+
+<ul>
+  <li>A <strong>load balancer</strong>: to dispatch the insertion of words among our workers</li>
+  <li>A <strong>pub / sub messaging system</strong>: to replicate the logs of one node to other nodes</li>
+</ul>
+
+<p>This is how it will work. We will send all our insertion request through the load balancer, which will be in charge of dispatching these requests among the workers. Workers will send their replicate log through the PubSub messaging system to broadcast it to all other workers asynchronously:</p>
+
+<p><img src="/assets/images/shufflinginfrastructure.png" alt="shuffling_infrastructure" /></p>
+
+<p>At the end of our experiment, we will ask each of our workers for their individual version of the history of event (and to do so, our load balancer will also need to be able to list of all the workers) and make sure they agree.</p>
+
+<h2 id="a-practical-implementation-of-absurdity">A practical implementation of absurdity</h2>
+
+<p>We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task: Elixir.</p>
+
+<h3 id="a-word-on-elixir">A word on Elixir</h3>
+
+<p><a href="https://elixir-lang.org/">Elixir</a> is a dynamically typed functional programming language built on top of <a href="https://en.wikipedia.org/wiki/BEAM_(Erlang_virtual_machine)">BEAM</a>, the virtual machine of <a href="https://www.erlang.org/">Erlang</a>. Thanks to this, it inherits from the powerful capabilities of Erlang and its actor model in terms of fault tolerance and parallelism.</p>
+
+<p>Elixir also have a strong similitude with <a href="https://clojure.org/">Clojure</a>. It puts the emphasis on being able to easily manipulate data rather than forcing data into types (I just wished it would have inherited from the amazing persistent vector of Clojure). It also has a <a href="https://8thlight.com/blog/patrick-gombert/2013/11/26/lispy-elixir.html">powerful meta-programming model through macros</a>.</p>
+
+<p>Today, we will mostly use Elixir for its ability to easily instantiate actors, which will be of great help to build our distributed over-engineered sentence shuffling algorithm.</p>
+
+<h3 id="what-is-an-actor">What is an actor?</h3>
+
+<p>We will let aside here the <a href="https://en.wikipedia.org/wiki/Actor_model">formal definition of actors</a> (which is a really good read) and go straight to the implementation of actors in Elixir.</p>
+
+<p>Actors are asynchronous independent light-weight processes, that each have their own state (and <a href="https://www.erlang-solutions.com/blog/erlang-garbage-collector.html">garbage collection</a>), and can only communicate with other actors by sending messages or reacting to messages sent to them (in particular, actors cannot share state).</p>
+
+<p>They are like objects (instances, not classes) that each run asynchronously and whose method calls are replaced by message passing. To “run a method”, we send a message containing the name of the method and the value of its arguments. To get back a result, we wait for an answer message.</p>
+
+<h3 id="the-plan">The plan</h3>
+
+<p>We will now implement our random-shuffling workers as actors, maintaining a state of the event they know about, and communicating with the external world (such as other actors) through messages.</p>
+
+<p>These worker actors will need to react to the following kind of messages:</p>
+
+<ul>
+  <li>A <code>add</code> message to insert of a new word in the data base</li>
+  <li>A <code>get_history</code> message to retrieve the history of event as seen by the worker</li>
+  <li>A <code>replication_log</code> message to transmit the replication log to others worker</li>
+</ul>
+
+<p>Our worker actors will also need to emit <code>replication_log</code> messages (and not only react to them), as well as maintaining a logical clock to implement the Lamport timestamp algorithm.</p>
+
+<h3 id="starting-a-worker">Starting a worker</h3>
+
+<p>Our first task is to do what needs to be done to correctly instantiate new workers and initialize their state. The following code defines the equivalent of a constructor for an actor (*), the <code>init</code> method:</p>
+
+<pre><code class="language-elixir">def init(_) do
+  PubSub.subscribe(@replication_log_topic, self())
+  {:ok, %State{ name: self(), clock: 1, eventLog: [] }}
+end
+</code></pre>
+
+<p>The init method is called at the instantiation of an actor, to perform the appropriate side effects at initialization and return the initial state of the actor. In our case, at startup, our worker:</p>
+
+<ul>
+  <li>Needs to subscribes to the replication log notifications (line 1)</li>
+  <li>Init its state (line 2) with an logical clock starting at 1 and an empty event log</li>
+</ul>
+
+<p>The event log represents what happened in the system, as viewed by the worker. Each log entry in this log contain the payload of an event, tagged with the time at which the event was processed, and its origin (where it was first processed). Here is the Elixir data type corresponding to a <code>LogEntry</code>:</p>
+
+<pre><code class="language-elixir">defmodule LogEntry do
+  defstruct origin: nil, time: 0, event: nil
+end
+</code></pre>
+
+<p><em>(*) In fact, this is the method used to initialize the state of a specific kind of actors, <a href="https://hexdocs.pm/elixir/GenServer.html">GenServers</a>. This detail is not relevant here, but you are encouraged to follow the <a href="https://elixir-lang.org/getting-started/mix-otp/genserver.html">Elixir tutorial</a> or the <a href="http://erlang.org/doc/man/gen_server.html">Erlang docs</a> for more information.</em></p>
+
+<p><em>Note: There is actually more logic to be done in the constructor, like getting the old history back (if a worker pops after events started flowing). We skipped this here for simplicity.</em></p>
+
+<h3 id="querying-for-the-history">Querying for the history</h3>
+
+<p>Now that we are able to instantiate an actor, let us see how we can communicate with it. As seen earlier, actors can only communicate by sending messages to each other.</p>
+
+<p>To handle and answer a given request in a actor, we need to implement a given callback (*) for this type of message. Technically, here is the code we need to react to the <code>get_history</code> message:</p>
+
+<pre><code class="language-elixir">def handle_call(:get_history, _from, worker) do
+  sortedLog = Enum.sort_by(worker.eventLog, fn event -&gt; {event.time, event.origin} end)
+  {:reply, sortedLog, worker}
+end
+</code></pre>
+
+<p>Let’s take it step by step. First, the prototype. The function <code>handle_call</code> is the name of the callback we must implement, and it takes 3 parameters:</p>
+
+<pre><code class="language-elixir">def handle_call(:get_history, _from, worker) do
+  …
+end
+</code></pre>
+
+<ul>
+  <li>The message received: here we pattern match on the <code>:get_history</code> constant</li>
+  <li>The origin of the message: the argument named <code>_from</code></li>
+  <li>The state of the actor at reception of the message: the argument named <code>worker</code></li>
+</ul>
+
+<p>Now let us look at the content of the function. We recognize the Lamport timestamp total ordering we talked about earlier: the history of event is obtained by sorting the event log by time and then origin.</p>
+
+<pre><code class="language-elixir">sortedLog = Enum.sort_by(worker.eventLog, fn event -&gt; {event.time, event.origin} end)
+</code></pre>
+
+<p>The callback <code>handle_call</code> must then return a tuple of 3 elements (the last line of a function is always the returned piece of data of a function):</p>
+
+<pre><code class="language-elixir">{:reply, sortedLog, worker}
+</code></pre>
+
+<ul>
+  <li>At the first position: whether or not the message was successfully handled (<code>:ok</code> for success)</li>
+  <li>As the second position: the answer to the request, the sorted event log</li>
+  <li>As the third position: the new state of the worker, which we keep unchanged here</li>
+</ul>
+
+<p>Assembled together, this callback will make our workers react to the get_history message by answering a sorted event log (the history as the worker sees it), and keep the state of the actor unchanged.</p>
+
+<p><em>(*) There are three main callbacks in a GenServer actor, named handle_call, handle_cast, and handle_info. handle_call is for synchronous requests, those for which the caller expects an answer.</em></p>
+
+<h3 id="receiving-events">Receiving events</h3>
+
+<p>To handle the insertion of a word of a sentence, we need to react to the <em>add</em> message. As before, we need to implement <code>handle_call</code>, but this time pattern matching on a message starting with the constant <code>:add</code> and containing a word as a payload:</p>
+
+<pre><code class="language-elixir">def handle_call({:add, event}, _from, worker) do
+  logEntry = %LogEntry{
+    origin: worker.name,
+    time: worker.clock,
+    event: event
+  }
+  newWorkerState = %{ worker |
+    clock: worker.clock + 1,
+    eventLog: [logEntry | worker.eventLog]
+  }
+  PubSub.broadcast(@log_replication_topic, {:replication_log, logEntry})
+  {:reply, :ok, newWorkerState }
+end
+</code></pre>
+
+<p>There are three main parts in this function. First we create a new log entry for the event we just received, tagged with the worker clock and the worker name:</p>
+
+<pre><code class="language-elixir">logEntry = %LogEntry{
+  origin: worker.name,
+  time: worker.clock,
+  event: event
+}
+</code></pre>
+
+<p>Then we construct the new worker state by appending the new entry in the log, and incrementing the logical clock of the worker by one:</p>
+
+<pre><code class="language-elixir">newWorkerState = %{ worker |              # Update worker state
+  clock: worker.clock + 1,                # – increment clock by one
+  eventLog: [logEntry | worker.eventLog]  # – prepend log entry to event log
+}
+</code></pre>
+
+<p>Finally, we broadcast this new log entry to all other workers, before answering positively (<code>:ok</code> for success) to the request:</p>
+
+<pre><code class="language-elixir">PubSub.broadcast(@log_replication_topic, {:replication_log, logEntry})
+</code></pre>
+
+<h3 id="receiving-logs">Receiving logs</h3>
+
+<p>Now for our last message, the replication log message. This time, we have to catch messages starting with <code>:replication_log</code> and containing a log entry payload:</p>
+
+<pre><code class="language-elixir">def handle_info({:replication_log, logEntry}, worker) do
+  newWorkerState =
+    if logEntry.origin == worker.name do
+      worker
+    else
+      %{ worker |
+        clock: max(worker.clock, logEntry.time) + 1,
+        eventLog: [logEntry | worker.eventLog] }
+    end
+  {:noreply, newWorkerState }
+end
+</code></pre>
+
+<p>Because we use a broadcast for the replication log, this function first has to check whether or not the worker is in fact the emitter of the replication log (<code>logEntry.origin == worker.name</code>).</p>
+
+<p>In case the emitter is the receiver, the function does nothing. On the other hand, if the emitter is some other worker, it implements the Lamport timestamp logic:</p>
+
+<pre><code class="language-elixir">%{ worker |
+  clock: max(worker.clock, logEntry.time) + 1,
+  eventLog: [logEntry | worker.eventLog] }
+</code></pre>
+
+<ul>
+  <li>The replicated log entry is appended to the log of the worker</li>
+  <li>The worker clock is updated according to Lamport timestamp’s algorithm</li>
+</ul>
+
+<p><em>Note: The astute code reader might have noticed we used <code>handle_info</code> instead of <code>handle_call</code>. This is no mistake. I will refer you to the <a href="https://hexdocs.pm/elixir/GenServer.html">GenServer</a> documentation regarding why it is so.</em></p>
+
+<h3 id="the-remaining-pieces-of-infrastructure">The remaining pieces of infrastructure</h3>
+
+<p>At this point, our worker is fully implemented, but for some technical details we skipped here for clarity. You can find the <a href="https://gist.github.com/deque-blog/7da616a7a3037a9da11be0fbdac01eb4">full code here</a> if you are interested.</p>
+
+<p>To run our tests, we only miss our Pub/Sub messaging infrastructure and our Load Balancer. Fortunately, Elixir has quite a good ecosystem and there are some high quality libraries available, such as Phoenix.PubSub. A few lines of code to wrap them (you can find the <a href="https://gist.github.com/deque-blog/4fc11e6c548f9d986df620f1c8b1c2e0">full code here</a>) and we get our infrastructure for free.</p>
+
+<p>The whole project is <a href="https://github.com/QuentinDuval/Clocks">available on GitHub</a>.</p>
+
+<h2 id="testing-eventual-stupidity">Testing eventual stupidity</h2>
+
+<p>All of this work has not been in vain: it is now time to test our eccentric shuffling algorithm.</p>
+
+<h3 id="example-of-random-shuffling">Example of random shuffling</h3>
+
+<p>Here is an example of sorted event log I got after sending the words of the sentence “hello my dear friend how are you in this glorious and beautiful day ?” to our eccentric shuffling algorithm:</p>
+
+<pre><code class="language-elixir">[
+  %Worker.LogEntry{event: "friend", origin: #PID&lt;0.183.0&gt;, time: 1},
+  %Worker.LogEntry{event: "dear", origin: #PID&lt;0.184.0&gt;, time: 1},
+  %Worker.LogEntry{event: "my", origin: #PID&lt;0.185.0&gt;, time: 1},
+  %Worker.LogEntry{event: "hello", origin: #PID&lt;0.186.0&gt;, time: 1},
+  %Worker.LogEntry{event: "how", origin: #PID&lt;0.186.0&gt;, time: 5},
+  %Worker.LogEntry{event: "are", origin: #PID&lt;0.185.0&gt;, time: 6},
+  %Worker.LogEntry{event: "in", origin: #PID&lt;0.183.0&gt;, time: 7},
+  %Worker.LogEntry{event: "you", origin: #PID&lt;0.184.0&gt;, time: 7},
+  %Worker.LogEntry{event: "glorious", origin: #PID&lt;0.185.0&gt;, time: 9},
+  %Worker.LogEntry{event: "this", origin: #PID&lt;0.186.0&gt;, time: 9},
+  %Worker.LogEntry{event: "beautiful", origin: #PID&lt;0.183.0&gt;, time: 11},
+  %Worker.LogEntry{event: "and", origin: #PID&lt;0.184.0&gt;, time: 11},
+  %Worker.LogEntry{event: "today", origin: #PID&lt;0.186.0&gt;, time: 12},
+  %Worker.LogEntry{event: "?", origin: #PID&lt;0.185.0&gt;, time: 14}
+]
+</code></pre>
+
+<p>In other words, all workers ended up agreeing on this random shuffling:</p>
+
+<p><em>“friend dear my hello how are in you glorious this beautiful and day ?”</em></p>
+
+<p>This, of course, is just one example of random shuffling of our original sentence. You can test other example by yourself: the code is available in <a href="https://github.com/QuentinDuval/Clocks">GitHub</a>.</p>
+
+<h3 id="the-fascinating-bit">The fascinating bit</h3>
+
+<p>What is interesting (and fascinating for me) is that, whatever the random order we end up having, <strong>all the workers will eventually always agree</strong> on the same. In fact, we can even write <a href="https://github.com/QuentinDuval/Clocks/blob/master/test/clocks_test.exs">unit tests on it</a>, and it will be green:</p>
+
+<pre><code class="language-elixir">Eventually.assertUntil 100, 5, fn() -&gt;
+  same_history =
+    Dispatcher.get_workers()
+      |&gt; Enum.map(fn w -&gt; Worker.get_history(w) end)
+      |&gt; all_equal
+  assert same_history == true
+end
+</code></pre>
+
+<p>We therefore managed to build a buzzword compliant, distributed sentence shuffling algorithm, all based on Lamport timestamp algorithm. Amazing, right?</p>
+
+<h2 id="conclusion-and-what-to-read-next">Conclusion and what to read next</h2>
+
+<p>Beside having some random fun, I hope this post gave you the desire to read the original publication of Lamport: <a href="https://amturing.acm.org/p558-lamport.pdf">Time, Clocks, and the Ordering of Events in a Distributed System</a>, which is truly an amazing paper to read.</p>
+
+<p>This notion of ordering is obviously quite useful in distributed systems. For instance, generalizations of Lamport clocks, such as vector clocks, allow to identify concurrent modifications in a distributed systems, which is tremendously useful to resolve write conflicts (although <a href="https://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks">they are not without problems</a>).</p>
+
+<p>The paper also shows an interesting application of Lamport timestamps, to implement a replicated state machine. This limited consensus algorithm is not fault tolerant (and is completely supplanted by algorithms such as <a href="http://www.tcs.hut.fi/Studies/T-79.5001/reports/2012-deSouzaMedeiros.pdf">Zookeeper Atomic Broadcast</a> or <a href="http://files.catwell.info/misc/mirror/raft/raft.pdf">Raft</a>) but nevertheless quite smart and interesting to read.</p>
+
+<p>Read this paper, try Elixir as well, you won’t regret it.</p>]]></content><author><name>Quentin Duval</name></author><category term="system-design" /><category term="Functional-Programming" /><category term="system-design" /><category term="Elixir" /><summary type="html"><![CDATA[If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task...]]></summary></entry><entry><title type="html">Small programming faults can overflow an entire system</title><link href="/blog/2018/07/28/cost-of-ignoring-errors.html" rel="alternate" type="text/html" title="Small programming faults can overflow an entire system" /><published>2018-07-28T00:00:00+00:00</published><updated>2018-07-28T00:00:00+00:00</updated><id>/blog/2018/07/28/cost-of-ignoring-errors</id><content type="html" xml:base="/blog/2018/07/28/cost-of-ignoring-errors.html"><![CDATA[<p>Many years back, in a different company… My company had been doing a shift toward the use of Service Oriented Architecture for the past few years.</p>
+
+<p>In this context, we built a micro-service <strong>A</strong> that maintained a view on some financial information. The goal was to asynchronously create a data representation that offered better performance for some very common query patterns we had.</p>
+
+<p>At the time, we had been testing the service extensively. We had a demo coming the next days, to show all the progress that we had made.</p>
+
+<p>The code had not changed since the last tests we made. Still, we decided to make a last run of the demo. And it failed miserably. The same test case as before failed. The system was not even responsive.</p>
+
+<p>The error that threw the entire system astray turn out to be ridiculously small.</p>
+
+<h2 id="the-context">The context</h2>
+
+<p>Our service <strong>A</strong> was a stateless service, fed by a message broker to receive a feed of real-time updates (from services <strong>X</strong> and <strong>Y</strong> below).</p>
+
+<p>Its goal was to aggregate asynchronously these updates and serve queries to other services (service <strong>Z</strong> below) via a REST API:</p>
+
+<p><img src="/assets/images/servicearchitecture.jpeg" alt="service_infrastructure" /></p>
+
+<p>The goal of the demo was to trigger an update on service <strong>X</strong> (via GUI interactions) and show that it correctly updates the view maintained in the service <strong>A</strong> (again via GUI interactions).</p>
+
+<p>Technically, it was meant to demonstrate that service <strong>X</strong> correctly sends update messages to service <strong>A</strong> and that our new service <strong>A</strong> correctly processes them, and importantly processes them faster than the previous implementation as a monolythic service.</p>
+
+<h2 id="following-the-log-trail">Following the log trail</h2>
+
+<p>But our service that was so quick to react in our previous tests now was apparently completely irresponsive. Or was it?</p>
+
+<h3 id="the-symptoms">The symptoms</h3>
+
+<p>After a quick investigation, it turned out that our service did not crash. In fact, it would still service queries! But the queries would return data that remained invariably stale, and so the GUI was not changing, giving us the impression that the service was dead.</p>
+
+<p>In reality, all services were running, but the view maintained by the service <strong>A</strong> was not impacted by GUI updates performed on service <strong>X</strong>.</p>
+
+<h3 id="the-rules-of-the-4-rs">The rules of the 4 Rs</h3>
+
+<p>We naturally tried the rules of the 4 Rs: Retry, Restart, Reboot, Re-deploy… but it did not clear the error away. Not this time. Something was stuck, something that was not in the transient memory of the services.</p>
+
+<p>So we started to look into the logs to identify the guilty service.</p>
+
+<h3 id="producer-or-consuner-fault-neither">Producer or consuner fault? Neither…</h3>
+
+<p>We first looked into the log of the service X, hoping to find why it did not send any update messages to service <strong>A</strong>. Instead, we found that the service <strong>X</strong> did correctly send the messages.</p>
+
+<p>We then looked the logs on the consumer side, hoping to find why the service <strong>A</strong> did not receive or process any of the messages. Instead, we found that the service <strong>A</strong> was being overwhelmed with tons of messages from the broker, conveying updates of service <strong>X</strong>.</p>
+
+<p>Looking these messages in details, to our surprise, they all looked the same! The service <strong>A</strong> was in fact consuming tons of update messages (several hundreds per second), but these messages were always the same ten or so.</p>
+
+<h3 id="maybe-a-message-acknowledgment-issue-no">Maybe a message acknowledgment issue? No…</h3>
+
+<p>Our next hypothesis was that our service was not correctly acknowledging the messages it received. In such case, the message broker would always serve the same messages over an over again.</p>
+
+<p>We verified the logs of the service and it was not the case: it was correctly acknowledging the messages sent to it. Digging deeper, it was also clear that the broker was correctly dropping these messages after receiving the acknowledgment and not serving them again.</p>
+
+<p>Back to the emitter (service <strong>X</strong>), we made sure that it was not sending those updates over and over. But no, it was doing the correct thing: one update, one notification message.</p>
+
+<p>So which services was responsible to send those messages to the message broker?</p>
+
+<h3 id="looking-for-the-guilty-emitter">Looking for the guilty emitter</h3>
+
+<p>Something, somewhere, must have been sending these same messages over and over again. They are not appearing out of thin air.</p>
+
+<p>At this point, we decided to proceed by elimination.</p>
+
+<p>We stopped, one by one, each and every service that could possibly send data to the service <strong>A</strong> through the messaging system, until we noticed a reduction of the traffic. And so we found the guilty service: it was service <strong>Y</strong>.</p>
+
+<p><img src="/assets/images/servicearchitectureerror.png" alt="service_infrastructure" /></p>
+
+<p>Once <strong>Y</strong> was shut down, we saw the queue being slowly consumed by service <strong>A</strong>. A few minutes later, the whole garbage was gone. And finally the update of service <strong>X</strong> was processed.</p>
+
+<h3 id="its-all-clear-now">It’s all clear now!</h3>
+
+<p>Now at that point, we could finally understand why our service <strong>A</strong> had not been very responsive to any updates during our demo rehearsal. It was actually responsive but was instead completely overwhelmed by the traffic it was facing. The resulting latency was so high that the service was not able to react to these updates in real-time.</p>
+
+<p>It was clear why the error first looked like a lost update issue. Because the service had been built with an idempotent business logic, the 10 repeating messages that were flowding the system had no observable effect other than overwhelming the service.</p>
+
+<p>And because the service had separate thread pools for processing updates and serving queries (which is a good design principle called the bulkhead), the query side was still responding with stale data.</p>
+
+<h2 id="debugging-the-sweeper-service">Debugging the Sweeper service</h2>
+
+<p>Now, time to understand why service <strong>Y</strong> suddenly started to flood the messaging infrastructure with a continuous flow of identical messages. First, we have to understand what service <strong>Y</strong> is for.</p>
+
+<h3 id="sweeping-unsent-messages">Sweeping unsent messages</h3>
+
+<p>The service <strong>Y</strong>, guilty of flooding the messaging system, was a technical service acting as a Sweeper. Its goal was to make sure that messages that could not have been sent to the message broker (because the broker was not alive at the time or not reachable) would eventually be sent to the broker when it would come back online.</p>
+
+<p>Basically, any service wanting to send a message to service <strong>A</strong> (or any other service) through the message broker, would first need the messaging infrastructure (the message broker) to be alive. But would the broker be down, we could not afford to halt all services.</p>
+
+<p>So instead, the transmitting service, service <strong>X</strong> in our case, would fall back to writing the message in the Sweeping table, a table stored in database (1).</p>
+
+<p><img src="/assets/images/sweepertable.png" alt="sweepertable" /></p>
+
+<p>The Sweeper task was to poll periodically the sweeping table, to fetch and transmit these messages that could not have been sent and remove those messages from the sweeping table after successful transmission.</p>
+
+<p><em>(1) The Sweeper can have another role as well. By writing in the sweeper table inside a DB transaction local to the transmitting service, this pattern allows to make sure we only send messages if the rest of the commit was successful (a useful pattern if the transmitting service has to write in his own DB and wants to make sure an update is sent if and only if this commit is successful).</em></p>
+
+<h3 id="digging-into-the-sweeper-code">Digging into the Sweeper code</h3>
+
+<p>In principle, the code of a Sweeper is really simple. It regularly polls the sweeping table, fetch the unsent messages, sends them, wait for the acknowledgment of the message broker, and then mark these messages as being sent (we marked them as sent after acknowledgement for guaranteed delivery (2)).</p>
+
+<p>In our case, the code was written in Java, and roughly looked like this:</p>
+
+<pre><code class="language-java">private void pollSweeperTable(Session session) {
+    List&lt;Message&gt; unsentMessages = messageRepository.fetchUnsentMessages();
+    for (Message message : unsentMessages)
+        sendMessage(session, message);
+    messageRepository.markSent(unsentMessages);
+}
+</code></pre>
+
+<ul>
+  <li>The load and save of unsent entries is done using <a href="https://en.wikipedia.org/wiki/Java_Persistence_API">JPA</a> (via the message repository of JPA)</li>
+  <li>The messages are sent using <a href="https://en.wikipedia.org/wiki/Java_Message_Service">JMS</a> (the <code>Session</code> object passed as parameter of the function)</li>
+</ul>
+
+<p>These might seem as details, but they are not. The failure mode of our APIs are often what makes the difference in how a failure propagate in our system.</p>
+
+<p><em>(2) And yes, as you have guessed, this means you can have double transmission, as often in distributed systems. So the the receiver of messages must do deduplication or be idempotent or else this pattern is dangerous to use.</em></p>
+
+<h3 id="jpa-saving-errors">JPA saving errors</h3>
+
+<p>It turns out that when JPA tries to save an object, it throws an exception if the ID of the object is not unique in the table. Basically, JPA uses the ID to know which record to replace, and does not know which one to replace, so it panics.</p>
+
+<p>The overall incident started like this: one service managed at some point to corrupt the Sweeping table. The direct consequence was that two messages now shared the same ID in the sweeper table (yes, there should have been a unique index, we will come back to that).</p>
+
+<p>So when the sweeper encountered these messages, it managed to load them, send them, but failed to save them, marked as “sent” for there were two messages with the same ID. So the next sweeper loop would load the same two messages, send them again, and fail to save them again.</p>
+
+<p>Basically, we got an infinite loop sending the same messages over and over again.</p>
+
+<h3 id="interacting-with-transactions">Interacting with transactions</h3>
+
+<p>This infinite loop does not yet explain everything. There were 2 corrupted messages. Why are there 10 messages being sent repeatedly instead of 2?</p>
+
+<p>A quick look at the code gave us the answer: the sweeper marked all the messages as sent in the same DB transaction. Therefore, a single corrupted message makes the whole transaction fails.</p>
+
+<pre><code class="language-java">private void pollSweeperTable(Session session) {
+    List&lt;Message&gt; unsentMessages = messageRepository.fetchUnsentMessages();
+    for (Message message : unsentMessages)
+        sendMessage(session, message);
+    messageRepository.markSent(unsentMessages); // One DB transaction
+}
+</code></pre>
+
+<p>As a consequence, instead of just sending the two corrupted messages over and over again, the Sweeper sends all the unsent messages of the Sweeping table over and over again. And guess what? There were about 10 messages in the sweeping table during the incident.</p>
+
+<p><em>Note: This behavior was motivated by performance. Marking all the messages as sent inside a single commit limits the impact on the database. It was an interesting bet knowing that sending the same messages twice – occasionally – is not a problem: idempotent receivers were already needed by the “at least once” guarantee of our messaging infrastructure.</em></p>
+
+<h3 id="here-comes-the-pokemon-catch">Here comes the pokemon catch</h3>
+
+<p>To finish up, there was a last issue that made everything much much worse. The Sweeper iteration loop was surrounded by a wonderful Pokemon try-catch, logging and swallowing all exceptions:</p>
+
+<pre><code class="language-java">try {
+   pollSweeperTable(Session session);
+   // …
+} catch (Exception e) {
+   // Log the exception
+}
+</code></pre>
+
+<p>For sure, not swallowing the exception would not have solved the issue. The Sweeper would have crashed upon marking the messages as sent, and then would have been revived by the supervisor, and then would have sent the messages again before crashing again.</p>
+
+<p>The sweeper would still have flooded the messaging system. But it would have shown on the monitoring. Instead, absorbing the exception made the identification of the root cause of the system failure much less obvious. The first visible sign was another service that stopped responding.</p>
+
+<h2 id="what-lessons-is-there-to-be-learned">What lessons is there to be learned?</h2>
+
+<h3 id="dealing-with-errors-not-anticipating-them">Dealing with errors, not anticipating them</h3>
+
+<p>Distributed systems are a weird beast. We cannot anticipate most errors in a distributed systems. As illustrated here, some errors are not even necessarily symmetric.</p>
+
+<p>We may be able to connect to the DB to load a record, but not to save the record, the same way that we may be able to send a message through a network link but not receive an answer. Some errors are out of our control (another service corruption our DB in our case).</p>
+
+<p>Therefore the important thing is to put in place mechanisms that limit errors from propagating and lead to a system failure, and try to detect and report these errors as soon as possible.</p>
+
+<p>Dealing with the errors that we anticipated, and pokemon catching the other cases, is a recipe for incidents such as this one.</p>
+
+<h3 id="the-way-to-fix-it">The way to fix it</h3>
+
+<p>In that case, a number of different things would have helped.</p>
+
+<p>First, adding a unique index on the sweeper table to prevent corruption of the message IDs and identify the source of the corruption (at the time of writing, we did not find it).</p>
+
+<p>We customized our JPA repository to use a JQL update where request. Now, whenever there are messages with conflicting IDs in the sweeper table, both duplicates will be marked as “sent” (we will lose a corrupted message instead of losing the entire system):</p>
+
+<pre><code class="language-java">@Modifying
+@Query(
+   value = "update SweeperTable set sent = 1 where messageId in (:messageIds)",
+   nativeQuery = true)
+void markSent(@Param("messageIds") List&lt;Long&gt; messageIds);
+</code></pre>
+
+<p>Adding back-pressure on the broker message queue, so that we get clear overflow errors when the situation gets out of control.</p>
+
+<p>And of course remove the Pokemon catching try-catch block ;)</p>]]></content><author><name>Quentin Duval</name></author><category term="system-design" /><category term="system-design" /><category term="Java" /><summary type="html"><![CDATA[A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system.]]></summary></entry></feed>

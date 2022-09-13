@@ -1,0 +1,905 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Code your own Quick Check (Higher Order Functions) - Double Ended Queue</title>
+<meta name="description" content="In the previous post, we started to build our own QuickCheck implementation in Haskell, which we named RapidCheck. We went over the basic concepts needed to build such a module, based on the original publication on QuickCheck.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Code your own Quick Check (Higher Order Functions)">
+<meta property="og:url" content="/blog/2017/02/06/code-quick-check-2.html">
+
+
+  <meta property="og:description" content="In the previous post, we started to build our own QuickCheck implementation in Haskell, which we named RapidCheck. We went over the basic concepts needed to build such a module, based on the original publication on QuickCheck.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Code your own Quick Check (Higher Order Functions)">
+  <meta name="twitter:description" content="In the previous post, we started to build our own QuickCheck implementation in Haskell, which we named RapidCheck. We went over the basic concepts needed to build such a module, based on the original publication on QuickCheck.">
+  <meta name="twitter:url" content="/blog/2017/02/06/code-quick-check-2.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-02-06T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/02/06/code-quick-check-2.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Code your own Quick Check (Higher Order Functions)">
+    <meta itemprop="description" content="In the previous post, we started to build our own QuickCheck implementation in Haskell, which we named RapidCheck. We went over the basic concepts needed to build such a module, based on the original publication on QuickCheck.">
+    <meta itemprop="datePublished" content="2017-02-06T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Code your own Quick Check (Higher Order Functions)
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-02-06T00:00:00+00:00">February 6, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html&text=Code+your+own+Quick+Check+%28Higher+Order+Functions%29&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/02/06/code-quick-check-2.html&title=Code your own Quick Check (Higher Order Functions)"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/02/06/code-quick-check-2.html&t=Code your own Quick Check (Higher Order Functions)">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivating-example">Motivating Example</a></li><li><a href="#toward-generating-functions">Toward generating functions</a></li><li><a href="#generators-perturbation">Generators perturbation</a></li><li><a href="#implementing-perturbations">Implementing perturbations</a><ul><li><a href="#general-pattern">General pattern</a></li><li><a href="#implementing-perturb">Implementing perturb</a></li><li><a href="#leveraging">Leveraging</a></li></ul></li><li><a href="#showable-functions">Showable functions</a></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the previous post, we started to build our own QuickCheck implementation in Haskell, which we named RapidCheck. We went over the basic concepts needed to build such a module, based on the <a href="http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf">original publication on QuickCheck</a>.</p>
+
+<p>In particular, we explained in details and implemented the following concepts from QuickCheck:</p>
+
+<ul>
+  <li><code>Gen a</code>: a generator of value of type <code>a</code></li>
+  <li><code>Result</code>: a type to represent the outcome of a test (success or counter example)</li>
+  <li><code>Arbitrary</code>: the class of types with a default <code>Gen</code> associated to it</li>
+  <li><code>Property</code>: a testable predicate, from which we can derive a <code>Gen Result</code></li>
+  <li><code>Testable</code>: the class of types we can convert to a <code>Property</code></li>
+</ul>
+
+<p>In this post, we will add the support for generators of functions, which is critical to test properties expressed as higher order functions, while the next post will focus on adding the support for argument shrinking, which is critical to provide better counter examples for failing properties.</p>
+
+<h2 id="motivating-example">Motivating Example</h2>
+
+<p>In a functional language such as Haskell, we often modularize and factorize our code through the use of Higher Order Functions. Testing these functions with generative testing requires QuickCheck to support the generation of functions.</p>
+
+<p>Our goal for today will be to enrich our RapidCheck implementation with everything needed to test the following properties.</p>
+
+<p>The <code>prop_partition</code> is a valid property. It verifies that partition correctly does it jobs:</p>
+
+<ul>
+  <li>It checks that all elements on the left match the predicate</li>
+  <li>It checks that no elements on the right matches the predicate</li>
+  <li>It checks that no elements were lost in the process</li>
+</ul>
+
+<p>We expect this property to pass:</p>
+
+<pre><code class="language-hs">prop_partition :: [Integer] -&gt; (Integer -&gt; Bool) -&gt; Bool
+prop_partition xs p =
+  let (lhs, rhs) = partition p xs
+  in and
+      [ all p lhs
+      , not (any p rhs)
+      , sort xs == sort (lhs ++ rhs) ]
+ 
+ rapidCheck prop_partition
+ &gt; Success
+</code></pre>
+
+<p>The prop_distributive is an invalid property. It asserts that every single functions from integer to integer is distributive over the operator plus. We expect this property to fail, and RapidCheck to provide us with a counter example:</p>
+
+<pre><code class="language-hs">prop_distributive :: Integer -&gt; Integer -&gt; (Integer -&gt; Integer) -&gt; Bool
+prop_distributive a b f = f (a + b) == f a + f b
+
+rapidCheck prop_distributive
+&gt; Failure {seed = 7720540227186278723,
+           counterExample = ["1716301762","55093645","&lt;function&gt;"]}
+</code></pre>
+
+<p>You might feel quite disappointed by this counter example. The “function” string counter example is not that helpful. While this is true, understanding how to circumvent this issue goes beyond the scope of this post.</p>
+
+<p>There is a <a href="https://www.youtube.com/watch?v=CH8UQJiv9Q4">brilliant presentation</a> you can have a look at to better understand how the real QuickCheck manages to provide useful outputs for counter examples on functions.</p>
+
+<h2 id="toward-generating-functions">Toward generating functions</h2>
+
+<p>How can we even generate functions? Functions can operate on a potentially infinite number of values, and it seems hard to conceive a way to generate such a complex structure.</p>
+
+<p>Fortunately, the original publication on QuickCheck gives us a nice trick to understand where to start. The trick is based on playing with types.</p>
+
+<p>Our goal is to be able to create a generator of functions from <code>a</code> to <code>b</code>: <code>Gen (a -&gt; b)</code>. We know this <code>Gen (a -&gt; b)</code> type is just a wrapper around a function <code>StdGen -&gt; (a -&gt; b)</code>. By getting rid of the parentheses and reordering the parameters of this function, we get the following prototype: <code>a -&gt; StdGen -&gt; b</code>.</p>
+
+<p>We recognize in this last expression a generator of value of type b. This means we can rewrite <code>Gen (a -&gt; b)</code> as <code>a -&gt; Gen b</code>.</p>
+
+<p>This play with types makes use realize that we can build a generator of functions from a function returning a generator, by merely moving the application of the function inside the generator.</p>
+
+<p>We name this transformation <code>promote</code>:</p>
+
+<pre><code class="language-hs">promote :: (a -&gt; Gen b) -&gt; Gen (a -&gt; b)
+promote f =
+  Gen $ \rand a -&gt;
+    runGen (f a) rand
+</code></pre>
+
+<h2 id="generators-perturbation">Generators perturbation</h2>
+
+<p>The <code>promote</code> helper requires us to give it a function: <code>a -&gt; Gen b</code>. Finding a way to instantiate such a function is the focus of this section.</p>
+
+<p>We can reason that implementing a function that instantiate a generator from a value of a completely different type is not conceivable unless this function is the result of a partially applied function. So let us add an argument in front of it to see how it could help us.</p>
+
+<p>By adding <code>Gen b</code>, we get the following prototype: <code>Gen b -&gt; a -&gt; Gen b</code>. One way to see this is as a perturbation on a random generator driven by a value of type <code>a</code>. We capture this requirement on a with the <code>CoArbitrary</code> type class:</p>
+
+<pre><code class="language-hs">class CoArbitrary a where
+  coarbitrary :: Gen b -&gt; a -&gt; Gen b
+</code></pre>
+
+<p>The <code>coarbitrary</code> function is very close to what the function <code>promote</code> needs to create a generator of function. We just need to provide it a generator as first parameter.</p>
+
+<p>To sum this up, it means we can make an <code>Arbitrary (a -&gt; b)</code> instances from the two following requirements:</p>
+
+<ul>
+  <li><code>Arbitrary b</code>: the existence of a standard generator for the type b</li>
+  <li><code>CoArbitrary a</code>: the ability for the type a to perturb another generator</li>
+</ul>
+
+<p>Then we only need to provide the generator to coarbitrary to feed it to promote:</p>
+
+<pre><code class="language-hs">instance
+  (CoArbitrary a, Arbitrary b)
+  =&gt; Arbitrary (a -&gt; b)
+  where
+    arbitrary = promote (coarbitrary arbitrary)
+</code></pre>
+
+<h2 id="implementing-perturbations">Implementing perturbations</h2>
+
+<p>We saw that generating a function requires each of the argument of the function to implement the <code>CoArbitrary</code> type class.</p>
+
+<p>We know that for a type a to be an instance of <code>CoArbitrary</code> it needs to be able to perturb generators of any other types. Let us now look at how we can implement such a perturbation.</p>
+
+<h3 id="general-pattern">General pattern</h3>
+
+<p>To influence a generator <code>Gen</code>, we can act on its <code>StdGen</code> parameter. This impact on the random generation process needs to be linked with the value of the type implementing <code>CoArbitrary</code>.</p>
+
+<p>Applied to the integer data type, this translates into the following code, where perturb is yet to be defined:</p>
+
+<pre><code class="language-hs">instance CoArbitrary Integer where
+  coarbitrary gen n =
+    Gen $ \rand -&gt;
+      runGen gen (perturb n rand)
+</code></pre>
+
+<p>This is the general pattern. We can use it to define any <code>CoArbitrary</code> instances: the only difference will be the implementation of the <code>perturb</code> function.</p>
+
+<h3 id="implementing-perturb">Implementing perturb</h3>
+
+<p>The implementation of <code>perturb</code> is critical to have good statistically properties. Matching the function prototype alone is not enough.</p>
+
+<p>As an extreme example, let us imagine an implementation of <code>perturb</code> that would return its input generator unmodified. The resulting function generator would produce functions that systematically ignore all their parameters and return the same result for any inputs. Applied to our partition property, it would generate predicates that either return True on all inputs, or False on all inputs. Not that great.</p>
+
+<p>To get good statistical properties, the implementation of <code>perturb</code> should instead try to map each possible value of a to a different perturbation on the generator <code>Gen b</code>.</p>
+
+<p>This is the approach we have chosen for our <code>CoArbitrary Integer</code> instance, for which we provide different chains of <code>split</code> calls for each different number we get:</p>
+
+<ul>
+  <li>The sign of the number is taken into account</li>
+  <li>The value zero is not forgotten and does impact the generator</li>
+  <li>The decomposition of the number into digits further drives the perturbation</li>
+</ul>
+
+<pre><code class="language-hs">perturb :: (Integral n) =&gt; n -&gt; StdGen -&gt; StdGen
+perturb n rand0 =
+  foldl
+    (\rand b -&gt; vary b rand)  -- Vary generator based on digit value
+    (vary (n &lt; 0) rand0)      -- Vary generator based on sign
+    (digits (abs n))          -- Decompose a positive number in digits
+  where
+    vary digit rand =
+      (if digit then snd else fst)
+      (split rand)
+    digits =
+      map ((== 0) . (`mod` 2))
+      . takeWhile (&gt; 0)
+      . iterate (`div` 2)
+</code></pre>
+
+<p>Although we must be careful, we are not limited: there are in practice many different valid implementations possible.</p>
+
+<h3 id="leveraging">Leveraging</h3>
+
+<p>We can use the pattern we saw above in combination with our implementation of <code>perturb</code> to easily build more instances of <code>CoArbitrary</code>. Since we have a way to build a perturbation from an integer, we can use it as an intermediary step.</p>
+
+<p>We can map the values of a type to an integer value to quickly get a <code>CoArbitrary</code> instance for it. We can also use perturb several times in a row:</p>
+
+<pre><code class="language-hs">instance CoArbitrary [Int] where
+  coarbitrary gen xs =
+    Gen $ \rand -&gt;
+      runGen gen (foldr perturb (perturb 0 rand) xs)
+</code></pre>
+
+<p>The bottom line is that we do not need to re-invent the wheel each time we want to define a <code>CoArbitrary</code> instance.</p>
+
+<p>In particular, QuickCheck offers a lot of helpers for building both <code>Arbitrary</code> and <code>CoArbitrary</code> in its <a href="https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Arbitrary.html">Test.QuickCheck.Arbitrary</a> module. This is a good place to look before starting implementing a new instance of either of those typeclasses.</p>
+
+<h2 id="showable-functions">Showable functions</h2>
+
+<p>We now have everything we need to run our tests cases… except for one small but important detail. Our code will not compile, due to the requirements associated with the <code>Testable</code> typeclass:</p>
+
+<pre><code class="language-hs">instance
+  (Show a, Arbitrary a,
+   Testable testable)
+  =&gt; Testable (a -&gt; testable)
+  where
+    property f = forAll arbitrary f
+</code></pre>
+
+<p>We need functions to implement <code>Show</code> for higher order functions to be valid instances of <code>Testable</code>. We will take a shortcut here and import the <a href="https://hackage.haskell.org/package/base-4.9.1.0/docs/Text-Show-Functions.html">Text.Show.Functions</a> module which defines it for us.</p>
+
+<p>The problem with this approach is that we get “function” inside our counter example, when the property does not pass. This is clearly not very informative.</p>
+
+<p>QuickCheck offers the <a href="https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Function.html">Test.QuickCheck.Function</a> to deal with this issue. It requires to transform the declaration of properties to use <code>Fun a b</code> instead of <code>a -&gt; b</code>. In exchange for this small change in syntax, it is both able to show and shrink functions, improving our user experience by that much.</p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next</h2>
+
+<p>In this post, we went over how we could generate functions to test properties expressed as higher order functions.</p>
+
+<p>We completed the code of our RapidCheck library with all that was needed to make our original test cases pass. You can find the current state of the code of our RapidCheck available in this <a href="https://gist.github.com/deque-blog/a498b6573e637e2d8d23f7230184bd2b">GitHub Gist</a>.</p>
+
+<p>Adding this feature allowed us to test properties on an algorithm such as partition by generating predicates for it.</p>
+
+<p>Our next post will aim at finishing the work and add one last important features of Property Based Testing, the ability to shrink counter examples.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-02-06T00:00:00+00:00">February 6, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Code+your+own+Quick+Check+%28Higher+Order+Functions%29%20%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html&title=Code+your+own+Quick+Check+%28Higher+Order+Functions%29" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F02%2F06%2Fcode-quick-check-2.html&t=Code your own Quick Check (Higher Order Functions)" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/02/03/code-quick-check-1.html" title="Code your own Quick Check">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Code your own Quick Check</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/02/10/code-quick-check-3.html" title="Code your own Quick Check (Shrink)">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Code your own Quick Check (Shrink)</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

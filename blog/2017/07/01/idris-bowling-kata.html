@@ -1,0 +1,1038 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Idris dependent typing challenge: Bowling Kata - Double Ended Queue</title>
+<meta name="description" content="Let’s implement an entirely type safe bowling game, where invalid games cannot even be instantiated, and see how it goes and if it is even desirable.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Idris dependent typing challenge: Bowling Kata">
+<meta property="og:url" content="/blog/2017/07/01/idris-bowling-kata.html">
+
+
+  <meta property="og:description" content="Let’s implement an entirely type safe bowling game, where invalid games cannot even be instantiated, and see how it goes and if it is even desirable.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Idris dependent typing challenge: Bowling Kata">
+  <meta name="twitter:description" content="Let’s implement an entirely type safe bowling game, where invalid games cannot even be instantiated, and see how it goes and if it is even desirable.">
+  <meta name="twitter:url" content="/blog/2017/07/01/idris-bowling-kata.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-07-01T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/07/01/idris-bowling-kata.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Idris dependent typing challenge: Bowling Kata">
+    <meta itemprop="description" content="Let’s implement an entirely type safe bowling game, where invalid games cannot even be instantiated, and see how it goes and if it is even desirable.">
+    <meta itemprop="datePublished" content="2017-07-01T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Idris dependent typing challenge: Bowling Kata
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-07-01T00:00:00+00:00">July 1, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html&text=Idris+dependent+typing+challenge%3A+Bowling+Kata&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/07/01/idris-bowling-kata.html&title=Idris dependent typing challenge: Bowling Kata"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/07/01/idris-bowling-kata.html&t=Idris dependent typing challenge: Bowling Kata">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#the-rules">The rules</a></li><li><a href="#describing-a-valid-frame">Describing a valid frame</a><ul><li><a href="#one-roll-or-two-rolls">One roll or two rolls</a></li><li><a href="#important-properties-involve-multiple-fields">Important properties involve multiple fields</a></li><li><a href="#proving-a-frame-is-valid">Proving a frame is valid</a></li><li><a href="#propositions-as-types">Propositions as types</a></li></ul></li><li><a href="#describing-a-valid-game">Describing a valid game</a><ul><li><a href="#subtelties-of-the-strike-bonus">Subtelties of the strike bonus</a></li><li><a href="#specifying-the-bonus">Specifying the bonus</a></li><li><a href="#properties-on-the-bonus">Properties on the bonus</a></li><li><a href="#specifying-the-game">Specifying the game</a></li><li><a href="#checking-our-type-checking">Checking our type checking</a></li></ul></li><li><a href="#implementating-the-scoring">Implementating the scoring</a><ul><li><a href="#view-a-series-of-rolls">View: a series of rolls</a></li><li><a href="#scoring-a-game">Scoring a game</a></li></ul></li><li><a href="#conclusion">Conclusion</a><ul><li><a href="#the-good-parts">The good parts</a></li><li><a href="#the-price-to-pay">The price to pay</a></li><li><a href="#strong-typing-is-not-for-everything">Strong typing is not for everything</a></li><li><a href="#consider-alternatives">Consider alternatives</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>The <a href="https://www.idris-lang.org/idris-1-0-released/">1.0.0 of Idris</a> has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers.</p>
+
+<p>In this post, we will look at implementing a type safe version of the <a href="http://codingdojo.org/kata/Bowling/">Bowling Kata</a> in Idris, to see how far we can go with the Idris type system.</p>
+
+<h2 id="the-rules">The rules</h2>
+
+<p>The goal of the original <a href="http://codingdojo.org/kata/Bowling/">Bowling Kata</a> is to implement a function that allows to compute the rules of the <a href="https://en.wikipedia.org/wiki/Ten-pin_bowling">Ten-Pin Bowling game</a>. Reading the problem description, we see it does <strong>not</strong> include any validity checks:</p>
+
+<ul>
+  <li><em>“We will not check for valid rolls”</em></li>
+  <li><em>“We will not check for correct number of rolls and frames”</em></li>
+  <li><em>“We will not provide scores for intermediate frames”</em></li>
+</ul>
+
+<p>We will extend this kata by adding the validity checks, and try to implement them at the type level. Our goal will be to make <strong>invalid bowling game not representable</strong>.</p>
+
+<p>Here are the constraints we will implement, all at the type level:</p>
+
+<ul>
+  <li>A <strong>roll</strong> cannot knock down more than 10 pins.</li>
+  <li>A <strong>frame</strong> cannot knock down more than 10 pins.</li>
+  <li>A valid game contains exactly <strong>10 frames</strong>.</li>
+  <li>There are exactly 2 bonus rolls for a <strong>strike</strong>, 1 for a <strong>spare</strong>, and 0 otherwise</li>
+  <li>Rolling a strike in the first <strong>bonus roll</strong> gives another 10 pins to roll against</li>
+  <li>Outside of a strike, a roll cannot knock down more than 9 pins</li>
+</ul>
+
+<p>Let’s do this as a challenge, to see where it leads us. We will discuss at the end whether or not going that far was a good idea.</p>
+
+<h2 id="describing-a-valid-frame">Describing a valid frame</h2>
+
+<p>A game of Ten-Pin Bowling rules consists of 10 frames. At each frame, a player attempt to knock down the 10 pins.</p>
+
+<ul>
+  <li>Should he succeeds in 1 roll, he gets a strike.</li>
+  <li>Should he succeeds in 2 rolls, he gets a spare.</li>
+</ul>
+
+<p>In this section, we will try to capture the nature of a frame in terms of types. Our goal will be to make an invalid frame not representable</p>
+
+<h3 id="one-roll-or-two-rolls">One roll or two rolls</h3>
+
+<p>The first distinction we have is that a frame consists either of 1 roll (for a strike) or 2 rolls in any other case. We will represent this using a sum type.</p>
+
+<pre><code class="language-haskell">data Frame : Type where
+  TwoRolls : (x, y : Nat) -&gt; Frame
+  Strike : Frame
+  
+roll : (x, y: Nat) -&gt; Frame
+roll x y = TwoRolls x y
+
+strike : Frame
+strike = Strike
+</code></pre>
+
+<ul>
+  <li>We use <code>Nat</code> to make sure the pins knocked down are positive</li>
+  <li>We added <em>smart constructors</em> to decoupled the instantiation (potentially exporting the smart constructors and not the data constructors)</li>
+</ul>
+
+<p>We add the notion of a spare though a predicate on our frame:</p>
+
+<pre><code class="language-haskell">PinCount : Nat
+PinCount = 10
+
+isSpare : Frame -&gt; Bool
+isSpare (TwoRolls x y) = x + y == PinCount
+isSpare _ = False
+</code></pre>
+
+<p>This implementation is however <strong>not</strong> type safe: any positive number will do. We might create a frame in which a player knocked 25 pins in one single roll.</p>
+
+<h3 id="important-properties-involve-multiple-fields">Important properties involve multiple fields</h3>
+
+<p>To make sure we can only construct valid <code>TwoRolls</code> frames, we need a pre-condition that relates both numbers given to the data constructor.</p>
+
+<p>Constraining each number individually is not enough. The best we could do is making sure that both numbers do not exceed 9 (included) individually. But it would not prevent the creation of frame with two rolls knocking 9 pins each.</p>
+
+<p>In general, <strong>the most interesting properties involve several arguments</strong> (or fields). Focusing on single value type-safety only checks the most trivial properties, for sometimes only a deceiving <strong>illusion of safety</strong> (yet this is the focus of most type systems).</p>
+
+<h3 id="proving-a-frame-is-valid">Proving a frame is valid</h3>
+
+<p>To make sure we can only create valid Bowling frame, we will need to express a property on both the rolls of the <code>TwoRolls</code> type constructor:</p>
+
+<pre><code class="language-haskell">data Frame : Type where
+  TwoRolls : (x, y : Nat) -&gt; { auto prf : ValidFrame x y } -&gt; Frame
+  Strike : Frame
+</code></pre>
+
+<p>This syntax is asking Idris to find an implicit proof (the <code>auto prf</code> syntax where <code>prf</code> is the variable name of the proof), that both our numbers <code>x</code> and <code>y</code> obey the property <code>ValidFrame</code> (described below).</p>
+
+<p>A <code>ValidFrame</code> is such that both rolls are below 10 (<em>excluded</em>, or else it would be a strike) pins knocked down, and that the sum of pins knocked down is below 10 (<em>included</em>, to take into account the possibility for spares).</p>
+
+<h3 id="propositions-as-types">Propositions as types</h3>
+
+<p>Prooving something in the sense of Idris, is being able to create an instance of a given type (if you are unclear why being able to instantiate a type is proving the proposition defined by the type, you should watch <a href="https://www.youtube.com/watch?v=IOiZatlZtGU">“Propositions as Types” by Philip Wadler</a>).</p>
+
+<p>In Idris, the type that represents “lower than” is <code>LT</code> and the type that represents “lower than or equal” is <code>LTE</code>. So a <code>TwoRolls x y</code> is valid if we can instantiate the following types:</p>
+
+<ul>
+  <li><code>LT x 10</code>: the first roll is strictly lower than 10</li>
+  <li><code>LT y 10</code>: the second roll is strictly lower than 10</li>
+  <li><code>LTE (x + y) 10</code>: the sum of both rolls is lower or equal than 10</li>
+</ul>
+
+<p>We need to express the conjunction of all these propositions. To do so, we need to prove that we can construct all the types that represent these propositions.</p>
+
+<p>A <strong>tuple represents a conjunction</strong>: to instantiate a tuple, we need to instantiate all the types it contains. We can therefore express our proof that a frame is valid as follows:</p>
+
+<pre><code class="language-haskell">PinCount : Nat
+PinCount = 10
+
+ValidFrame : (x, y: Nat) -&gt; Type
+ValidFrame x y = (x + y `LTE` PinCount, x `LT` PinCount, y `LT` PinCount)
+</code></pre>
+
+<p>Now, any attempt at constructing an invalid Bowling frame should be rejected by the type system. Here are some example in the REPL:</p>
+
+<pre><code class="language-haskell">roll 10 0
+-- COMPILE ERROR: "Can't find a value of type (LTE 10 10, LTE 11 10, LTE 1 10)"
+
+roll 9 9
+-- COMPILE ERROR: "Can't find a value of type (LTE 18 10, LTE 10 10, LTE 10 10)"
+
+roll 0 0 -- Fine
+=&gt; TwoRolls 0 0 : Frame
+
+roll 5 5 -- Fine
+=&gt; TwoRolls 5 5 : Frame
+</code></pre>
+
+<h2 id="describing-a-valid-game">Describing a valid game</h2>
+
+<p>A game of Ten-Pin Bowling rules consists of 10 frames, with the last frame being somewhat special. In case the last frame of the game is a spare, the player gets one additional roll, if it is a strike, the layer gets two additional rolls.</p>
+
+<h3 id="subtelties-of-the-strike-bonus">Subtelties of the strike bonus</h3>
+
+<p>In the case of a strike, there is some additional complexity. In case the first bonus roll is a strike, we get another 10 pins to roll against. In case your first bonus roll is not a strike, the second roll only has the remaining available pins to knock down.</p>
+
+<p>Some examples of valid and invalid bonus rolls following a strike at the last frame:</p>
+
+<pre><code>Valid: [9, 1]
+Invalid: [9, 2]
+
+Valid: [2, 8]
+Invalid: [2, 9]
+
+Valid: [10, 8]
+Invalid: [8, 10]
+</code></pre>
+
+<p>This shows that encoding the bonus rolls as a vector of positive integer bounded by 10 (the type <code>Fin 11</code> in Idris) will not cut it. We need to do a better than that.</p>
+
+<h3 id="specifying-the-bonus">Specifying the bonus</h3>
+
+<p>We will start by writing a function that returns the number of bonus rolls given the last frame. It returns 2 for a strike, 1 for a spare and 0 otherwise:</p>
+
+<pre><code class="language-haskell">bonusRolls : Frame -&gt; Nat
+bonusRolls Strike = 2
+bonusRolls rolls = if isSpare rolls then 1 else 0
+</code></pre>
+
+<p>We can use this function to compute type of the vector of bonus rolls. <code>BonusRollType</code> returns the type of the bonus roll vector with the appropriate size:</p>
+
+<pre><code class="language-haskell">BonusRollType : Frame -&gt; Type
+BonusRollType f = Vect (bonusRolls f) (Fin (S PinCount))
+</code></pre>
+
+<ul>
+  <li>The <code>Vect</code> is a list parametized by its length: <code>Vect 2 Int</code> contains exactly 2 integers</li>
+  <li><code>Fin (S PinCount)</code> represent positive integers bounded by <code>PinCount</code> (10) included</li>
+</ul>
+
+<p>Used on the last frame of a bowling game, this function will compute the type of the vector of bonus rolls. This will make sure the number of bonus rolls will match the rules of the bowling game.</p>
+
+<p>But this is not be enough. We need to forbid sequences such as 9 followed by 2. We will therefore need to add some preconditions.</p>
+
+<h3 id="properties-on-the-bonus">Properties on the bonus</h3>
+
+<p>The bonus rolls of a strike are valid if either the sum of the rolls is lesser or equal than 10, or if the first roll is a 10. We can express this property in types:</p>
+
+<pre><code class="language-haskell">ValidBonuses : Vect n (Fin (S PinCount)) -&gt; Type
+ValidBonuses {n = Z}      bonuses = LTE 0 0     -- 1) No bonuses, no constraints
+ValidBonuses {n = (S _)}  bonuses =             -- 2) In case of bonuses:
+  Either                                        -- Either:
+    (finToNat (head bonuses) = PinCount)        -- * The first roll is 10
+    (sum (map finToNat bonuses) `LTE` PinCount) -- * Or the sum is less than 10
+</code></pre>
+
+<ul>
+  <li><code>Either</code> express a disjunction of proposition: you can construct a <code>Either a b</code> instance if you can instantiate either a <code>a</code> or a <code>b</code></li>
+  <li><code>finToNat</code> allows to convert from a bounded positive integer <code>Fin Bound</code> to a non bounded positive integer <code>Nat</code> (<code>LTE</code> only works on <code>Nat</code>)</li>
+</ul>
+
+<p>The conversions between <code>Fin</code> (bounded natural numbers) and <code>Nat</code> (unbounded natural numbers) make this this quite dense. Another interesting design would have been to get rid of <code>Fin</code> and encode the bounds inside <code>ValidBonuses</code>.</p>
+
+<h3 id="specifying-the-game">Specifying the game</h3>
+
+<p>It is now time to wrap up our specification for a valid bowling game.</p>
+
+<ul>
+  <li>A game is made of 10 exactly frames. We can enforce this using a <code>Vect 10 Frame</code></li>
+  <li>We use <code>BonusRollType</code> to compute the bonus roll vector type from the last frame</li>
+  <li>The <code>ValidBonuses</code> precondition makes sure the strike bonus rolls are valid</li>
+</ul>
+
+<pre><code class="language-haskell">FrameCount : Nat
+FrameCount = 10
+
+data BowlingGame : Type where
+  MkBowlingGame :                              -- Create a bowling game from:
+    (frames: Vect FrameCount Frame)            -- A vector of 10 frames
+    -&gt; (bonuses : BonusRollType (last frames)) -- The bonus rolls of the last frame
+    -&gt; {auto prf: ValidBonuses bonuses}        -- The bonus rolls precondition
+    -&gt; BowlingGame
+</code></pre>
+
+<p>We used dependent types extensively here. We see that the BowlingGame type depends heavily on its content.</p>
+
+<h3 id="checking-our-type-checking">Checking our type checking</h3>
+
+<p>Time to make sure we did a fine work. We will fire up a REPL and try to instantiate some valid and invalid games:</p>
+
+<pre><code class="language-haskell">MkBowlingGame (replicate 10 strike) [10, 10] -- OK: The perfect game
+MkBowlingGame (replicate 10 strike) [10, 1] -- OK: Almost perfect game
+MkBowlingGame (replicate 10 strike) [9, 1] -- OK: Too bad for the last rolls
+
+MkBowlingGame (replicate 10 strike) [10]
+-- FAIL: Missing a last bonus roll (there should be 2)
+
+MkBowlingGame (replicate 10 strike) [9, 2]
+-- FAIL: Can't find a value of type Either (9 = 10) (LTE 11 10)
+
+MkBowlingGame (replicate 10 (roll 5 5)) [10] -- OK: only spares
+MkBowlingGame (replicate 10 (roll 5 5)) [9] -- OK: only spares
+
+MkBowlingGame (replicate 10 (roll 5 5)) [10, 10]
+-- FAIL: Only spares but two bonus rolls instead of 1
+</code></pre>
+
+<p>Note that testing that invalid instances are rejected is interesting, but it is even more important to test that valid instances pass the type checking. We would not want to forbid valid use cases.</p>
+
+<h2 id="implementating-the-scoring">Implementating the scoring</h2>
+
+<p>Pretty interestingly, the code to implement the scoring of a Bowling game (which is the focus of the original <a href="http://codingdojo.org/kata/Bowling/">Bowling Kata</a>) ends up being shorter than the code needed to implement the rigorous type safety.</p>
+
+<h3 id="view-a-series-of-rolls">View: a series of rolls</h3>
+
+<p>To solve the puzzle elegantly, we need two views on our data: one as a sequence of frames and one as a sequence of rolls. The latter will be used when dealing with strikes and spares.</p>
+
+<p>We therefore need a function gameRolls to transform our game to a list of rolls:</p>
+
+<pre><code class="language-haskell">knockedPins : Frame -&gt; List Nat
+knockedPins (TwoRolls x y) = [x, y]
+knockedPins Strike = [PinCount]
+
+gameRolls : BowlingGame -&gt; List Nat
+gameRolls (MkBowlingGame frames bonuses) =
+  concatMap knockedPins frames ++ toList (map finToNat bonuses)
+</code></pre>
+
+<p>Aside from being helpful for the computation of the score, this function is useful in a more general context. We illustrate how it behaves below:</p>
+
+<pre><code class="language-haskell">gameRolls $ MkBowlingGame (replicate 10 (roll 5 5)) [9]
+[5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9] : List Nat
+</code></pre>
+
+<h3 id="scoring-a-game">Scoring a game</h3>
+
+<p>Implementing the score function makes use of both our frames-based view and our rolls-based view. We recur on both these view at the same time, dropping one frame and one or two rolls at each iteration.</p>
+
+<pre><code class="language-haskell">score' : Nat -&gt; Vect n Frame -&gt; List Nat -&gt; Nat
+score' current [] _ = current
+score' current (f :: fs) rolls =
+  let frameRollNb = length (knockedPins f)      -- Nb of rolls in the frame
+      scoreRollNb = frameRollNb + bonusRolls f  -- Nb of rolls to sum
+      frameScore = sum (take scoreRollNb rolls) -- Sum of the rolls to sum
+  in score'                       -- Recur:
+       (current + frameScore)     -- Add the frame score to the current score
+       fs                         -- Advance the the next frame
+       (drop frameRollNb rolls)   -- Advance to the next rolls
+
+score : BowlingGame -&gt; Nat
+score game@(MkBowlingGame frames bonus) = score' 0 frames (gameRolls game)
+</code></pre>
+
+<p>We can check that our code works correctly by implementing a series of unit tests. I only listed two of them below:</p>
+
+<pre><code class="language-haskell">should_be_300_for_perfect_game : IO ()
+should_be_300_for_perfect_game =
+  assertEq 300 $ score $ MkBowlingGame (replicate 10 strike) [10, 10]
+
+should_be_150_for_5_pins_only_game : IO ()
+should_be_150_for_5_pins_only_game =
+  assertEq 150 $ score $ MkBowlingGame (replicate 10 (roll 5 5)) [5]
+</code></pre>
+
+<p>Note that we did not have to perform any defensive checks in our scoring function. Our type-safety has already got rid of any kind of badly formed inputs. The code instead focuses on the <strong>nominal case</strong>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Using Idris, we managed to build a type-safe variant of the <a href="http://codingdojo.org/kata/Bowling/">Bowling Kata</a>, making sure than invalid Bowling games are not representable. The full code is available in this <a href="https://github.com/QuentinDuval/IdrisBowlingKata/tree/master">GitHub repo</a>, in the file <a href="https://github.com/QuentinDuval/IdrisBowlingKata/blob/master/Bowling.idr">Bowling.idr</a>.</p>
+
+<p>Now let’s take a step back.</p>
+
+<h3 id="the-good-parts">The good parts</h3>
+
+<p>Idris allows to check quite complex properties at the type level. These properties can capture quite a lot of our <strong>domain invariants</strong>.</p>
+
+<p>Where most type systems are limited to single argument or field validity, Idris is not. We can use this ability to ensure lots of invariants, and not only the most trivial ones (as type systems such as the one of Java do).</p>
+
+<p>Also, since Idris blurs the limit between the type system and run-time values, our work at the type level can often be reused in our run-time code. For instance, <code>bonusRolls</code> is used to both compute the score and the type of the vector holding the bonus rolls.</p>
+
+<h3 id="the-price-to-pay">The price to pay</h3>
+
+<p>First, we have to pay long <strong>compilation times</strong>. The simple module here takes several seconds to compile on my laptop. And I could observe things getter slower as I added more properties on the bowling game types.</p>
+
+<p>The second issue is the cost of dependent typing in terms of <strong>flexibility</strong>. The scoring is so coupled to the notion of valid game that we cannot use it to compute the intermediary scores anymore (the bowling kata does not deal with intermediary score either).</p>
+
+<p>Finally, and for all cases in which the inputs are coming from the real world (like a bowling game inputs), making invalid states not representables does not dispense us to implement the run-time checks of validity of our inputs (*). Dependent types however make sure that these checks take place.</p>
+
+<p><em>(*) These run-times checks will differ from the usual run-time checks in that they will have to provide a proof. A simple boolean will not do.</em></p>
+
+<h3 id="strong-typing-is-not-for-everything">Strong typing is not for everything</h3>
+
+<p>Due to the additional efforts needed and the potential inflexibility implied by that much type safety, a valid question is whether or not dependent typing is worth it.</p>
+
+<p>Richard Eisenberg arguments about reserving them to the core business logic in this <a href="http://www.haskellcast.com/episode/014-richard-eisenberg-on-dependent-types-in-haskell">Haskell Cast</a>. It looks like a real good advice: dependent types are not for everything, abusing them certainly can lead to code that is unnecessarily rigid and more complex.</p>
+
+<p>The good news is that <strong>Idris does not forces us to dependently type everything</strong>. Ultimately, this is our responsibility to decide on the appropriate use of those features.</p>
+
+<h3 id="consider-alternatives">Consider alternatives</h3>
+
+<p>Last but not least, we should also note that there are other ways than dependent typing to get very strong type safety, some of these being less expensive. For instance, we could use <a href="https://wiki.haskell.org/Phantom_type">phantom types</a> to <strong>force a workflow</strong> in which we would validate our Bowling Game before scoring it.</p>
+
+<p>Overall, <strong>data-flow typed-enforced designs</strong> seem more appropriate for cases like the bowling game: we know that the inputs will come from the real world, we know they will require validation, so having a design that matches the real world acquisition process seems much more robust.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-07-01T00:00:00+00:00">July 1, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Idris+dependent+typing+challenge%3A+Bowling+Kata%20%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html&title=Idris+dependent+typing+challenge%3A+Bowling+Kata" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F07%2F01%2Fidris-bowling-kata.html&t=Idris dependent typing challenge: Bowling Kata" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/06/14/idris-improvements.html" title="10 things Idris improved over Haskell">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">10 things Idris improved over Haskell</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/07/06/hexagonal-architecture-free-monad.html" title="Hexagonal Architecture and Free Monad: Two related design patterns?">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Hexagonal Architecture and Free Monad: Two related design patterns?</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

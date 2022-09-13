@@ -1,0 +1,785 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Meetup Report: The philosophy of FP - Double Ended Queue</title>
+<meta name="description" content="My meetup report on a talk by Arnaud Lemaire introducing the philosophy behind functional programming.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Meetup Report: The philosophy of FP">
+<meta property="og:url" content="/blog/2016/12/20/fp-meetup-report.html">
+
+
+  <meta property="og:description" content="My meetup report on a talk by Arnaud Lemaire introducing the philosophy behind functional programming.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Meetup Report: The philosophy of FP">
+  <meta name="twitter:description" content="My meetup report on a talk by Arnaud Lemaire introducing the philosophy behind functional programming.">
+  <meta name="twitter:url" content="/blog/2016/12/20/fp-meetup-report.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-12-20T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2016/12/20/fp-meetup-report.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Meetup Report: The philosophy of FP">
+    <meta itemprop="description" content="My meetup report on a talk by Arnaud Lemaire introducing the philosophy behind functional programming.">
+    <meta itemprop="datePublished" content="2016-12-20T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Meetup Report: The philosophy of FP
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2016-12-20T00:00:00+00:00">December 20, 2016</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html&text=Meetup+Report%3A+The+philosophy+of+FP&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2016/12/20/fp-meetup-report.html&title=Meetup Report: The philosophy of FP"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2016/12/20/fp-meetup-report.html&t=Meetup Report: The philosophy of FP">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#what-is-a-state">What is a state?</a></li><li><a href="#what-are-pure-functions">What are pure functions?</a></li><li><a href="#objects-and-closures">Objects and closures</a></li><li><a href="#on-type-systems">On type systems</a></li><li><a href="#pattern-matching-and-polymorphism">Pattern matching and Polymorphism</a></li><li><a href="#practical-advices">Practical advices</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>Yesterday, I attended a <a href="https://www.meetup.com/Crafting-Software/events/236062267/">meetup</a> at <a href="http://www.arolla.fr/">Arolla</a>, where Arnaud LEMAIRE (<a href="https://twitter.com/Lilobase">@lilobase</a>) did a wonderful talk on the philosophy of Functional Programming. You can find the slides of the presentation <a href="https://speakerdeck.com/lilobase/philosophie-fonctionnelle-meetup-craftingsw-paris-2016">here</a>.</p>
+
+<p>The presentation was an introduction to the concepts behind Functional Programming. It went over the pillars of FP, before concluding with practical advices on how to use this knowledge in our (most probably object-oriented) code base.</p>
+
+<p>Arnaud summarized complex ideas into simple definitions and managed to find analogies and make interesting parallels that made these concepts easily understandable.  So I thought it would be a good idea to write down here what notes I took, and share it with you in this post.</p>
+
+<h2 id="what-is-a-state">What is a state?</h2>
+
+<p>The result of combining a value with time. This is how you get variables and overall, this is a good recipe to get bugs.</p>
+
+<p>The functional paradigm language is about getting rid of (or more realistically controling) this complexity by getting rid of time (or more realistically introducing an <strong>explicit model of time</strong>), and play with immutable values instead. The trick is to avoid variables in large portion of our programs, and create new values for each <em>modification</em> we would do in imperative programming style.</p>
+
+<p>Creating these new values can be done very efficiently. Persistent data structures are based on structural sharing, the ability to re-use part of the old data value to construct the new one.</p>
+
+<p>But <strong>persistent data structures</strong> do not make the cost of creating new values disappear entirely. They do consume more memory than their respective counterparts. They also add indirections that may cost in terms of computation time. This cost can often be offset by the whole range of possible optimization they make possible in exchange. In particular:</p>
+
+<ul>
+  <li>Much easier use of parallel or distributed computations</li>
+  <li>No need to use defensive locking mechanisms</li>
+</ul>
+
+<h2 id="what-are-pure-functions">What are pure functions?</h2>
+
+<p>Pure functions can be seen as <strong>delayed values</strong>: they just miss some arguments to be able to deliver their value. Give them the same arguments twice, and they output the same value. This has important consequences:</p>
+
+<p><strong>Memoization</strong>: Instead of recomputing the values of a pure functions called with the same argument, we can keep the result in store for the next time it is called. Pure functions make caching almost trivial.</p>
+
+<p><strong>Lazy evaluation</strong>: We can emulate the lazy evaluation of languages like Haskell by wrapping a computation inside a lambda that takes no arguments. Forcing the computation is just calling that closure with no arguments.</p>
+
+<p><strong>First class functions</strong>: If functions are like values, there is no reason you could not manipulate them as values. In particular, it means having functions returning functions, and functions taking functions as parameters, both of which are called higher-order functions.</p>
+
+<h2 id="objects-and-closures">Objects and closures</h2>
+
+<p>OOP is based on smart data structures, classes that carry with them the functions that operate on them. Functional Programming is based on simpler data structures: functions that operate on the data structure are moved outside of it.</p>
+
+<p>The FP view makes for easier composition of functions, especially if you see the functions as transformation between two sets of values. Chaining functions becomes function composition, and can be done without utilizing side effects.</p>
+
+<p>Arnaud ended this sections with a wonderful comparison of Closure and Objects. He pointed out that <strong>Closures can be seen as the inverse of Objects</strong>:</p>
+
+<ul>
+  <li>Objects are data that carry some functions with them</li>
+  <li>Closures are functions that carry some data with them</li>
+</ul>
+
+<h2 id="on-type-systems">On type systems</h2>
+
+<p>Functional programming is usually based on structural typing, whereas Object Oriented Programming is usually based on nominative typing.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Structural_type_system">Structural typing</a> checks if types are equivalent by matching their structure. If two values have a similar structure, they can be considered of the same type.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Nominal_type_system">Nominative typing</a> checks if types are equivalent by matching their “name”. If two values have the name class name, they are considered of the same type.</p>
+
+<p>As an example of structural typing, if a coordinate is made of two doubles, and if a function expects a coordinate, providing it two doubles will work fine. In the case of nominative typing, this would not type-check: you would need an explicit coordinate data structure to be instantiated.</p>
+
+<p>Structural typing is more loose and flexible than nominative typing. It makes it easier to build generic functions that can apply on different data structures. But it comes at a price: nominative type systems are better at ensuring correctness of your program.</p>
+
+<p>In reality, this dichotomy is not as strict as it may sound. Some languages reinforce the structural typing by putting a name on the structure. This ensures the same correctness guaranty as nominative type systems, but provides a greater expressiveness.</p>
+
+<h2 id="pattern-matching-and-polymorphism">Pattern matching and Polymorphism</h2>
+
+<p>Pattern matching in Functional Programming can be seen as the opposite of polymorphism in Object Oriented Programming:</p>
+
+<ul>
+  <li>Interfaces in OOP are closed under the addition of new functions, but not on a addition of new types. The dispatch is based on the name of the type.</li>
+  <li>Algebraic data types are closed under addition of new types, but open in terms of addition of new functions. The dispatch is based on the structure.</li>
+</ul>
+
+<p>We can see there a reference to the <a href="https://en.wikipedia.org/wiki/Expression_problem">Expression Problem</a> coined by <a href="https://en.wikipedia.org/wiki/Philip_Wadler">Philip Wadler</a>. Both use cases exists: for example in Haskell, you can switch to <em>typeclasses</em> when you need to be open to new types and closed to new functions.</p>
+
+<p>This is why Arnaud talked about not being a zealot and advised against the strict segregation of paradigms.</p>
+
+<h2 id="practical-advices">Practical advices</h2>
+
+<p>The talk ended by a collection of practical advices for all of us that do not program into a natively functional programming language. These pieces of advice were especially useful since most of attendees did not have access to languages like Haskell or Clojure at their workplace:</p>
+
+<ul>
+  <li>Try to use immutability as much as you can: use const everywhere you possibly can. This will catch a lot of bugs.</li>
+  <li>Use algorithms like map, filter and reduce to avoid states in your looping constructs. It makes the code more declarative and less error prone.</li>
+  <li>Try to use Algebraic Data Types. They are available in most languages: JS, Python, <code>std::variant</code> in C++, etc.</li>
+  <li>To handle concurrency, try to rely on concepts like actors to avoid the synchronization nightmares (dead-lock and other performances issues).</li>
+  <li>Use concepts like Functional Core, Imperative Shell to make your business logic code as pure as possible.</li>
+</ul>
+
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2016-12-20T00:00:00+00:00">December 20, 2016</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Meetup+Report%3A+The+philosophy+of+FP%20%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html&title=Meetup+Report%3A+The+philosophy+of+FP" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2016%2F12%2F20%2Ffp-meetup-report.html&t=Meetup Report: The philosophy of FP" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2016/12/04/open-recursion-performance.html" title="Open Recursion (Performance)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Open Recursion (Performance)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2016/12/22/folding-merge-sort.html" title="Folding merge sort (Haskell)">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Folding merge sort (Haskell)</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

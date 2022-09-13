@@ -1,0 +1,948 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Lost in std::is_permutation complexity - Double Ended Queue</title>
+<meta name="description" content="This post is dedicated to an STL algorithm which caused me some serious performance issues at my first use of it: std::is_permutation.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Lost in std::is_permutation complexity">
+<meta property="og:url" content="/blog/2017/04/04/std-permuration-complexity.html">
+
+
+  <meta property="og:description" content="This post is dedicated to an STL algorithm which caused me some serious performance issues at my first use of it: std::is_permutation.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Lost in std::is_permutation complexity">
+  <meta name="twitter:description" content="This post is dedicated to an STL algorithm which caused me some serious performance issues at my first use of it: std::is_permutation.">
+  <meta name="twitter:url" content="/blog/2017/04/04/std-permuration-complexity.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-04-04T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/04/04/std-permuration-complexity.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Lost in std::is_permutation complexity">
+    <meta itemprop="description" content="This post is dedicated to an STL algorithm which caused me some serious performance issues at my first use of it: std::is_permutation.">
+    <meta itemprop="datePublished" content="2017-04-04T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Lost in std::is_permutation complexity
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-04-04T00:00:00+00:00">April 4, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html&text=Lost+in+std%3A%3Ais_permutation+complexity&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/04/04/std-permuration-complexity.html&title=Lost in std::is_permutation complexity"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/04/04/std-permuration-complexity.html&t=Lost in std::is_permutation complexity">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation-for-stdis_permutation">Motivation for std::is_permutation</a><ul><li><a href="#anagrams">Anagrams</a></li><li><a href="#equality-but-for-the-ordering">Equality but for the ordering</a></li></ul></li><li><a href="#testing-an-unstable-sort">Testing an unstable sort</a><ul><li><a href="#finding-a-good-property-to-check">Finding a good property to check</a></li><li><a href="#implementing-the-property">Implementing the property</a></li><li><a href="#generating-vectors">Generating vectors</a></li><li><a href="#generating-tuples">Generating tuples</a></li><li><a href="#composing-and-testing-our-generators">Composing and testing our generators</a></li><li><a href="#three-two-one-test">Three, two, one… test!</a></li></ul></li><li><a href="#hopelessly-inefficient-stdis_permutation">Hopelessly inefficient std::is_permutation</a><ul><li><a href="#quadratic-by-design">Quadratic by design</a></li><li><a href="#surprisingly-slow">Surprisingly slow</a></li><li><a href="#what-about-range-v3">What about Range-V3?</a></li></ul></li><li><a href="#some-possible-alternatives">Some possible alternatives</a><ul><li><a href="#potential-solutions">Potential solutions</a></li><li><a href="#drawbacks-of-the-alternatives">Drawbacks of the alternatives</a></li></ul></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next?</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>This post is dedicated to an STL algorithm I discovered only recently, and which caused me some serious performance issue at my first use of it: <code>std::is_permutation</code>.</p>
+
+<p>The algorithm appeared in the STL with C++11 and in principle is quite a useful one. It is however deeply penalized by its inefficiency, which make this algorithm almost impractical.</p>
+
+<p>In this post, we will first describe the algorithm itself and describe some of the use cases that makes it interesting in principle.</p>
+
+<p>Then we will talk a bit about my misadventure with it. This misadventure could have been avoided by reading the manual and not use <code>std::is_permutation</code> in the first place. But I suspect other might fall into the trap as well, for reasons that we will describe as well.</p>
+
+<p>We will conclude by discussing the design decision that makes this algorithm implementation inefficient by construction, and discuss some alternatives.</p>
+
+<h2 id="motivation-for-stdis_permutation">Motivation for std::is_permutation</h2>
+
+<p>From the the <a href="http://en.cppreference.com/w/cpp/algorithm/is_permutation">cppreference documentation</a>, <code>std::is_permutation</code> is an algorithm that takes two ranges as input. It indicates whether there exists a rearrangement of the elements that would make both ranges be equal. The equality criteria can be parameterized.</p>
+
+<h3 id="anagrams">Anagrams</h3>
+
+<p>The simplest use case for <code>std::is_permutation</code> would be to implement a function that would tell if two strings are anagrams of each others.</p>
+
+<p>An anagram is “the result of rearranging the letters of a word [..] to produce a new word [..], using all the original letters exactly once” (Wikipedia). This is a perfect match for <code>std::is_permutation</code>:</p>
+
+<pre><code class="language-cpp">bool is_anagram(std::string const&amp; lhs, std::string const&amp; rhs)
+{
+  return std::is_permutation(begin(lhs), end(lhs), begin(rhs), end(rhs));
+}
+</code></pre>
+
+<h3 id="equality-but-for-the-ordering">Equality but for the ordering</h3>
+
+<p>A more interesting use case of <code>std::is_permutation</code> is to check that two collections are equal but for the ordering. In other words, that they contain the exact same elements. This is a pretty <strong>common use case inside Unit Tests</strong>.</p>
+
+<p>For instance, we may want to test a function <code>eval_accounting_entries</code> that produces a vector of accounting entries for the current period. The contract says nothing about the order of the accounting entries produced.</p>
+
+<p>In order to avoid testing more than the actual contract of <code>eval_accounting_entries</code>, increasing the precision and resilience of our unit test, we could use <code>std::is_permutation</code> instead of <code>std::equal</code>.</p>
+
+<pre><code class="language-cpp">std::vector&lt;AccountingEntry&gt; expected = ...;
+std::vector&lt;AccountingEntry&gt; result = eval_accounting_entries(...);
+	
+ASSERT_TRUE(
+  std::is_permutation(
+    begin(expected), end(expected),
+    begin(result), end(result)));
+</code></pre>
+
+<p>This check of equality without the ordering might be useful as well inside a GUI. We might be interested in notifying some listening processes if the user modifies some accounting entries, but not if the modification is a simple rearrangement.</p>
+
+<h2 id="testing-an-unstable-sort">Testing an unstable sort</h2>
+
+<p>Time to describe my little misadventure. Let us say that we just implemented a new unstable sort algorithm and want to make sure that it is correct. How can we test that our implementation is bug free?</p>
+
+<p>We could do some example based tests for starter, before adding some Property Based Testing to increase our level of confidence. The plan is to:</p>
+
+<ul>
+  <li>Find a good invariant that, if it holds, proves the sort is correct</li>
+  <li>Generate a bunch of random vectors</li>
+  <li>Call our sort routine on each of these vectors</li>
+  <li>Check that the invariant hold on the outputs of the sort</li>
+</ul>
+
+<h3 id="finding-a-good-property-to-check">Finding a good property to check</h3>
+
+<p>If our sort was stable, we could check the result of our sort against <code>std::stable_sort</code>. That would make it a perfect property. But <strong>our sort is unstable</strong>. So we cannot compare it against a reference sort to prove that it works. Sure, <code>std::sort</code> is unstable too, but the unstable swaps do not have to be the same.</p>
+
+<p>Fortunately for us, sorting a collection is performing a permutation of the elements of a range such that the resulting order of the elements complies with the increasing order relative to some ordering relation R.</p>
+
+<p>It means that we can check that our unstable sort works fine by simply checking whether the resulting collection answers true to both <code>std::is_permutation</code> and <code>std::is_sorted</code>.</p>
+
+<h3 id="implementing-the-property">Implementing the property</h3>
+
+<p>We can port this definition into code. The <code>check_sort_property</code> function returns true if the result iterable is a correct sort of the input iterable:</p>
+
+<pre><code class="language-cpp">template&lt;typename InputIterable, typename ResultIterable, typename Less&gt;
+bool check_sort_property(InputIterable const&amp; input,
+                         ResultIterable const&amp; result,
+                         Less less)
+{
+  return
+    std::is_permutation(begin(input), end(input), begin(result), end(result))
+    &amp;&amp; std::is_sorted(begin(result), end(result), less);
+}
+
+template&lt;typename InputIterable, typename ResultIterable&gt;
+bool check_sort_property(InputIterable const&amp; input,
+                         ResultIterable const&amp; result)
+{
+  auto less = std::less&lt;typename InputIterable::value_type&gt;();
+  return check_sort_property(input, result, less);
+}
+</code></pre>
+
+<p><em>Note: Asserting that <code>std::is_sorted</code> returns true would not be enough: there could be missing elements. Asserting that the number of elements is the same would not be enough either: it could be the same element repeated as many time as needed. We really need the permutation check to ensure our sort works correctly.</em></p>
+
+<h3 id="generating-vectors">Generating vectors</h3>
+
+<p>We then need to generate random vectors to perform our tests. We define a function <code>make_vector_gen</code> that will return a lambda which we can call to generate random vectors for us.</p>
+
+<ul>
+  <li>The max_size allows us to parameterise how big the vector can be.</li>
+  <li>The value_generator allows us to generate the content of the vector</li>
+</ul>
+
+<p>With this small piece of code, we are able to generate random vectors made of random elements of any chosen type:</p>
+
+<pre><code class="language-cpp">template&lt;typename ValueGenerator&gt;
+auto make_vector_gen(int max_size, ValueGenerator value_generator)
+{
+  return [=](std::mt19937&amp; gen) {
+    std::uniform_int_distribution&lt;int&gt; distribution (0, max_size);
+    std::vector&lt;decltype(value_generator(gen))&gt; out(distribution(gen));
+    for (auto&amp; val: out) val = value_generator(gen);
+    return out;
+  };
+}
+</code></pre>
+
+<p><em>Note: alternatively, we could rely on <a href="https://github.com/emil-e/rapidcheck">RapidCheck</a>. This is the choice to make if it was production code. But as the generator is simple enough, we can do it by hand here.</em></p>
+
+<h3 id="generating-tuples">Generating tuples</h3>
+
+<p>To test our our sort on our random vector, we must first be able to generate some random elements inside our vector. We will settle for tuples of integers.</p>
+
+<p>Why tuples and not simple integers? The motivation is to test our sort routine with a “less” function that orders by the second value of the tuple. This will allow us to exercise the “unstable” part of our algorithm (sorting integers would show no differences between stable and unstable sorts).</p>
+
+<p>We design our tuple generator generically. The following code allows to generate arbitrarily large tuples, makes of arbitrarily chosen types:</p>
+
+<pre><code class="language-cpp">template&lt;typename... Generators&gt;
+auto make_tuple_gen(Generators... generators)
+{
+  return [=](std::mt19937&amp; gen)
+  {
+    return std::make_tuple(generators(gen)...);
+  };
+}
+</code></pre>
+
+<h3 id="composing-and-testing-our-generators">Composing and testing our generators</h3>
+
+<p>We now have the ability to generate vectors of tuples of arbitrary types. We can create a last generator of random integers:</p>
+
+<pre><code class="language-cpp">auto int_gen(int max_size) {
+  return [=](std::mt19937&amp; gen) -&gt; int {
+    std::uniform_int_distribution&lt;int&gt; distribution(0, max_size);
+    return distribution(gen);
+  };
+}
+</code></pre>
+
+<p>We can now easily combine all of our generators to create a vector of tuples of integers. We can quickly check that it behaves correctly:</p>
+
+<pre><code class="language-cpp">auto int_vector_gen = make_vector_gen(10, int_gen(1000));
+auto int_pair_gen = make_tuple_gen(int_gen(100), int_gen(1000));
+auto int_pair_vector_gen = make_vector_gen(20, int_pair_gen);
+
+// Example code
+std::mt19937 gen = ...;
+
+int_vector_gen(gen);
+//Outputs: [171,614,15,346,263,44]
+
+int_pair_vector_gen(gen);
+//Outputs: [(1, 280),(47, 218),(42, 867),(32, 119),(48, 396),(58, 82),(41, 576),(63, 108),(16, 108),(50, 216)]
+</code></pre>
+
+<h3 id="three-two-one-test">Three, two, one… test!</h3>
+
+<p>Everything is ready. We can now test that our <code>custom_sort</code> routine does its job correctly by running some random test inputs and check that our sort property always holds.</p>
+
+<p>Let us start small, with one single example of a vector holding up to 50,000 tuples of integers, which we will sort by their second component:</p>
+
+<pre><code class="language-cpp">auto int_pair_gen = make_tuple_gen(int_gen(100), int_gen(1000));
+auto inputs_gen = make_vector_gen(50000, int_pair_gen);
+auto less_on_second = ordering_by_index&lt;1&gt;();
+
+//Generate a vector of up to 50k elements
+auto input = inputs_gen(gen);
+
+//To test our sorting routine
+auto sorted = input;
+custom_sort(begin(sorted), end(sorted), less_on_second);
+
+//Check the property of unstable sort
+check_sort_property(input, sorted, less_on_second);
+</code></pre>
+
+<p>Now, this is where it hurts. Depending on the generating inputs:</p>
+
+<ul>
+  <li>The actual sorting lasts less than 1 milliseconds</li>
+  <li>The property check might last more than 500 milliseconds</li>
+</ul>
+
+<p>So much for the fast feedback of unit tests… With 100 test samples (the default of most property based testing libraries), we have to wait almost a minute to get some feedback. What is happening?</p>
+
+<h2 id="hopelessly-inefficient-stdis_permutation">Hopelessly inefficient std::is_permutation</h2>
+
+<p>The reason why the property check is so slow is because the implementation of <code>std::is_permutation</code> has worst case quadratic complexity. This behaviour is documented in both <a href="http://www.cplusplus.com/reference/algorithm/is_permutation/">cplusplus.com</a> and <a href="http://en.cppreference.com/w/cpp/algorithm/is_permutation">en.cppreference.com</a>.</p>
+
+<p><em>Note: obviously, I should have read the manual. But had I read the manual, I would have chosen not to use <code>std::is_permutation</code>. This is not very satisfactory.</em></p>
+
+<h3 id="quadratic-by-design">Quadratic by design</h3>
+
+<p>Given the definition of the <code>std::is_permutation</code> algorithm, there is no other way it could be better. Having only access to an equality predicate, the algorithm cannot do much better than trying (in the worse case) all the combinations.</p>
+
+<p>By asking for a little more than an equality predicate, it could do a much better job. We will explore such alternatives later in the post.</p>
+
+<h3 id="surprisingly-slow">Surprisingly slow</h3>
+
+<p>Most algorithm design courses teach us that quadratic complexity is something we should not accept unless we have no other choice (*). The big problem here is that there are much more efficient algorithms available for us to check for <code>std::is_permutation</code>.</p>
+
+<p>Most developers do know about these better algorithms, as they are frequently asked as interview questions. This makes the quadratic implementation of <code>std::is_permutation</code> <strong>counter-intuitively slow</strong>, increasing the the chance of introducing a performance issue in the software.</p>
+
+<p><em>(*): The rationale is that quadratic algorithms do not scale. Linear algorithms scale with the hardware. Throwing a multiplicative logarithm does not change this result that much: with twice as much as resources, such algorithm can handle nearly twice as big inputs.</em></p>
+
+<h3 id="what-about-range-v3">What about Range-V3?</h3>
+
+<p><a href="https://github.com/ericniebler/range-v3">Range V3</a> seems to follow the same algorithm as the one used for std::is_permutation. It also implements a quadratic algorithm to do the job. You can have a look at <a href="https://github.com/ericniebler/range-v3/blob/master/include/range/v3/algorithm/permutation.hpp">permutation.hpp</a> and read the code by yourself.</p>
+
+<h2 id="some-possible-alternatives">Some possible alternatives</h2>
+
+<p>There are plenty of alternatives to implement <code>std::is_permutation</code> much more efficiently. Which alternative to select depends on the concepts available on the type inside the iterables provided to <code>std::is_permutation</code>.</p>
+
+<h3 id="potential-solutions">Potential solutions</h3>
+
+<p>We list below some of these most obvious algorithms we could use to implement <code>std::is_permutation</code>, in decreasing order of preference:</p>
+
+<p>For types with <strong>few inhabitants</strong>, like char, we can number each inhabitant. We can create an array, indexed by each inhabitant, and count the number of characters for both strings. We then check that the number of occurrences of each character is the same in both strings. The resulting algorithm is <strong>O(N)</strong>.</p>
+
+<p>For types with <strong>hash functions</strong>, we can follow the same principle, but with a hash map. We count the frequency of each term in each collection and compare the result. We then check if the keys and their associated values (the number of occurrences of the key) match in both hash maps. The resulting algorithm is slower, but still <strong>O(N)</strong>.</p>
+
+<p>For types with a <strong>strict total ordering</strong>, we can sort both collections and compare them for equality. If their size differ, we can early return with a negative answer. We can also sort one of the collection, and binary search each element of the other collection in it (the usual trick is to <strong>sort the smallest collection</strong>), but that would require all elements to be unique in order to work. The resulting algorithm is <strong>O(N * log N)</strong> in both cases.</p>
+
+<h3 id="drawbacks-of-the-alternatives">Drawbacks of the alternatives</h3>
+
+<p>Each of these alternative solutions are much faster than the <code>std::is_permutation</code> current implementation. They will scale properly.</p>
+
+<p>The problem with each of these algorithms is that they require extra memory to perform their work. The first two alternatives requires either an array or an hash map, and the last one will have to create a vector to avoid mutating its inputs (and also, binary search requires a random access container to be efficient, which is not a given).</p>
+
+<p>One additional problem with each of these algorithms is that they ask for more than the standard <strong>Regular Type</strong> requirements on which the STL is based. On the other side, the <code>std::is_permutation</code> implementation is perfectly satisfied by the Regular Type requirements.</p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next?</h2>
+
+<p>We went over a use case that show how penalising the quadratic algorithmic complexity of <code>std::is_permutation</code> can be. We discussed why the algorithm could not be made better with the requirements it makes on the types contained in the ranges it takes as inputs.</p>
+
+<p>We went over some alternative, in which the algorithm complexity could be vastly improved by requiring just a bit more on the types manipulated inside the algorithm.</p>
+
+<p>The next post will discuss a bit more these additional requirements and whether they can be justified as basic assumption on types manipulated by the STL algorithms.</p>
+
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-04-04T00:00:00+00:00">April 4, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Lost+in+std%3A%3Ais_permutation+complexity%20%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html&title=Lost+in+std%3A%3Ais_permutation+complexity" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F04%2F04%2Fstd-permuration-complexity.html&t=Lost in std::is_permutation complexity" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/03/31/paramorph-dsl-cpp.html" title="Paramorph your DSL (C++)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Paramorph your DSL (C++)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/04/10/std-permuration-complexity-2.html" title="How to improve std::is_permutation complexity">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">How to improve std::is_permutation complexity</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

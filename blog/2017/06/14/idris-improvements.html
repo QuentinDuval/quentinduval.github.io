@@ -1,0 +1,1023 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>10 things Idris improved over Haskell - Double Ended Queue</title>
+<meta name="description" content="The 1.0.0 of Idris has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="10 things Idris improved over Haskell">
+<meta property="og:url" content="/blog/2017/06/14/idris-improvements.html">
+
+
+  <meta property="og:description" content="The 1.0.0 of Idris has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="10 things Idris improved over Haskell">
+  <meta name="twitter:description" content="The 1.0.0 of Idris has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers">
+  <meta name="twitter:url" content="/blog/2017/06/14/idris-improvements.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-06-14T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/06/14/idris-improvements.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="10 things Idris improved over Haskell">
+    <meta itemprop="description" content="The 1.0.0 of Idris has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers">
+    <meta itemprop="datePublished" content="2017-06-14T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">10 things Idris improved over Haskell
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-06-14T00:00:00+00:00">June 14, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html&text=10+things+Idris+improved+over+Haskell&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/06/14/idris-improvements.html&title=10 things Idris improved over Haskell"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/06/14/idris-improvements.html&t=10 things Idris improved over Haskell">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#1-idris-strings-are-not-lists">1) Idris strings are not lists</a></li><li><a href="#2-overloading-without-type-classes">2) Overloading without Type Classes</a></li><li><a href="#3-record-fields-are-namespaced">3) Record fields are namespaced</a></li><li><a href="#4-record-update-and-access-syntax">4) Record update and access syntax</a></li><li><a href="#5-monad-and-functor-got-fixed">5) Monad and Functor got fixed</a></li><li><a href="#6-laziness-is-opt-in-not-opt-out">6) Laziness is opt-in, not opt-out</a></li><li><a href="#7-a-smaller-num-class">7) A smaller Num class</a></li><li><a href="#8-the-cast-type-class">8) The Cast type class</a></li><li><a href="#9-clear-separation-of-evaluation-and-execution">9) Clear separation of evaluation and execution</a></li><li><a href="#10-the-do-notation-without-monads">10) The Do-notation without Monads</a></li><li><a href="#conclusion">Conclusion</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>The <a href="https://www.idris-lang.org/idris-1-0-released/">1.0.0 of Idris</a> has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers.</p>
+
+<p>But this post is not about dependent typing. There is already a really good book that came out this year, named <a href="https://www.manning.com/books/type-driven-development-with-idris">Type Driven Development with Idris</a>, exploring the benefits (and trade-offs) of dependent typing. I highly recommend you to read it.</p>
+
+<p>Instead, this post describes some of the pleasant surprises you get trying out Idris, coming from the Haskell world. These pleasant surprises have nothing to do with the dependent typing features. They are simple yet impacting modifications, which improve the developer experience substantially.</p>
+
+<p>I listed my top 10 in the hope they will convince you to give a try at Idris.</p>
+
+<h2 id="1-idris-strings-are-not-lists">1) Idris strings are not lists</h2>
+
+<p>It does not seem like much, but Haskell Strings are such a pain to deal with, that this improvement got the first place.</p>
+
+<p>Haskell String are lists of characters. This big mistake in terms of efficiency is corrected by two very good packages: <a href="https://hackage.haskell.org/package/text-1.2.2.2/docs/Data-Text.html">Data.Text</a> and <a href="https://hackage.haskell.org/package/bytestring-0.10.8.1/docs/Data-ByteString.html">Data.ByteString</a>. Nevertheless, this is still a source of pain and accidental complexity:</p>
+
+<ul>
+  <li>Newcomers to Haskell almost always face the inefficiency of Strings</li>
+  <li>Strings are not first class, and forces use the <a href="https://ocharles.org.uk/blog/posts/2014-12-17-overloaded-strings.html">Overloaded Strings</a> extension</li>
+  <li>The code gets obscured by successive by pack and unpack calls</li>
+</ul>
+
+<p>Idris learned from the mistakes of Haskell and made Strings first class. You can call pack and unpack strings to go back an forth to a List Char representation. This is illustrated by this simplistic implementation of the <a href="https://deque.blog/2017/06/14/10-things-idris-improved-over-haskell/caesar%20cipher">caesar cipher</a> algorithm:</p>
+
+<pre><code class="language-haskell">caesar_cipher : Int -&gt; String -&gt; String
+caesar_cipher shift input =
+  let cipher = chr . (+ shift) . ord
+  in pack $ map cipher (unpack input)
+
+caesar_cipher 1 "abc"
+=&gt; "bcd"
+
+caesar_cipher 0 "abc"
+=&gt; "abc"
+</code></pre>
+
+<h2 id="2-overloading-without-type-classes">2) Overloading without Type Classes</h2>
+
+<p>Overloading of function has also been a subject of numerous complains in the Haskell community. Of course, we can workaround the issue by using Type Classes, but this has some drawbacks as well.</p>
+
+<p>Idris learned from these complains as well, and offers a kind of overloading. You can import the same name from different modules and Idris will not care, as long as it can deduce which one to use.</p>
+
+<p>Even better, Idris introduce the notion of <strong>namespace</strong>, that we can use inside a module to introduce overloads. For instance, we can create a plus operator that works for both scalars and lists in the same module.</p>
+
+<pre><code class="language-haskell">infixr 5 +.
+
+namespace Scalar
+  (+.) : Int -&gt; Int -&gt; Int
+  x +. y = x + y
+
+namespace Vector
+  (+.) : List Int -&gt; List Int -&gt; List Int
+  xs +. ys = zipWith (+) xs ys
+</code></pre>
+
+<p>As long as Idris can deduce which overload to use, the developer does not have to prefix the symbol with the namespace:</p>
+
+<pre><code class="language-haskell">3 +. 5
+=&gt; 8 : Int
+
+[1, 2, 3] +. [4, 5]
+=&gt; [5, 7] : List Int
+</code></pre>
+
+<p>This is a very nice improvement over Haskell rules that forbid any kind of overloading, and has nice benefits on the code:</p>
+
+<ul>
+  <li>It improves composability of software (by limiting conflicts of names)</li>
+  <li>It avoids using awkward operators to avoid ones used by other libraries</li>
+  <li>It remains safe and clear, by supporting explicit namespace prefix</li>
+</ul>
+
+<h2 id="3-record-fields-are-namespaced">3) Record fields are namespaced</h2>
+
+<p>The notion of namespace of Idris really shines when it comes to records. The fields of a record live in the namespace of their respective record. The net effect is that they do not collide with the names of the other records as they do in Haskell.</p>
+
+<p>So we can have several records with the same field name. For instance, we define below an <code>Account</code> and <code>Customer</code> record, each having an <code>address</code> field:</p>
+
+<pre><code class="language-haskell">record Account where
+  constructor MkAccount
+  accound_id : String
+  address : String
+
+record Customer where
+  constructor MkCustomer
+  name : String
+  address : String
+  account : Account
+</code></pre>
+
+<p>As for the overloading rules and namespace, Idris will try to infer which function is being referred to when using the name <code>address</code>. Most often, the developer does not have to provide any hint.</p>
+
+<p>Here is an example of function that uses both the customer address and account address to check if they both match:</p>
+
+<pre><code class="language-haskell">custom_billing_account : Customer -&gt; Bool
+custom_billing_account customer =
+  address customer /= address (account customer)
+</code></pre>
+
+<p>This type-checks correctly. In case of ambiguous calls, you can always add the namespace as prefix to help Idris figuring your intent:</p>
+
+<pre><code class="language-haskell">custom_billing_account : Customer -&gt; Bool
+custom_billing_account customer =
+  Customer.address customer /= Account.address (account customer)
+</code></pre>
+
+<h2 id="4-record-update-and-access-syntax">4) Record update and access syntax</h2>
+
+<p>Updating values in nested record does come at the cost of verbosity in Haskell. There are packages that help navigating data structure, such as lenses, but a lot of Haskell users recognise it as a pretty big dependency.</p>
+
+<p>Idris offers a lighter update syntax for the fields of nested records. We can update the address of the account of a customer that way:</p>
+
+<pre><code class="language-haskell">update_billing_address : Customer -&gt; String -&gt; Customer
+update_billing_address customer address =
+  record { account-&gt;address = address } customer
+</code></pre>
+
+<p>Idris also offers the possibility to apply a function over a field in a nested records. For instance, we can complete (by concatenation) the address of the account of the customer with <code>$=</code>:</p>
+
+<pre><code class="language-haskell">concat_billing_address : Customer -&gt; String -&gt; Customer
+concat_billing_address customer complement =
+  record { account-&gt;address $= (++ complement) } customer
+</code></pre>
+
+<p>We can try both our previous function in the REPL to convince ourselves that they work properly (and they do):</p>
+
+<pre><code class="language-haskell">john : Customer
+john = MkCustomer "John" "NYC" (MkAccount "123" "NYC")
+
+update_billing_address john " LND"
+=&gt; MkCustomer "John" "NYC" (MkAccount "123" "LND") : Customer
+
+concat_billing_address john " LND"
+=&gt; MkCustomer "John" "NYC" (MkAccount "123" "NYC LND") : Customer
+</code></pre>
+
+<p>This does not replace the need for lenses (which are much more general). But it is nice to count of some basic support in core Idris when we do not need that much power.</p>
+
+<h2 id="5-monad-and-functor-got-fixed">5) Monad and Functor got fixed</h2>
+
+<p>The Haskell Monad <code>return</code> is absent of Idris, and so is the fail method, which most Haskell developers recognise as being a design mistake.</p>
+
+<p>In Idris, Monad extends the <code>Applicative</code> (as it does now in Haskell, but did not for quite a long time) and so <code>pure</code> makes sure that <code>return</code> is not needed. Since the naming was conflicting with the <em>return statement</em> of many programming languages, this is one less distinction to explain to newcomers to Idris when compared to Haskell.</p>
+
+<p>You can also notice the presence of <code>join</code> in the interface of the Monad, allowing to define whichever of <code>bind</code> or <code>join</code> is more intuitive depending on the Monad instance:</p>
+
+<pre><code class="language-haskell">Idris&gt; :doc Monad
+Interface Monad
+
+Parameters:
+    m
+
+Constraints:
+    Applicative m
+
+Methods:
+    (&gt;&gt;=) : Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+    join : Monad m =&gt; m (m a) -&gt; m a
+</code></pre>
+
+<p>Looking at the <code>Functor</code> type class, <code>fmap</code> is renamed <code>map</code> in Idris. This also improves over Haskell, by avoiding the awkward explanation to newcomers to Haskell of why map is in fact named fmap for legacy reasons:</p>
+
+<pre><code class="language-haskell">Idris&gt; :t map
+map : Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</code></pre>
+
+<h2 id="6-laziness-is-opt-in-not-opt-out">6) Laziness is opt-in, not opt-out</h2>
+
+<p>There are plenty of good reasons for laziness, there is no denying it. Reading the amazing <a href="https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf">Why Functional Programming matters</a> shows how much it helps modularising and decoupling our software, by allowing the separation of processes producing data from the one consuming it.</p>
+
+<p>But there are plenty of drawbacks to laziness as well. Some are technical (space leaks) and some are psychological (non strict evaluation is not intuitive when coming from other languages).</p>
+
+<p>A bit like Clojure and other FP languages did before, Idris embraces opt-in laziness, with a strict evaluation by default. Streams are the lazy equivalent of Lists and the language features both. You can notice the different pretty easily, when playing with infinite and finite ranges:</p>
+
+<pre><code class="language-haskell">Idris&gt; :t [1 .. 10]
+enumFromTo 1 10 : List Integer
+
+Idris&gt; :t [1 ..]
+enumFrom 1 : Stream Integer
+</code></pre>
+
+<h2 id="7-a-smaller-num-class">7) A smaller Num class</h2>
+
+<p>For all of those who likes to play with DSL in Haskell, the fact that the <a href="http://hackage.haskell.org/package/base-4.9.1.0/docs/Prelude.html#t:Num">Haskell Num class</a> is split into smaller bits in Idris is a small but nevertheless enjoyable improvement:</p>
+
+<pre><code class="language-haskell">Idris&gt; :doc Num
+Interface Num
+    The Num interface defines basic numerical arithmetic.
+
+Parameters:
+    ty
+
+Methods:
+    (+) : Num ty =&gt; ty -&gt; ty -&gt; ty
+    (*) : Num ty =&gt; ty -&gt; ty -&gt; ty
+    fromInteger : Num ty =&gt; Integer -&gt; ty
+
+Child interfaces:
+    Integral ty
+    Fractional ty
+    Neg ty
+</code></pre>
+
+<p>The Haskell version often leads to dummy implementations of the <code>negate</code>, <code>abs</code> or <code>signum</code> methods. This should not occur anymore in the Idris version of the <code>Num</code> class.</p>
+
+<h2 id="8-the-cast-type-class">8) The Cast type class</h2>
+
+<p>Idris removed the <code>Read</code> type class and replaces it with the more general <code>Cast</code> type class. The <code>Read</code> type class allowed to parse a String into a type <code>a</code>, effectively a transformation from a String to any other type. The <code>Cast</code> class is parameterized on the input type as well, allowing to transform between any two types implementing the type class.</p>
+
+<pre><code class="language-haskell">Idris&gt; :doc Cast
+Interface Cast
+    Interface for transforming an instance of a data type to another type.
+
+Parameters:
+    from, to
+
+Methods:
+    cast : Cast from to =&gt; (orig : from) -&gt; to
+</code></pre>
+
+<p>We can read a string into an integer like follows (you can note that reading an invalid string returns a default value instead of throwing an exception):</p>
+
+<pre><code class="language-haskell">the Int (cast "abc")
+=&gt; 0 : Int
+
+the Int (cast "123")
+=&gt; 123 : Int
+</code></pre>
+
+<p>The generalisation allows to avoid the multiplication of functions to convert between the numeric types. For instance, we can use it to convert (with losses) a double into an integer value:</p>
+
+<pre><code class="language-haskell">the Int (cast 1.1)
+=&gt; 1.0 : Int
+</code></pre>
+
+<h2 id="9-clear-separation-of-evaluation-and-execution">9) Clear separation of evaluation and execution</h2>
+
+<p>Let us write a simple function that reads the input from the command line, interprets it as a number, double this number, before printing it on the screen:</p>
+
+<pre><code class="language-haskell">double_it : IO ()
+double_it = do
+  input &lt;- getLine
+  let n = the Int (cast input)
+  printLn (n * 2)
+</code></pre>
+
+<p>If you evaluate a call to this function in the Idris REPL, you will get the following big pile of Abstract Syntax Tree, which correspond to the recipe to execute the IO expression described by <code>double_it</code>:</p>
+
+<pre><code class="language-haskell">[*src/InOut&gt; double_it
+io_bind (io_bind prim_read
+                 (\x =&gt;
+                    io_pure (prim__strRev (with block in Prelude.Interactive.getLine', trimNL (MkFFI C_Types String String)
+                                                                                              (prim__strRev x)
+                                                                                              (with block in Prelude.Strings.strM (prim__strRev x)
+                                                                                                                                  (Decidable.Equality.Bool implementation of Decidable.Equality.DecEq, method decEq (not (intToBool (prim__eqString (prim__strRev x)
+                                                                                                                                                                                                                                                    "")))
+                                                                                                                                                                                                                    True))))))
+        (\input =&gt;
+           io_bind (prim_write (prim__concat (prim__toStrInt (prim__mulInt (prim__fromStrInt input) 2)) "\n"))
+                   (\__bindx =&gt; io_pure ())) : IO ()
+</code></pre>
+
+<p>To execute the function and not just evaluate it, you need to say so explicitly, by using :exec as prefix to the expression to execute:</p>
+
+<pre><code class="language-haskell">[*src/InOut&gt; :exec double_it
+123 -- My input
+246 -- Output
+</code></pre>
+
+<p>Why considering this an improvement over Haskell. If you are a Lisp adept, you can but appreciate the <strong>reification</strong> of the <code>IO</code> actions into a proper AST. It may just be personal taste, but I just love it.</p>
+
+<h2 id="10-the-do-notation-without-monads">10) The Do-notation without Monads</h2>
+
+<p>I kept the best part of Idris for the last. Before of its support for overloading, Idris allows the developer to define a bind operator out of the Monad class, and the <code>do</code> notation is based on the sole presence of this operator.</p>
+
+<p>This is truly an awesome idea. It allows the developer to profit from the nice syntax of the do notation, without having to comply to the interface of the Monad <code>bind</code> operator.</p>
+
+<ul>
+  <li>It avoids forcing awkward design just to fit the Monad type class requirements</li>
+  <li>It opens up the notation for numerous types that could not be made proper instance of Functor, Applicative or Monad, because they are not parameterised</li>
+  <li>It allows to keep the do notation for dependent types, which much rarely conform to the interface of Monad</li>
+</ul>
+
+<p>It also allows us to abuse even more the do notation. More power means more changes to do horrors as well. Here is an example of abuse that shows that we do not even need a parameterized type for the do notation anymore:</p>
+
+<ul>
+  <li>It describes a not very useful StringBuilder DSL</li>
+  <li>Evaluating an expression of this DSL with <code>eval_string</code> yields a String</li>
+  <li>Defining the bind operator allows us to describe our DSL expression with do</li>
+</ul>
+
+<pre><code class="language-haskell">data StringBuilder
+  = Pure String
+  | (&gt;&gt;=) StringBuilder (String -&gt; StringBuilder)
+
+eval_string : StringBuilder -&gt; String
+eval_string (Pure s) = s
+eval_string (x &gt;&gt;= f) = eval_string (f (eval_string x))
+</code></pre>
+
+<p>Here is an example of usage of this DSL, in which we create an StringBuilder expression named john, using our beloved and dreaded do notation:</p>
+
+<pre><code class="language-haskell">build_john : StringBuilder
+build_john = do
+  john &lt;- Pure "John"
+  let john_doe = john ++ " Doe" ++ concat (replicate 10 "!")
+  Pure john_doe
+</code></pre>
+
+<p>Evaluating our StringBuilder expression shows us the AST, and calling <code>eval_string</code> on it interprets it as a String:</p>
+
+<pre><code class="language-haskell">[*src/DoNotation&gt; build_john
+Bind (Pure "John") (\john =&gt; Pure (prim__concat john " Doe!!!!!!!!!!")) : StringBuilder
+
+[*src/DoNotation&gt; eval_string build_john
+"John Doe!!!!!!!!!!" : String
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Idris offers some pleasant surprises for the Haskell programmers, even without considering the dependent typing support. There are many other pleasant surprises I got, such as the distinction between <code>print</code> and <code>printLn</code>, which is now aligned with <code>putStr</code> and <code>putStrLn</code>, and many others.</p>
+
+<p>These changes mostly show how helpful it is to be able to start all over again from scratch and fixing these pesky mistakes we did at the beginning.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-06-14T00:00:00+00:00">June 14, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=10+things+Idris+improved+over+Haskell%20%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html&title=10+things+Idris+improved+over+Haskell" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F06%2F14%2Fidris-improvements.html&t=10 things Idris improved over Haskell" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/04/14/std-permuration-complexity-3.html" title="Lost in std::is_permutation complexity (reddit answer)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Lost in std::is_permutation complexity (reddit answer)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/07/01/idris-bowling-kata.html" title="Idris dependent typing challenge: Bowling Kata">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Idris dependent typing challenge: Bowling Kata</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

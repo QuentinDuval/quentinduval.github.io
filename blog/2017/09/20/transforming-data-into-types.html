@@ -1,0 +1,1089 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Transforming data structures into types: an introduction to dependent typing and its benefits - Double Ended Queue</title>
+<meta name="description" content="A showcase of how dependent typing can help both to increase type-safety and reduce to zero the cost of change when introducing type-safety in legacy code.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Transforming data structures into types: an introduction to dependent typing and its benefits">
+<meta property="og:url" content="/blog/2017/09/20/transforming-data-into-types.html">
+
+
+  <meta property="og:description" content="A showcase of how dependent typing can help both to increase type-safety and reduce to zero the cost of change when introducing type-safety in legacy code.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Transforming data structures into types: an introduction to dependent typing and its benefits">
+  <meta name="twitter:description" content="A showcase of how dependent typing can help both to increase type-safety and reduce to zero the cost of change when introducing type-safety in legacy code.">
+  <meta name="twitter:url" content="/blog/2017/09/20/transforming-data-into-types.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-09-20T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/09/20/transforming-data-into-types.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Transforming data structures into types: an introduction to dependent typing and its benefits">
+    <meta itemprop="description" content="A showcase of how dependent typing can help both to increase type-safety and reduce to zero the cost of change when introducing type-safety in legacy code.">
+    <meta itemprop="datePublished" content="2017-09-20T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Transforming data structures into types: an introduction to dependent typing and its benefits
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-09-20T00:00:00+00:00">September 20, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html&text=Transforming+data+structures+into+types%3A+an+introduction+to+dependent+typing+and+its+benefits&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/09/20/transforming-data-into-types.html&title=Transforming data structures into types: an introduction to dependent typing and its benefits"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/09/20/transforming-data-into-types.html&t=Transforming data structures into types: an introduction to dependent typing and its benefits">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#the-adapted-test-case">The (adapted) test case</a><ul><li><a href="#whats-an-event">What’s an event?</a></li><li><a href="#requirements">Requirements</a></li></ul></li><li><a href="#first-catching-errors-at-runtime">First, catching errors at runtime</a><ul><li><a href="#message-specification">Message specification</a></li><li><a href="#event-definition">Event definition</a></li><li><a href="#pretty-printing-an-event">Pretty printing an event</a></li><li><a href="#interpolation-of-values">Interpolation of values</a></li><li><a href="#examples-of-interpolation">Examples of interpolation</a></li></ul></li><li><a href="#evaluating-the-costs">Evaluating the costs</a><ul><li><a href="#the-cost-of-implementation">The cost of implementation</a></li><li><a href="#the-cost-of-change">The cost of change</a></li></ul></li><li><a href="#now-with-compile-time-checks">Now, with compile time checks</a><ul><li><a href="#overall-design">Overall Design</a></li><li><a href="#how-we-will-proceed">How we will proceed</a></li><li><a href="#computing-types">Computing types</a></li><li><a href="#the-type-of-logevent">The type of logEvent</a></li><li><a href="#finishing-up-the-implementation">Finishing up the implementation</a></li></ul></li><li><a href="#conclusion">Conclusion</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>The <a href="https://www.idris-lang.org/idris-1-0-released/">1.0.0 of Idris</a> has been released just a few months back, just enough to start trying out the language and some of the possibilities dependent typing offers.</p>
+
+<p>Back in July, we implemented a <a href="/blog/2017/07/01/idris-bowling-kata.html">type safe bowling kata</a> in which we could not create a bowling game that would not satisfy the rules of the game. This was a show-off of the strong typing capabilities of <a href="https://en.wikipedia.org/wiki/Dependent_type">dependent types</a>.</p>
+
+<p>Today’s post is not a extensive show-off of the capabilities of Idris. Instead, it is inspired from a real and recent use case, in which I wish I had a dependently typed language to support me. Through a practical use case, we will discover that dependent typing:</p>
+
+<ul>
+  <li>Is not really more complex to use despite its sophistication</li>
+  <li>Avoids some of the nasty headaches with less advanced type systems</li>
+  <li>Limits the risk of rewrites when going the strong typing road</li>
+</ul>
+
+<p><em>Disclaimer: The post features Idris. This is an introduction post. As such, it is written so that the knowledge of this language is not a prerequisite, but it helps if you know a bit about Haskell-like syntax.</em></p>
+
+<h2 id="the-adapted-test-case">The (adapted) test case</h2>
+
+<p>Let us say that we have a list of event to celebrate, and we want to build a small program to automatically publish some message when one of these events occurs.</p>
+
+<h3 id="whats-an-event">What’s an event?</h3>
+
+<p>Each event has a <strong>title</strong> such as “Birthday”. This title is a short name for the event, which allows to categorize it and identify it more easily. It is represented as a simple string.</p>
+
+<p>Each event also has an associated <strong>message specification</strong>. This is the template of the announcement of the event. It can be viewed as a string with placeholders for missing values. For instance, the message specification <em>“Happy Birthday: {int} years old, {string}”</em> contains two placeholders.</p>
+
+<p>The <strong>placeholders each have an associated type</strong> such as integer or string. Only a value of the corresponding type should be interpolated at this position. This avoids emitting strange messages such as <em>“Happy Birthday: John years old, 37”</em> instead of <em>“Happy Birthday: 37 years old, John”</em>.</p>
+
+<h3 id="requirements">Requirements</h3>
+
+<p>Our goal is to support the following needs:</p>
+
+<ul>
+  <li>Pretty printing an event (for documentation) with its title and message specification</li>
+  <li>Storing our events in a list to scan and automate tasks such as pretty printing</li>
+  <li>Parsing the message specification as a string, such as “Happy {int} birthday {string}”</li>
+  <li>Interpolating values inside the message specification to produce a valid announcement message</li>
+</ul>
+
+<p>We would also like to support these needs <strong>in a type-safe way</strong>: it should not be possible to interpolate values of the wrong types inside a message specification. And if possible, we would like this to fail at compile time.</p>
+
+<p><em>Note: Without going into much details, the original use case is about constraining the schema of a JSON-like data structure, based on an identifier associated to this particular structure.</em></p>
+
+<h2 id="first-catching-errors-at-runtime">First, catching errors at runtime</h2>
+
+<p>Let us start simple. We will focus on having a simple API which will catch the interpolation type errors inside the message specification at runtime. The next sections will deal with moving these checks at compile time.</p>
+
+<h3 id="message-specification">Message specification</h3>
+
+<p>We start by defining some types that will allow us to describe a message specification. We will call this type <code>Schema</code>. It consists in a list of schema elements which each represents part of the message.</p>
+
+<p>Each <strong>schema element</strong> is either some known text, or a placeholder for an integer or string value. For instance, here is how we could decompose the message specification <em>“{int} years old, {string}”</em>:</p>
+
+<pre><code>Placeholder        Placeholder
+     |                  |
+     v                  v
+  "{int} years old, {string}"
+        ^^^^^^^^^^^^
+         Known text
+</code></pre>
+
+<p>Translated in Idris, a <code>Schema</code> is an alias for a list of <code>SchemaElem</code> which can be either:</p>
+
+<ul>
+  <li><code>IntVar</code>: a placeholder for an integer value</li>
+  <li><code>StrVar</code>: a placeholder for a string value</li>
+  <li><code>StrCst</code>: a wrapper around a known string</li>
+</ul>
+
+<pre><code class="language-haskell">data SchemaElem
+  = IntVar
+  | StrVar
+  | StrCst String
+
+Schema : Type
+Schema = List SchemaElem
+</code></pre>
+
+<p>To create a message specification, we just build a list of schema elements. Here is the code that corresponds to the message specification <em>”{int} years old, {string}”</em>:</p>
+
+<pre><code class="language-haskell">-- Equivalent of: "{int} years old, {string}"
+[IntVar, StrCst " years old, ", StrVar]
+</code></pre>
+
+<p>Since it is much more convenient to describe the message specification as text, we also provide a function <code>parseMessageSpec</code> to parse the textual description into <code>Schema</code> value:</p>
+
+<pre><code class="language-haskell">&gt; parseMessageSpec "{int} years old, {string}"
+[IntVar, StrCst " years old, ", StrVar]
+</code></pre>
+
+<p>We now have a way to define a message specification quite succinctly.</p>
+
+<h3 id="event-definition">Event definition</h3>
+
+<p>An event contains both a title and a message specification. This is easily translated into an Idris record, which is analog to a data structure with automatically defined accessors on it:</p>
+
+<pre><code class="language-haskell">record Event where
+  constructor MkEvent
+  title : String
+  messageSpec : Schema
+</code></pre>
+
+<p>Instantiating an event is pretty simple. We just use the constructor <code>MkEvent</code> followed by a string that describe the title, and a message specification. Here are two examples of such events:</p>
+
+<ul>
+  <li>The birthDay message specification is described by writing the Schema manually</li>
+  <li>The newYearEve message specification is parsed from a string</li>
+</ul>
+
+<pre><code class="language-haskell">birthDay : Event                                                            -- Declaration
+birthDay = MkEvent "Happy BirthDay" [IntVar, StrCst " years old, ", StrVar] -- Definition
+
+newYearEve : Event
+newYearEve = MkEvent "New Year's Eve:" (parseSchema "Happy new year {int}")
+</code></pre>
+
+<p>Finally, accessing the members of an event instance is done by calling the accessors functions on it:</p>
+
+<pre><code class="language-haskell">&gt; title birthDay
+"Happy BirthDay"
+
+&gt; messageSpec birthDay
+[IntVar, StrCst " years old, ", StrVar]
+</code></pre>
+
+<h3 id="pretty-printing-an-event">Pretty printing an event</h3>
+
+<p>Our requirements include the need to pretty print the definition of an event. This means printing the title, followed by pretty printing the message specification.</p>
+
+<p>We will use the <code>Show</code> interface of Idris (an interface to specify show the equivalent of Java’s <code>toString</code>) and provide two implementations for both a schema element and an event:</p>
+
+<pre><code class="language-haskell">implementation Show SchemaElem where
+  show IntVar = "{int}"
+  show StrVar = "{string}"
+  show (StrCst s) = s
+
+implementation Show Event where
+  show e = title e ++ ": " ++ concatMap show (messageSpec e)
+</code></pre>
+
+<ul>
+  <li>We make use of pattern matching on SchemaElem to distinguish placeholder from know text</li>
+  <li>We use concatMap to transform each schema element into a string and concatenate them</li>
+</ul>
+
+<p>Going back to our birthDay event definition, we can now call show on it to pretty print it:</p>
+
+<pre><code class="language-haskell">birthDay : Event
+birthDay = MkEvent "Happy BirthDay" [IntVar, StrCst " years old, ", StrVar]
+
+-- In the REPL:
+&gt; show birthDay
+"Happy BirthDay: {int} years old, {string}" -- Output
+</code></pre>
+
+<h3 id="interpolation-of-values">Interpolation of values</h3>
+
+<p>A message specification contains <strong>placeholder</strong> for integer and string values. To emit an announcement message, we first need to <strong>interpolate</strong> integer and string values in place of the placeholders.</p>
+
+<p>We will start by defining a type to represent values that can be used to fill a placeholder, which we will name <code>PlaceholderValue</code>. It contains either an integer or a string:</p>
+
+<pre><code class="language-haskell">data PlaceholderValue
+  = IntVal Int
+  | StrVal String
+</code></pre>
+
+<p>To interpolate these placeholder values inside the message specification, the <code>logEvent</code> event function will take as input an event (containing a message specification) as well as a list of placeholder values.</p>
+
+<p>It will try to match the placeholders in the order in which they appear in the message specification, with the placeholders values in the order in which they appear in the list.</p>
+
+<pre><code>"Happy birthday: {int} years old, {string}"
+                   ^                 ^
+                   |                 |
+                   v                 v
+              [IntVal 32, StrVal "Quentin"]
+</code></pre>
+
+<p>Since this process might fail (due to arguments of the wrong type, or missing arguments), <code>logEvent</code> will return an optional value (<code>Maybe</code> in Idris) to signal it.</p>
+
+<pre><code class="language-haskell">-- Takes an Event + a List of PlaceholderValue as argument
+-- Returns an optional String as a result
+logEvent : Event -&gt; List PlaceholderValue -&gt; Maybe String
+logEvent = ?missingImplementation
+</code></pre>
+
+<p>The implementation of this function is not that important (it is mainly pattern matching the placeholder expected type against the placeholder value) but provided <a href="https://gist.github.com/deque-blog/4ab18f24db8a201a8d65344b6a5a2462">here</a> as reference.</p>
+
+<h3 id="examples-of-interpolation">Examples of interpolation</h3>
+
+<p>Below are some examples of using our logEvent function:</p>
+
+<pre><code class="language-haskell">birthDay : Event
+birthDay = MkEvent "Happy BirthDay" [IntVar, StrCst " years old, ", StrVar]
+
+-- In the REPL:
+
+&gt; logEvent birthDay [IntVal 32, StrVal "Quentin"]    -- Values match the placeholder expected types
+Just "Happy BirthDay: 32 years old, Quentin"
+
+&gt; logEvent birthDay [StrVal "Quentin", IntVal 32]    -- Wrong placeholder types (inverted)
+Nothing
+
+&gt; logEvent birthDay [IntVal 32]                      -- Missing placeholder value
+Nothing
+</code></pre>
+
+<p>It is safe because <strong>wrong types for placeholder will lead to Nothing being returned</strong> as an answer (to indicate a failure) at runtime. So we cannot construct and therefore emit bad messages.</p>
+
+<p>But we could argue that these type and missing values errors are programming errors, not user input errors, and could therefore be moved at compile time. We will see how to do this in the next section.</p>
+
+<h2 id="evaluating-the-costs">Evaluating the costs</h2>
+
+<p>Before we proceed into making our API type-safe in such as way that interpolation errors are caught at compile time, it is worth to consider the cost of doing so.</p>
+
+<h3 id="the-cost-of-implementation">The cost of implementation</h3>
+
+<p>Our needs are pretty simple. A non-technical person would expect it to be done quite quickly. Yet, and depending in the language we use, making our API type-safe might be quite expensive.</p>
+
+<p>There is indeed a hidden challenge here. Ensuring type safety, while still allowing message specifications to be parsed from a string, is no easy programming task.</p>
+
+<p>Take C++ for instance. Type-safety would go through hoisting our message specification to the type level. Parsing the message specification will therefore have to be done at compile-time too. This would require using either template meta programming or constexpr functions.</p>
+
+<p>This can be done. <a href="https://twitter.com/ben_deane">Ben Deane</a> and <a href="https://twitter.com/lefticus">Jason Turner</a> showed how to parse JSON at compile time in their <a href="https://www.youtube.com/watch?v=HMB9oXFobJc">“constexpr ALL the things!”</a> talk. But it is not for the feint of heart, and certainly not without a cost.</p>
+
+<p>The question then becomes whether it is worth it. It is not if the cost of developing a fully type-safe implementation is higher than the cost of dealing with or correcting the errors.</p>
+
+<h3 id="the-cost-of-change">The cost of change</h3>
+
+<p>We also need to evaluate the cost of migrating our previously developed API into this new compile-time type safe API. Think about the refactoring needed to accommodate a single new requirement, type safety. Think about the potential cost of migrating potential existing users.</p>
+
+<p>Can we even keep a single function from the previous API?</p>
+
+<p>Now, it turns out that <strong>in Idris, we do not need to change anything</strong> of our previous API. To make it fully type safe, we <strong>only have to add two new functions</strong>. And the use of the word add instead of change is important here: we do not need to break anything.</p>
+
+<h2 id="now-with-compile-time-checks">Now, with compile time checks</h2>
+
+<p>In our current design, interpolation errors can only be caught at runtime. Let us see how we catch them at compile time instead, without breaking our previous code.</p>
+
+<h3 id="overall-design">Overall Design</h3>
+
+<p>We want a way to interpolate placeholder values inside a message specification such that any missing or invalid placeholder values is caught at compile time.</p>
+
+<p>To get an idea of where we want to go, let us write some client code of the API first. Here is one possible such client code, where <code>logEvent</code> is a function which:</p>
+
+<ul>
+  <li>Takes as first argument the event to be announced</li>
+  <li>Takes as subsequent arguments its placeholder values</li>
+</ul>
+
+<pre><code class="language-haskell">birthDay : Event
+birthDay = MkEvent "Happy BirthDay" [IntVar, StrCst " years old, ", StrVar]
+
+-- In the REPL:
+&gt; logEvent birthDay 32 "Quentin"
+"Happy BirthDay: 32 years old, Quentin"
+</code></pre>
+
+<p>Now, it is important to notice that <strong>the number and the types of the arguments</strong> of this <code>logEvent</code> function <strong>depend on the value (not the type) of the first argument</strong>. A perfect match for dependent types.</p>
+
+<h3 id="how-we-will-proceed">How we will proceed</h3>
+
+<p>Thanks to <a href="https://en.wikipedia.org/wiki/Currying">currying</a>, we know that a function that takes N arguments can be seen as a function that takes one argument, and returns a function which expects N-1 arguments.</p>
+
+<p>So we can see the <code>logEvent</code> as a function which takes an event and returns a new function, which we will name <code>f</code> here. This function <code>f</code> expects as many arguments as there are placeholders in the event, each with the appropriate type. It will return the resulting announcement message as a string.</p>
+
+<p>To illustrate this, we can use <code>:t</code> (in the REPL) to query the type of the function <code>f</code> returned by the partial application of logEvent on an event:</p>
+
+<pre><code class="language-haskell">birthDay : Event
+birthDay = MkEvent "Happy BirthDay" [IntVar, StrCst " years old, ", StrVar]
+
+-- In the REPL:
+&gt; :t logEvent birthDay    -- Query the type of logEvent applied to the birthDay event
+Int -&gt; String -&gt; String   -- The type of a function expecting an integer and a string to produce a string
+</code></pre>
+
+<p>Writing <code>logEvent</code> consists in finding how to write this function <code>f</code>. We will proceed in two phases:</p>
+<ul>
+  <li>We will first see how to compute the type of this function f, provided a message specification (ultimately the one of the event).</li>
+  <li>Then we will complete the implementation.</li>
+</ul>
+
+<h3 id="computing-types">Computing types</h3>
+
+<p>So how do we compute the type of this mysterious <code>f</code> function? And what does it mean to compute a type?</p>
+
+<p>In Idris, it means nothing in particular. A perfectly normal function can take a type as input, or return a type as output. Computing a type simply means calling a function which returns a type.</p>
+
+<p>We will now write a function <code>SchemaType</code> to compute the type of <code>f</code> from the schema of a message specification. We recall that a <code>Schema</code> is a list of schema element, where each element is either a known text fragment or a placeholder:</p>
+
+<pre><code class="language-haskell">data SchemaElem
+  = IntVar
+  | StrVar
+  | StrCst String
+
+Schema : Type
+Schema = List SchemaElem
+</code></pre>
+
+<p>We can use recursion on the list of schema element to slowly build the type of a function. At each recursive call, we will pattern match on the list, until we reach the empty list</p>
+
+<pre><code class="language-haskell">-- Function which takes a Schema and returns a function Type
+SchemaType : Schema -&gt; Type
+SchemaType [] = String
+SchemaType (IntVar :: xs) = Int -&gt; SchemaType xs
+SchemaType (StrVar :: xs) = String -&gt; SchemaType xs
+SchemaType (_ :: xs) = SchemaType xs
+</code></pre>
+
+<ul>
+  <li>If the list starts with an <code>IntVar</code> placeholder, we recur and add a <code>Int</code> argument in first position</li>
+  <li>If the list starts with an <code>StrVar</code> placeholder, we recur and add a <code>String</code> argument in first position</li>
+  <li>If the list starts with known text, we recur, not adding any new argument</li>
+</ul>
+
+<p>We can try our SchemaType function in the REPL to convince ourselves that it works:</p>
+
+<pre><code class="language-haskell">&gt; SchemaType [IntVar, StrCst " years old, ", StrVar]
+Int -&gt; String -&gt; String
+</code></pre>
+
+<h3 id="the-type-of-logevent">The type of logEvent</h3>
+
+<p>Until now, we carefully avoided to define the type signature of the <code>logEvent</code> function. Now, that we defined <code>SchemaType</code>, we can finally do it.</p>
+
+<p>To do so, we extract the message specification from the event given as first argument of the function and call <code>SchemaType</code> on it, <strong>inside the type signature of the function</strong>:</p>
+
+<pre><code class="language-haskell">logEvent : (event: Event) -&gt; SchemaType (messageSpec event)
+logEvent e = ?unspecified
+</code></pre>
+
+<p>There are important characteristics of Idris to notice here:</p>
+
+<ul>
+  <li>Idris allows to refer to other arguments’ value by name in any type signature</li>
+  <li>We can call functions such as <code>messageSpec</code> in the type signature of a function</li>
+  <li>We can call functions such as <code>SchemaType</code> to compute part of the type signature</li>
+</ul>
+
+<p>In our specific case, the return type of <code>logEvent</code> refers to the value of its first argument, <code>event</code>. We then extract the message specification out of it, in order to compute the rest of the type of the function.</p>
+
+<p>Let’s check that we get what we expect:</p>
+
+<pre><code class="language-haskell">&gt; :t logEvent birthDay
+Int -&gt; String -&gt; String -- A function that expects an integer and a string to produce the message
+</code></pre>
+
+<h3 id="finishing-up-the-implementation">Finishing up the implementation</h3>
+
+<p>Now that we have the type signature of <code>logEvent</code>, it is only a <a href="https://en.wikipedia.org/wiki/Small_matter_of_programming">small matter of programming</a> to complete the implementation of the function. We just use the same trick we already used: recursion.</p>
+
+<p>Each recursion level looks at a schema element, and builds a lambda which takes one placeholder value (the syntax <code>\argument =&gt; body_of_the_lambda</code>). Inside the lambda, we simply concatenate the result of serializing the placeholder value with the rest of the message.</p>
+
+<pre><code class="language-haskell">logEvent : (event: Event) -&gt; SchemaType (messageSpec event)
+logEvent e = loop (messageSpec e) (title e ++ ": ")
+  where
+    loop : (messageSpec: Schema) -&gt; String -&gt; SchemaType messageSpec
+    loop [] out = out
+    loop (IntVar :: rest) out = \i =&gt; loop rest (out ++ show i)
+    loop (StrVar :: rest) out = \s =&gt; loop rest (out ++ s)
+    loop (StrCst s :: rest) out = loop rest (out ++ s)
+</code></pre>
+
+<p>We can try it and check that it works fine when correctly used and that it fails when incorrectly used:</p>
+
+<pre><code class="language-haskell">&gt; logEvent birthDay 32 "Quentin"
+"Happy BirthDay: 32 years old, Quentin"
+
+&gt; logEvent newYearEve 2017
+"New Year's Eve: Happy new year 2017"
+
+
+&gt; logEvent birthDay "Quentin" 32
+".. Fails to compile ..."
+
+&gt; logEvent birthDay 32 32
+".. Fails to compile ..."
+</code></pre>
+
+<p>We know have a fully type-safe interpolation of values inside the message specification. And we did not break our previous implementation. In fact, both versions can co-exist.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In today’s post we showed some important feature of Idris type system, and of dependent typing in general: being able to compute types based on values.</p>
+
+<p>We applied it to a use case, inspired from real a real one. We showed that it allows to build a stronger type-safety than what is allowed with more traditional type systems.</p>
+
+<p>In addition of stronger type-safety, dependent types also fill the gap between values and types. They allow us to move between runtime and compile time checks in a smooth way. This helps removing some of the costs of using strong types in statically typed languages.</p>
+
+<p>In particular, <strong>the risk of having to rewrite entirely an API is reduced substantially</strong> (as well as the risk to adapt or migrate its client code) upon changes in the requirements.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-09-20T00:00:00+00:00">September 20, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Transforming+data+structures+into+types%3A+an+introduction+to+dependent+typing+and+its+benefits%20%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html&title=Transforming+data+structures+into+types%3A+an+introduction+to+dependent+typing+and+its+benefits" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F09%2F20%2Ftransforming-data-into-types.html&t=Transforming data structures into types: an introduction to dependent typing and its benefits" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/09/13/monoids.html" title="Monoids: what they are, why they are useful, and what they teach us about software">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Monoids: what they are, why they are useful, and what they teach us about software</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/10/12/dependent-type-deduction.html" title="Why template parameters of dependent type names cannot be deduced, and what to do about it">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Why template parameters of dependent type names cannot be deduced, and what to do about it</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

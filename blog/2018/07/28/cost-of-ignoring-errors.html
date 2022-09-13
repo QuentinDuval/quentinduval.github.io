@@ -1,0 +1,893 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Small programming faults can overflow an entire system - Double Ended Queue</title>
+<meta name="description" content="A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Small programming faults can overflow an entire system">
+<meta property="og:url" content="/blog/2018/07/28/cost-of-ignoring-errors.html">
+
+
+  <meta property="og:description" content="A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Small programming faults can overflow an entire system">
+  <meta name="twitter:description" content="A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system.">
+  <meta name="twitter:url" content="/blog/2018/07/28/cost-of-ignoring-errors.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2018-07-28T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2018/07/28/cost-of-ignoring-errors.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Small programming faults can overflow an entire system">
+    <meta itemprop="description" content="A short story on the impact of ignoring errors and not knowing error modes in distributed systems, and how it lead to paralyse an entire system.">
+    <meta itemprop="datePublished" content="2018-07-28T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Small programming faults can overflow an entire system
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2018-07-28T00:00:00+00:00">July 28, 2018</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html&text=Small+programming+faults+can+overflow+an+entire+system&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2018/07/28/cost-of-ignoring-errors.html&title=Small programming faults can overflow an entire system"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2018/07/28/cost-of-ignoring-errors.html&t=Small programming faults can overflow an entire system">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#the-context">The context</a></li><li><a href="#following-the-log-trail">Following the log trail</a><ul><li><a href="#the-symptoms">The symptoms</a></li><li><a href="#the-rules-of-the-4-rs">The rules of the 4 Rs</a></li><li><a href="#producer-or-consuner-fault-neither">Producer or consuner fault? Neither…</a></li><li><a href="#maybe-a-message-acknowledgment-issue-no">Maybe a message acknowledgment issue? No…</a></li><li><a href="#looking-for-the-guilty-emitter">Looking for the guilty emitter</a></li><li><a href="#its-all-clear-now">It’s all clear now!</a></li></ul></li><li><a href="#debugging-the-sweeper-service">Debugging the Sweeper service</a><ul><li><a href="#sweeping-unsent-messages">Sweeping unsent messages</a></li><li><a href="#digging-into-the-sweeper-code">Digging into the Sweeper code</a></li><li><a href="#jpa-saving-errors">JPA saving errors</a></li><li><a href="#interacting-with-transactions">Interacting with transactions</a></li><li><a href="#here-comes-the-pokemon-catch">Here comes the pokemon catch</a></li></ul></li><li><a href="#what-lessons-is-there-to-be-learned">What lessons is there to be learned?</a><ul><li><a href="#dealing-with-errors-not-anticipating-them">Dealing with errors, not anticipating them</a></li><li><a href="#the-way-to-fix-it">The way to fix it</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>Many years back, in a different company… My company had been doing a shift toward the use of Service Oriented Architecture for the past few years.</p>
+
+<p>In this context, we built a micro-service <strong>A</strong> that maintained a view on some financial information. The goal was to asynchronously create a data representation that offered better performance for some very common query patterns we had.</p>
+
+<p>At the time, we had been testing the service extensively. We had a demo coming the next days, to show all the progress that we had made.</p>
+
+<p>The code had not changed since the last tests we made. Still, we decided to make a last run of the demo. And it failed miserably. The same test case as before failed. The system was not even responsive.</p>
+
+<p>The error that threw the entire system astray turn out to be ridiculously small.</p>
+
+<h2 id="the-context">The context</h2>
+
+<p>Our service <strong>A</strong> was a stateless service, fed by a message broker to receive a feed of real-time updates (from services <strong>X</strong> and <strong>Y</strong> below).</p>
+
+<p>Its goal was to aggregate asynchronously these updates and serve queries to other services (service <strong>Z</strong> below) via a REST API:</p>
+
+<p><img src="/assets/images/servicearchitecture.jpeg" alt="service_infrastructure" /></p>
+
+<p>The goal of the demo was to trigger an update on service <strong>X</strong> (via GUI interactions) and show that it correctly updates the view maintained in the service <strong>A</strong> (again via GUI interactions).</p>
+
+<p>Technically, it was meant to demonstrate that service <strong>X</strong> correctly sends update messages to service <strong>A</strong> and that our new service <strong>A</strong> correctly processes them, and importantly processes them faster than the previous implementation as a monolythic service.</p>
+
+<h2 id="following-the-log-trail">Following the log trail</h2>
+
+<p>But our service that was so quick to react in our previous tests now was apparently completely irresponsive. Or was it?</p>
+
+<h3 id="the-symptoms">The symptoms</h3>
+
+<p>After a quick investigation, it turned out that our service did not crash. In fact, it would still service queries! But the queries would return data that remained invariably stale, and so the GUI was not changing, giving us the impression that the service was dead.</p>
+
+<p>In reality, all services were running, but the view maintained by the service <strong>A</strong> was not impacted by GUI updates performed on service <strong>X</strong>.</p>
+
+<h3 id="the-rules-of-the-4-rs">The rules of the 4 Rs</h3>
+
+<p>We naturally tried the rules of the 4 Rs: Retry, Restart, Reboot, Re-deploy… but it did not clear the error away. Not this time. Something was stuck, something that was not in the transient memory of the services.</p>
+
+<p>So we started to look into the logs to identify the guilty service.</p>
+
+<h3 id="producer-or-consuner-fault-neither">Producer or consuner fault? Neither…</h3>
+
+<p>We first looked into the log of the service X, hoping to find why it did not send any update messages to service <strong>A</strong>. Instead, we found that the service <strong>X</strong> did correctly send the messages.</p>
+
+<p>We then looked the logs on the consumer side, hoping to find why the service <strong>A</strong> did not receive or process any of the messages. Instead, we found that the service <strong>A</strong> was being overwhelmed with tons of messages from the broker, conveying updates of service <strong>X</strong>.</p>
+
+<p>Looking these messages in details, to our surprise, they all looked the same! The service <strong>A</strong> was in fact consuming tons of update messages (several hundreds per second), but these messages were always the same ten or so.</p>
+
+<h3 id="maybe-a-message-acknowledgment-issue-no">Maybe a message acknowledgment issue? No…</h3>
+
+<p>Our next hypothesis was that our service was not correctly acknowledging the messages it received. In such case, the message broker would always serve the same messages over an over again.</p>
+
+<p>We verified the logs of the service and it was not the case: it was correctly acknowledging the messages sent to it. Digging deeper, it was also clear that the broker was correctly dropping these messages after receiving the acknowledgment and not serving them again.</p>
+
+<p>Back to the emitter (service <strong>X</strong>), we made sure that it was not sending those updates over and over. But no, it was doing the correct thing: one update, one notification message.</p>
+
+<p>So which services was responsible to send those messages to the message broker?</p>
+
+<h3 id="looking-for-the-guilty-emitter">Looking for the guilty emitter</h3>
+
+<p>Something, somewhere, must have been sending these same messages over and over again. They are not appearing out of thin air.</p>
+
+<p>At this point, we decided to proceed by elimination.</p>
+
+<p>We stopped, one by one, each and every service that could possibly send data to the service <strong>A</strong> through the messaging system, until we noticed a reduction of the traffic. And so we found the guilty service: it was service <strong>Y</strong>.</p>
+
+<p><img src="/assets/images/servicearchitectureerror.png" alt="service_infrastructure" /></p>
+
+<p>Once <strong>Y</strong> was shut down, we saw the queue being slowly consumed by service <strong>A</strong>. A few minutes later, the whole garbage was gone. And finally the update of service <strong>X</strong> was processed.</p>
+
+<h3 id="its-all-clear-now">It’s all clear now!</h3>
+
+<p>Now at that point, we could finally understand why our service <strong>A</strong> had not been very responsive to any updates during our demo rehearsal. It was actually responsive but was instead completely overwhelmed by the traffic it was facing. The resulting latency was so high that the service was not able to react to these updates in real-time.</p>
+
+<p>It was clear why the error first looked like a lost update issue. Because the service had been built with an idempotent business logic, the 10 repeating messages that were flowding the system had no observable effect other than overwhelming the service.</p>
+
+<p>And because the service had separate thread pools for processing updates and serving queries (which is a good design principle called the bulkhead), the query side was still responding with stale data.</p>
+
+<h2 id="debugging-the-sweeper-service">Debugging the Sweeper service</h2>
+
+<p>Now, time to understand why service <strong>Y</strong> suddenly started to flood the messaging infrastructure with a continuous flow of identical messages. First, we have to understand what service <strong>Y</strong> is for.</p>
+
+<h3 id="sweeping-unsent-messages">Sweeping unsent messages</h3>
+
+<p>The service <strong>Y</strong>, guilty of flooding the messaging system, was a technical service acting as a Sweeper. Its goal was to make sure that messages that could not have been sent to the message broker (because the broker was not alive at the time or not reachable) would eventually be sent to the broker when it would come back online.</p>
+
+<p>Basically, any service wanting to send a message to service <strong>A</strong> (or any other service) through the message broker, would first need the messaging infrastructure (the message broker) to be alive. But would the broker be down, we could not afford to halt all services.</p>
+
+<p>So instead, the transmitting service, service <strong>X</strong> in our case, would fall back to writing the message in the Sweeping table, a table stored in database (1).</p>
+
+<p><img src="/assets/images/sweepertable.png" alt="sweepertable" /></p>
+
+<p>The Sweeper task was to poll periodically the sweeping table, to fetch and transmit these messages that could not have been sent and remove those messages from the sweeping table after successful transmission.</p>
+
+<p><em>(1) The Sweeper can have another role as well. By writing in the sweeper table inside a DB transaction local to the transmitting service, this pattern allows to make sure we only send messages if the rest of the commit was successful (a useful pattern if the transmitting service has to write in his own DB and wants to make sure an update is sent if and only if this commit is successful).</em></p>
+
+<h3 id="digging-into-the-sweeper-code">Digging into the Sweeper code</h3>
+
+<p>In principle, the code of a Sweeper is really simple. It regularly polls the sweeping table, fetch the unsent messages, sends them, wait for the acknowledgment of the message broker, and then mark these messages as being sent (we marked them as sent after acknowledgement for guaranteed delivery (2)).</p>
+
+<p>In our case, the code was written in Java, and roughly looked like this:</p>
+
+<pre><code class="language-java">private void pollSweeperTable(Session session) {
+    List&lt;Message&gt; unsentMessages = messageRepository.fetchUnsentMessages();
+    for (Message message : unsentMessages)
+        sendMessage(session, message);
+    messageRepository.markSent(unsentMessages);
+}
+</code></pre>
+
+<ul>
+  <li>The load and save of unsent entries is done using <a href="https://en.wikipedia.org/wiki/Java_Persistence_API">JPA</a> (via the message repository of JPA)</li>
+  <li>The messages are sent using <a href="https://en.wikipedia.org/wiki/Java_Message_Service">JMS</a> (the <code>Session</code> object passed as parameter of the function)</li>
+</ul>
+
+<p>These might seem as details, but they are not. The failure mode of our APIs are often what makes the difference in how a failure propagate in our system.</p>
+
+<p><em>(2) And yes, as you have guessed, this means you can have double transmission, as often in distributed systems. So the the receiver of messages must do deduplication or be idempotent or else this pattern is dangerous to use.</em></p>
+
+<h3 id="jpa-saving-errors">JPA saving errors</h3>
+
+<p>It turns out that when JPA tries to save an object, it throws an exception if the ID of the object is not unique in the table. Basically, JPA uses the ID to know which record to replace, and does not know which one to replace, so it panics.</p>
+
+<p>The overall incident started like this: one service managed at some point to corrupt the Sweeping table. The direct consequence was that two messages now shared the same ID in the sweeper table (yes, there should have been a unique index, we will come back to that).</p>
+
+<p>So when the sweeper encountered these messages, it managed to load them, send them, but failed to save them, marked as “sent” for there were two messages with the same ID. So the next sweeper loop would load the same two messages, send them again, and fail to save them again.</p>
+
+<p>Basically, we got an infinite loop sending the same messages over and over again.</p>
+
+<h3 id="interacting-with-transactions">Interacting with transactions</h3>
+
+<p>This infinite loop does not yet explain everything. There were 2 corrupted messages. Why are there 10 messages being sent repeatedly instead of 2?</p>
+
+<p>A quick look at the code gave us the answer: the sweeper marked all the messages as sent in the same DB transaction. Therefore, a single corrupted message makes the whole transaction fails.</p>
+
+<pre><code class="language-java">private void pollSweeperTable(Session session) {
+    List&lt;Message&gt; unsentMessages = messageRepository.fetchUnsentMessages();
+    for (Message message : unsentMessages)
+        sendMessage(session, message);
+    messageRepository.markSent(unsentMessages); // One DB transaction
+}
+</code></pre>
+
+<p>As a consequence, instead of just sending the two corrupted messages over and over again, the Sweeper sends all the unsent messages of the Sweeping table over and over again. And guess what? There were about 10 messages in the sweeping table during the incident.</p>
+
+<p><em>Note: This behavior was motivated by performance. Marking all the messages as sent inside a single commit limits the impact on the database. It was an interesting bet knowing that sending the same messages twice – occasionally – is not a problem: idempotent receivers were already needed by the “at least once” guarantee of our messaging infrastructure.</em></p>
+
+<h3 id="here-comes-the-pokemon-catch">Here comes the pokemon catch</h3>
+
+<p>To finish up, there was a last issue that made everything much much worse. The Sweeper iteration loop was surrounded by a wonderful Pokemon try-catch, logging and swallowing all exceptions:</p>
+
+<pre><code class="language-java">try {
+   pollSweeperTable(Session session);
+   // …
+} catch (Exception e) {
+   // Log the exception
+}
+</code></pre>
+
+<p>For sure, not swallowing the exception would not have solved the issue. The Sweeper would have crashed upon marking the messages as sent, and then would have been revived by the supervisor, and then would have sent the messages again before crashing again.</p>
+
+<p>The sweeper would still have flooded the messaging system. But it would have shown on the monitoring. Instead, absorbing the exception made the identification of the root cause of the system failure much less obvious. The first visible sign was another service that stopped responding.</p>
+
+<h2 id="what-lessons-is-there-to-be-learned">What lessons is there to be learned?</h2>
+
+<h3 id="dealing-with-errors-not-anticipating-them">Dealing with errors, not anticipating them</h3>
+
+<p>Distributed systems are a weird beast. We cannot anticipate most errors in a distributed systems. As illustrated here, some errors are not even necessarily symmetric.</p>
+
+<p>We may be able to connect to the DB to load a record, but not to save the record, the same way that we may be able to send a message through a network link but not receive an answer. Some errors are out of our control (another service corruption our DB in our case).</p>
+
+<p>Therefore the important thing is to put in place mechanisms that limit errors from propagating and lead to a system failure, and try to detect and report these errors as soon as possible.</p>
+
+<p>Dealing with the errors that we anticipated, and pokemon catching the other cases, is a recipe for incidents such as this one.</p>
+
+<h3 id="the-way-to-fix-it">The way to fix it</h3>
+
+<p>In that case, a number of different things would have helped.</p>
+
+<p>First, adding a unique index on the sweeper table to prevent corruption of the message IDs and identify the source of the corruption (at the time of writing, we did not find it).</p>
+
+<p>We customized our JPA repository to use a JQL update where request. Now, whenever there are messages with conflicting IDs in the sweeper table, both duplicates will be marked as “sent” (we will lose a corrupted message instead of losing the entire system):</p>
+
+<pre><code class="language-java">@Modifying
+@Query(
+   value = "update SweeperTable set sent = 1 where messageId in (:messageIds)",
+   nativeQuery = true)
+void markSent(@Param("messageIds") List&lt;Long&gt; messageIds);
+</code></pre>
+
+<p>Adding back-pressure on the broker message queue, so that we get clear overflow errors when the situation gets out of control.</p>
+
+<p>And of course remove the Pokemon catching try-catch block ;)</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-07-28T00:00:00+00:00">July 28, 2018</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Small+programming+faults+can+overflow+an+entire+system%20%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html&title=Small+programming+faults+can+overflow+an+entire+system" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2018%2F07%2F28%2Fcost-of-ignoring-errors.html&t=Small programming faults can overflow an entire system" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/12/08/cps-free-monads.html" title="Continuation passing style Free Monads and direct style Free Monads">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Continuation passing style Free Monads and direct style Free Monads</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2018/09/13/distributed-agreement-on-random-order.html" title="Distributed agreement on random order: Lamport Timestamps">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Distributed agreement on random order: Lamport Timestamps</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

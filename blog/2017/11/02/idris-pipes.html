@@ -1,0 +1,1035 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>IdrisPipes: a library for composable and effectful stream processing in Idris - Double Ended Queue</title>
+<meta name="description" content="Our goal here is to provide Idris with a library for composable and effectful production, transformation and consumption of streams of data.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="IdrisPipes: a library for composable and effectful stream processing in Idris">
+<meta property="og:url" content="/blog/2017/11/02/idris-pipes.html">
+
+
+  <meta property="og:description" content="Our goal here is to provide Idris with a library for composable and effectful production, transformation and consumption of streams of data.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="IdrisPipes: a library for composable and effectful stream processing in Idris">
+  <meta name="twitter:description" content="Our goal here is to provide Idris with a library for composable and effectful production, transformation and consumption of streams of data.">
+  <meta name="twitter:url" content="/blog/2017/11/02/idris-pipes.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-11-02T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/11/02/idris-pipes.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="IdrisPipes: a library for composable and effectful stream processing in Idris">
+    <meta itemprop="description" content="Our goal here is to provide Idris with a library for composable and effectful production, transformation and consumption of streams of data.">
+    <meta itemprop="datePublished" content="2017-11-02T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">IdrisPipes: a library for composable and effectful stream processing in Idris
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-11-02T00:00:00+00:00">November 2, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html&text=IdrisPipes%3A+a+library+for+composable+and+effectful+stream+processing+in+Idris&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/11/02/idris-pipes.html&title=IdrisPipes: a library for composable and effectful stream processing in Idris"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/11/02/idris-pipes.html&t=IdrisPipes: a library for composable and effectful stream processing in Idris">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation--examples">Motivation &amp; Examples</a><ul><li><a href="#a-world-without-pipes">A world without pipes</a></li><li><a href="#adding-concerns">Adding concerns</a></li></ul></li><li><a href="#refactoring-with-idrispipes">Refactoring with IdrisPipes</a><ul><li><a href="#thinking-in-streams">Thinking in streams</a></li><li><a href="#refactoring">Refactoring</a></li><li><a href="#running-a-recipe">Running a recipe</a></li><li><a href="#using-pipes-to-decouple-concerns">Using pipes to decouple concerns</a></li></ul></li><li><a href="#a-quick-tour-of-idrispipes-support-for-stream-processing">A Quick tour of IdrisPipes support for stream processing</a><ul><li><a href="#a-few-concepts---one-composition-operator">A few concepts - One composition operator</a></li><li><a href="#two-main-primitives-yield-and-await">Two main primitives: yield and await</a></li><li><a href="#return-value-and-early-termination">Return value and early termination</a></li><li><a href="#pull-based-stream-model">Pull based stream model</a></li><li><a href="#large-collection-of-built-in-algorithms">Large collection of built-in algorithms</a></li><li><a href="#missing-features">Missing features</a></li></ul></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next?</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>Let’s implement a pipe library for Idris, inspired by the great <a href="https://hackage.haskell.org/package/pipes">Haskell Pipes</a> and <a href="https://hackage.haskell.org/package/conduit">Haskell Conduit</a> libraries. Our goal is to provide Idris with a library for composable and effectful production, transformation and consumption of streams of data.</p>
+
+<p>In short, our <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> library is an Idris package that aims at providing the means to write:</p>
+
+<ul>
+  <li>Effectful programs, with side effects such as IO</li>
+  <li>Over a stream of data, potentially infinite</li>
+  <li>Efficiently, by streaming data and controlling memory consumption</li>
+  <li>In a composable way, allowing problem decomposition and reuse</li>
+</ul>
+
+<p>In this first post, we will illustrate with examples the motivations behind this library, and give a quick overview of the features it offers. Future posts will be dedicated to explain how it works in more details, how to build your own pipes easily, as well as describing some of the difficulties I had implementing it in Idris.</p>
+
+<h2 id="motivation--examples">Motivation &amp; Examples</h2>
+
+<p>To explain the goal of this library, we will first illustrate how to use it on a small example of effectful code, and see how we can use <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> to improve on it.</p>
+
+<h3 id="a-world-without-pipes">A world without pipes</h3>
+
+<p>We will start with a small effectful function, which we will later enrich with additional requirements. This small function is named “echo”:</p>
+
+<ul>
+  <li>It acquires some strings from the standard inputs</li>
+  <li>Echo them back in the standard output</li>
+  <li>And stops upon receiving the string “quit” as input</li>
+</ul>
+
+<p>Here is one possible implementation of this need, without using pipes:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = do
+  putStr "in&gt; "                 -- Write "in&gt; " in standard output
+  l &lt;- getLine                  -- Read the standard input
+  when (l /= "quit") $ do       -- Upon encountering something else than "quit"
+    putStrLn ("out&gt; " ++ l)     -- Echo the string in standard output
+    echo                        -- Recurse to loop again
+</code></pre>
+
+<p>Let us run it into the REPL. Upon each line entered after the “in” prompt, it echos back the same string in the “out” prompt, and the “quit” string correctly terminates the execution of the function:</p>
+
+<pre><code class="language-haskell">in&gt; toto   -- user input
+out&gt; toto  -- output
+in&gt; titi
+out&gt; titi
+in&gt; quit
+</code></pre>
+
+<p>Simple enough. Let us now enrich our “echo” function with an additional requirement.</p>
+
+<h3 id="adding-concerns">Adding concerns</h3>
+
+<p>Our <code>echo</code> function should not repeat the same output twice in a row anymore. In other words, if we write two times in a row the same string, we want it to ignore the second occurrence:</p>
+
+<pre><code class="language-haskell">in&gt; toto   -- user input
+out&gt; toto  -- output
+in&gt; toto   -- same entry, do not repeat
+in&gt; quit
+</code></pre>
+
+<p>We can easily adapt our previous <code>echo</code> function to support this new requirement, with just a few additional lines of code:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = loop (const True) where
+  loop : (String -&gt; Bool) -&gt; IO ()
+  loop isDifferent = do           -- `isDifferent` refers to the previous string
+    putStr "in&gt; "
+    l &lt;- getLine
+    when (l /= "quit") $ do
+      when (isDifferent l) $      -- If the string is different from the previous
+        putStrLn ("out&gt; " ++ l)   -- Echo the string in standard output
+      loop (/= l)                 -- Track the last read string
+</code></pre>
+
+<p>While the number of lines did not increase that much, the overall complexity of the function did.</p>
+
+<p>The loop has to maintain a state that allows us to identify whether the new value is different from the previous one. This state is visible from the whole loop, and comes with additional conditional branching. In short, the additional concern is coupled with the rest of the <code>echo</code> function.</p>
+
+<h2 id="refactoring-with-idrispipes">Refactoring with IdrisPipes</h2>
+
+<p>We will now see how to get rid of this coupling by refactoring the function using <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>. We will start with our initial “echo” function and then add the additional requirement of deduplicating entries afterwards.</p>
+
+<h3 id="thinking-in-streams">Thinking in streams</h3>
+
+<p><a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> is based on the idea of building small pipes dedicated to one specific task to perform on a stream of data (like production, transformation or consumption). Each pipe is only concerned with dealing with awaiting for new inputs, transforming this piece of data, and yielding resulting outputs.</p>
+
+<p>These pipes can be connected together to form more complex pipes: the outputs of one pipes become the inputs of the next pipe. Ultimately, these pipes are assembled as a complete pipeline, an <code>Effect</code> in the vocabulary of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>, a recipe for stream processing.</p>
+
+<p>The key to our refactoring of <code>echo</code> to use <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> is thus to observe in what way the function corresponds to the processing of a stream of data.</p>
+
+<h3 id="refactoring">Refactoring</h3>
+
+<p>We can easily view our <code>echo</code> function as processing a stream of lines read from the standard input and flowing down to standard output. We can therefore use <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> to model the recipe matching it:</p>
+
+<pre><code class="language-haskell">stdinLn "in&gt; "
+  .| takingWhile (/= "quit")
+  .| mapping ("out&gt; " ++)
+  .| stdoutLn
+</code></pre>
+
+<p>This recipe is made of several pipes, connected together with the <code>.|</code> pipe operator:</p>
+
+<ul>
+  <li><code>stdinLn</code> feeds the pipe with strings read from the standard input</li>
+  <li><code>takingWhile</code> forwards elements passing through it, interrupting the pipeline if it sees the string “quit”</li>
+  <li><code>mapping</code> transforms elements passing through it (here to prepend a prompt to each string)</li>
+  <li><code>stdoutLn</code> writes in standard output any string which goes through it</li>
+</ul>
+
+<p>Assembled together, these pipes build an <code>Effect</code> that corresponds to the recipe of echoing back strings as long as the string read is not “quit”.</p>
+
+<h3 id="running-a-recipe">Running a recipe</h3>
+
+<p>The <code>Effect</code> we just wrote is but the description for a recipe for processing a stream. This allow us to decouple the specification of the transformation from its execution (and therefore potentially offer several ways to execute a recipe).</p>
+
+<p>To run the recipe in a sequential fashion, and start flowing some data (from left to right) inside it, we use the <code>runEffect</code> function:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = runEffect $              -- Run the pipeline which
+  stdinLn "in&gt; "                -- * read the standard input
+    .| takingWhile (/= "quit")  -- * as long as the user does not write "quit"
+    .| mapping ("out&gt; " ++)     -- * preprend "out&gt;" to the string read
+    .| stdoutLn                 -- * then write the string in standard output
+</code></pre>
+
+<p>The code above is equivalent to our initial “echo” function:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = do
+  putStr "in&gt; "                 -- Write "in&gt; " in standard output
+  l &lt;- getLine                  -- Read the standard input
+  when (l /= "quit") $ do       -- Upon encountering something else than "quit"
+    putStrLn ("out&gt; " ++ l)     -- Echo the string in standard output
+    echo                        -- Recurse to loop again
+</code></pre>
+
+<p>The big difference is that each concerns are kept separated: for instance, the acquisition of inputs (<code>stdinLn</code>) and the stop condition (<code>takingWhile</code>) are fully decoupled. As we will see, this will help us a lot when comes to some additional requirements in our program.</p>
+
+<h3 id="using-pipes-to-decouple-concerns">Using pipes to decouple concerns</h3>
+
+<p>In our initial implement of “echo”, adding the requirement of deduplicating the input strings led to coupled concerns. Using <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>, we can instead isolate this additional concern into a specific pipe, named deduplicating.</p>
+
+<p>This pipe will <strong>await</strong> values, keep track of the last value read, and only <strong>yield</strong> those that are different from the previous one. The full code of deduplicating is shown below as reference (*). We will later explain how to build our own pipelines in more details:</p>
+
+<pre><code class="language-haskell">deduplicating : (Eq a, Monad m) =&gt; Pipe a m a
+deduplicating = recur (the (a -&gt; Bool) (const True)) where
+  recur isDifferent =
+    awaitOne $ \x =&gt; do
+      when (isDifferent x) (yield x)
+      recur (/= x)
+</code></pre>
+
+<p>This deduplicating logic is isolated, decoupled from the rest of the pipeline, and can now be used else where in the code. In particular, we can add this new pipe in our pipeline to support the new requirement, and no other parts of the pipeline need to know about it:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = runEffect $
+  stdinLn "in&gt; "                
+    .| takingWhile (/= "quit")  
+    .| deduplicating            -- Remove consecutive repeating calls
+    .| mapping ("out&gt; " ++)     
+    .| stdoutLn  
+</code></pre>
+
+<p>And we are done. We managed to add the requirement of deduplicated entries as a separate concern, decoupled from the rest of the pipeline.</p>
+
+<p><em>(*) This Pipe is also available in the library in <a href="https://github.com/QuentinDuval/IdrisPipes/blob/master/src/Pipes/Prelude.idr">Pipes.Prelude</a>, along with plenty other standard pipes. You should consider taking a look at the rich set of already available pipes before implementing your own.</em></p>
+
+<h2 id="a-quick-tour-of-idrispipes-support-for-stream-processing">A Quick tour of IdrisPipes support for stream processing</h2>
+
+<p>Let us now do a quick tour of the design and model followed by <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> and the features it provides to build effectful streaming programs.</p>
+
+<h3 id="a-few-concepts---one-composition-operator">A few concepts - One composition operator</h3>
+
+<p>A pipeline of data transformation typically consists of three kind of elements: a source that streams pieces of data, intermediary pipes to transform that data, and a sink that consumes the data to produce a single result. Each of these elements can produce some side effects as well.</p>
+
+<p><a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> defines a type for each of these kinds of pipes. These types are listed below, with <code>m</code> standing for the Monad matching the desired side effects:</p>
+
+<ul>
+  <li>A <code>Pipe i m o</code> awaits values of type <code>i</code> and yields values of type <code>o</code></li>
+  <li>A <code>Source m o</code> yields values of type <code>o</code>, and cannot await any values</li>
+  <li>A <code>Sink i m r</code> awaits values of type <code>i</code> to build a result of type <code>m r</code></li>
+  <li>A <code>Effect m r</code> cannot yield or await, and produces <code>a m r</code> when executed</li>
+</ul>
+
+<p>In short, an <code>Effect</code> represents the complete pipeline, starting with a <code>Source</code>, ending with a <code>Sink</code> and possibly made of intermediary <code>Pipes</code>, and which can be run using <code>runEffect</code>:</p>
+
+<pre><code class="language-haskell">echo : IO ()
+echo = runEffect $
+  stdinLn "in&gt; "                -- Source
+    .| takingWhile (/= "quit")  -- Pipe
+    .| deduplicating            -- Pipe
+    .| mapping ("out&gt; " ++)     -- Pipe
+    .| stdoutLn                 -- Sink
+</code></pre>
+
+<p>All these types compose together nicely using a single <code>.|</code> operator, to produce new pipes that automatically match their associated semantic model:</p>
+
+<ul>
+  <li>A <code>Source m a</code> followed by a <code>Pipe a m b</code> is a <code>Source m b</code></li>
+  <li>A <code>Pipe a m b</code> followed by a <code>Sink b m r</code> is a <code>Sink a m r</code></li>
+  <li>A <code>Pipe a m b</code> followed by a <code>Pipe b m c</code> is a <code>Pipe a m c</code></li>
+  <li>A <code>Source m a</code> followed by a <code>Sink a m r</code> is an <code>Effect m r</code></li>
+</ul>
+
+<p>All these types are in fact type synonyms for the core data type <code>PipeM i o r1 m r2</code>, with some of the type variables replaced by <code>Void</code>. We will explore in future posts what this type represents in more details.</p>
+
+<p><em>Note: If you look at the API, you will also notice additional types such as <code>SourceM</code>, <code>SinkM</code>, <code>PipeM</code>. These types are more general than <code>Source</code>, <code>Sink</code> and <code>Pipe</code> and give full access to the return type of the pipe, something useful in particular cases. We will explore this in future posts.</em></p>
+
+<h3 id="two-main-primitives-yield-and-await">Two main primitives: yield and await</h3>
+
+<p>Defining a new pipe is rather easy and relies upon just a few ingredients: <code>yield</code> (to send a value downstream) and <code>await</code> (to receive a value from upstream). To complete the picture, we can use tail recursion to build stateful pipes, and the Monad <code>m</code> to produce side-effects.</p>
+
+<p>For instance, we can define an infinite <code>Source</code> that <code>yield</code> the repeated application of a given function (known as the function <code>iterate</code> in Idris) rather easily:</p>
+
+<pre><code class="language-haskell">iterating : (Monad m) =&gt; (a -&gt; a) -&gt; a -&gt; Source m a
+iterating f = recur where
+  recur a = do
+    yield a     -- Yield the value downstream
+    recur (f a) -- Recurse with (f a) as next seed
+</code></pre>
+
+<p>Similarly, we can easily define a <code>Sink</code> that folds over its inputs to build a result. It just awaits for inputs and combine them with an initial accumulator. Upon <code>await</code> returning <code>Nothing</code>, the stream does not have any more values to stream, and we can return the result:</p>
+
+<pre><code class="language-haskell">fold : (Monad m) =&gt; (a -&gt; b -&gt; b) -&gt; b -&gt; Sink a m b
+fold f = recur where
+  recur acc = do
+    ma &lt;- await           -- await for more inputs
+    case ma of                   
+      Just x =&gt; do        -- in case there is a value to process
+        acc' &lt;- f x acc   -- * combine it the current accumulator
+        recur acc'        -- * and recurse with the new value
+      Nothing =&gt; pure acc -- otherwise, return the result
+</code></pre>
+
+<p>We can plug these two pipes together to sum the integers from 0 to 4 as follows:</p>
+
+<pre><code class="language-haskell">runPure $                 -- Run the pipeline in the Identity Monad (pure)
+  iterating (+1) 0        -- Generate the integers from 0 to infinity
+    .| takingWhile (&lt; 5)  -- Take the ones below 5
+    .| fold (+) 0         -- And sum them
+</code></pre>
+
+<p><em>Note: these pipes are already available in <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>, although the actual implementation is more concise and general. The library also offer a function “awaitOr” that allows to capture the return type of the previous pipe.</em></p>
+
+<h3 id="return-value-and-early-termination">Return value and early termination</h3>
+
+<p>As demonstrated by the great <a href="https://hackage.haskell.org/package/pipes">Haskell Pipes</a> and <a href="https://hackage.haskell.org/package/conduit">Haskell Conduit</a> libraries, there is a huge design space for a pipe library such as <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>.</p>
+
+<p>In particular, there are many design choice we can make regarding the support of early termination inside the core of the library, or the support of return values at different stages of the pipeline.</p>
+
+<p>Following the reading of this <a href="https://www.yesodweb.com/blog/2013/10/core-flaw-pipes-conduit">great post on the flows of Haskell Pipes and Conduit</a> by <a href="https://twitter.com/snoyberg">Michael Snoyman</a>, I decided to follow the path of <a href="https://hackage.haskell.org/package/conduit">Conduit</a> and integrate early termination inside the core of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>.</p>
+
+<p>This way, you can define a <code>Sink</code> such as fold, or a pipe such as <code>groupBy</code>, which would not have been possible without the support for early termination, while still allowing for the pipes to return some values.</p>
+
+<h3 id="pull-based-stream-model">Pull based stream model</h3>
+
+<p><a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> follows a pull-based streaming model:</p>
+
+<ul>
+  <li>The <code>Sink</code> starts processing first</li>
+  <li>Each pipe gives control to the pipe before it when it awaits a value</li>
+  <li>Each pipe immediately releases control to the pipe after it when it yields a value</li>
+</ul>
+
+<p>This allows keeping the memory consumption of the pipeline under control. You can tweak it, and exchange memory for speed in some cases, by implementing pipes that group individual pieces of data into chunks. In fact, an implementation of this pipe is available in <a href="https://github.com/QuentinDuval/IdrisPipes/blob/master/src/Pipes/Prelude.idr">Pipes.Prelude</a>, named <code>chunking</code>:</p>
+
+<pre><code class="language-haskell">chunking : (Monad m) =&gt; (n: Nat) -&gt; {auto prf: GTE n 0} -&gt; Pipe a m (List a)
+chunking = ?hole -- Defined in Pipes.Prelude
+</code></pre>
+
+<p>One direct consequence of this pull-based streaming model is that the source might not be totally consumed. The pipeline will only consume as much as the source as needed.</p>
+
+<p>It also means that you can use <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> to perform pure <strong>lazy computation</strong> (using <code>runPure</code>), which you can find useful as Idris is strict by default (there are other solutions available for you to do this though).</p>
+
+<h3 id="large-collection-of-built-in-algorithms">Large collection of built-in algorithms</h3>
+
+<p>In order to avoid you having to re-invent the wheel, <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> also comes with a large collection of already existing pipes in <a href="https://github.com/QuentinDuval/IdrisPipes/blob/master/src/Pipes/Prelude.idr">Pipes.Prelude</a>, which will only grow as time goes by.</p>
+
+<p>Here is a non-exhaustive list of existing pipes you can use:</p>
+
+<ul>
+  <li><code>mapping f</code> maps each element of the pipe with <code>f</code></li>
+  <li><code>filtering p</code> only forward elements satisfying <code>p</code></li>
+  <li><code>groupingBy p</code> build chunks of elements comparable by <code>p</code></li>
+  <li><code>splittingBy p</code> splits in chunk at elements satisfying <code>p</code></li>
+  <li><code>tracing f</code> runs an effectful function <code>f</code> on each element</li>
+</ul>
+
+<p>The library also comes with some helper functions which help you building your own pipes. For instance, some helpers will take care of early termination and automatic forwarding of the return value of the previous pipe. In particular, the following function might prove useful to you:</p>
+
+<ul>
+  <li><code>awaitForever</code> helps building stateless pipes</li>
+  <li><code>awaitOne</code> helps building stateful pipes</li>
+  <li><code>each</code> helps yielding several values</li>
+  <li><code>idP</code> gives you an identity pipe</li>
+</ul>
+
+<p>These helpers are available and documented in <a href="https://github.com/QuentinDuval/IdrisPipes/blob/master/src/Pipes/Core.idr">Pipes.Core</a>.</p>
+
+<h3 id="missing-features">Missing features</h3>
+
+<p><a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> does not yet support leftovers, or the prompt release of resources, as <a href="https://hackage.haskell.org/package/pipes-safe">Haskell pipes-safe</a> and <a href="https://hackage.haskell.org/package/conduit">Haskell conduit</a> allows you to do. These features might be integrated into the library in the coming months.</p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next?</h2>
+
+<p>In this post, we went over the motivations and goals behind <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> as well as a quick overview of the package and the features it offers.</p>
+
+<p>In future posts, we will zoom into the implementation details of the package to explain how it works, and discuss some of the design choices and some possible alternatives.</p>
+
+<p>You can have a look at the full package in this <a href="https://github.com/QuentinDuval/IdrisPipes">GitHub</a> repo.</p>
+
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-11-02T00:00:00+00:00">November 2, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=IdrisPipes%3A+a+library+for+composable+and+effectful+stream+processing+in+Idris%20%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html&title=IdrisPipes%3A+a+library+for+composable+and+effectful+stream+processing+in+Idris" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F11%2F02%2Fidris-pipes.html&t=IdrisPipes: a library for composable and effectful stream processing in Idris" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/10/12/dependent-type-deduction.html" title="Why template parameters of dependent type names cannot be deduced, and what to do about it">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Why template parameters of dependent type names cannot be deduced, and what to do about it</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/11/13/free-monads-intro.html" title="Free Monads: from the basics to composable and effectful stream processing">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Free Monads: from the basics to composable and effectful stream processing</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

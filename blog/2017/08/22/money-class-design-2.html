@@ -1,0 +1,929 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Money class design: why not having currencies as type parameters? - Double Ended Queue</title>
+<meta name="description" content="A follow up on the study of the ideal design for the Money class, answering an interesting question on Reddit.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Money class design: why not having currencies as type parameters?">
+<meta property="og:url" content="/blog/2017/08/22/money-class-design-2.html">
+
+
+  <meta property="og:description" content="A follow up on the study of the ideal design for the Money class, answering an interesting question on Reddit.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Money class design: why not having currencies as type parameters?">
+  <meta name="twitter:description" content="A follow up on the study of the ideal design for the Money class, answering an interesting question on Reddit.">
+  <meta name="twitter:url" content="/blog/2017/08/22/money-class-design-2.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-08-22T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/08/22/money-class-design-2.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Money class design: why not having currencies as type parameters?">
+    <meta itemprop="description" content="A follow up on the study of the ideal design for the Money class, answering an interesting question on Reddit.">
+    <meta itemprop="datePublished" content="2017-08-22T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Money class design: why not having currencies as type parameters?
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-08-22T00:00:00+00:00">August 22, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html&text=Money+class+design%3A+why+not+having+currencies+as+type+parameters%3F&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/08/22/money-class-design-2.html&title=Money class design: why not having currencies as type parameters?"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/08/22/money-class-design-2.html&t=Money class design: why not having currencies as type parameters?">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#summary-of-the-last-episode">Summary of the last episode</a><ul><li><a href="#two-broad-category-of-designs">Two broad category of designs</a></li><li><a href="#martin-fowlers-approach">Martin Fowler’s approach</a></li><li><a href="#type-safe-preconditions-with-idris">Type safe preconditions with Idris</a></li></ul></li><li><a href="#currencies-as-type-parameters">Currencies as type parameters</a><ul><li><a href="#motivation">Motivation</a></li><li><a href="#how-it-works">How it works</a></li></ul></li><li><a href="#down-the-rabbit-hole">Down the rabbit hole</a><ul><li><a href="#support-for-equality">Support for equality</a></li><li><a href="#what-just-happened">What just happened</a></li><li><a href="#storage-becomes-an-issue">Storage becomes an issue</a></li><li><a href="#algorithms-are-out-of-reach">Algorithms are out of reach</a></li><li><a href="#types-are-contagious">Types are contagious!</a></li></ul></li><li><a href="#conclusion">Conclusion</a><ul><li><a href="#types-have-drawbacks">Types have drawbacks</a></li><li><a href="#type-safety-vs-flexibility">Type safety VS flexibility</a></li><li><a href="#the-best-of-both-worlds-with-dependent-typing">The best of both worlds with dependent typing?</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the <a href="/blog/2017/08/17/money-class-design.html">previous post</a>, we went through a comparative study of 4 different designs for a Money class that represents an amount of money in a given currency. This article received a quite positive review, and also a lot of comments and remarks.</p>
+
+<p>One of the most recurring remark was: <strong>why not encode the currencies as types parameters of the Money class?</strong> If we do so, the currencies will be visible in the type system and should allow us to implement safe arithmetic.</p>
+
+<p>This is a fair and interesting remark, especially since it appears to be such a good design solution at first sight.</p>
+
+<p>In this post, we will first present the solution in details, before explaining why it is not really a viable option for the Money class. We will conclude this post with some words of advice regarding using strong types, and not using them.</p>
+
+<h2 id="summary-of-the-last-episode">Summary of the last episode</h2>
+
+<p>We first start with a quick recap on the 4 different designs we evaluated so far.</p>
+
+<h3 id="two-broad-category-of-designs">Two broad category of designs</h3>
+
+<p>In the <a href="/blog/2017/08/17/money-class-design.html">previous post</a>, we went trough two broad categories of design for the Money class.</p>
+
+<ul>
+  <li>Martin Fowler’s design was about forbidding cross-currency addition with an assertion</li>
+  <li>Kent Beck and Ward Cunningham designs implemented a sound cross currency addition</li>
+</ul>
+
+<p>In short, we could either choose to support the addition of money amounts in different currencies, or to forbid it.</p>
+
+<h3 id="martin-fowlers-approach">Martin Fowler’s approach</h3>
+
+<p>The design of <a href="https://twitter.com/martinfowler">Martin Fowler</a> relies on adding a runtime check (an assertion) to forbid cross-currency money addition. In this design, it is invalid to call add on two amounts with different currencies, and the client of the API is responsible for ensuring these preconditions are fulfilled.</p>
+
+<p>The only problem with this solution is that the client of the API might forget to do those checks. If so, the assertion will catch the violation at runtime and not at compile time, hopefully before production.</p>
+
+<h3 id="type-safe-preconditions-with-idris">Type safe preconditions with Idris</h3>
+
+<p>Using Idris, we then improved the design proposed by Martin Fowler to make it more type-safe. We made sure <strong>at compile time</strong> that the add function could only be called in the conditional branches for which the runtime checks of the precondition were done and returned a positive answer.</p>
+
+<pre><code class="language-haskell">case sameCurrency m1 m2 of  -- Forced to call the predicate
+  Yes _ =&gt; add m1 m1        -- Can only call `add` in this branch
+  No _  =&gt; ...              -- Cannot call `add` in this branch
+</code></pre>
+
+<p>It is important to understand that this last solution is not about <strong>ensuring that the structure of the code is correct</strong>. It is about ensuring that the runtime checks are always called correctly before calling add. It is not about ensuring that the two currencies are the same at compile time (it cannot be done if values are created dynamically).</p>
+
+<h2 id="currencies-as-type-parameters">Currencies as type parameters</h2>
+
+<p>Now, let us have a look at the proposal that consists in lifting the currencies as type parameters of the Money class. We will first implement it in this section. The next section will then explain why it does not make for a great design.</p>
+
+<h3 id="motivation">Motivation</h3>
+
+<p>The motivation behind this design is to answer the same concern than the Idris design. The goal is to improve on Martin Fowler’s design to make it more type-safe. The goal is to forbid cross-currency addition and to catch violation of that rule at compile time.</p>
+
+<p>To achieve that, the proposed solution is to parametize the Money class with a currency. The currency becomes a type parameter of the Money class, such that we can play with it in the type system.</p>
+
+<p>This solution was proposed by different persons (and in different languages) such as <a href="https://twitter.com/MinskAD">@MinskAD</a>, <a href="https://www.reddit.com/user/bstempi">u/bstempi</a> or <a href="https://www.reddit.com/user/zokier">u/zokier</a>. The implementation showed below is greatly inspired from these comments, and especially the one of <a href="https://www.reddit.com/user/zokier">u/zokier</a> in this <a href="https://www.reddit.com/r/programming/comments/6u8lq6/a_study_of_4_money_class_designs_featuring_martin/">reddit post</a> (and the <a href="https://gist.github.com/anonymous/acd21e856d57760b0976357a88a4d4a2">Gist</a> associated to it).</p>
+
+<h3 id="how-it-works">How it works</h3>
+
+<p>The solution consists in encoding the currency as a type parameter of the <code>Money</code> class, invisible in the runtime representation of the class, a technique reminiscent of <a href="https://wiki.haskell.org/Phantom_type">Phantom types</a> in Haskell.</p>
+
+<p>Here is a (simplistic) implementation that illustrates this design, where <code>Currency</code> is a type, and <code>Money</code> is templated on a value of that type:</p>
+
+<pre><code class="language-cpp">template&lt;Currency MoneyCurrency&gt;
+class Money
+{
+public:
+   Money() : m_amount(Amount{}) {}
+   explicit Money(Amount amount) : m_amount(amount) {}
+   Amount amount() const { return m_amount; }
+
+private:
+   Amount m_amount;
+};
+</code></pre>
+
+<p>Now that the currency appears as a type parameter, we can exploit it in the C++ type system and write an add function that it only works for two Moneys templated on the same currency:</p>
+
+<pre><code class="language-cpp">template&lt;Currency SameCurrency&gt;
+Money&lt;SameCurrency&gt; operator+ (Money&lt;SameCurrency&gt; const&amp; lhs, Money&lt;SameCurrency&gt; const&amp; rhs)
+{
+   return Money&lt;SameCurrency&gt;{lhs.amount() + rhs.amount()};
+}
+</code></pre>
+
+<p>This solves the problem for add. Money instances with the same currencies can be added normally, while trying to add Money instance with different currencies will fail to compile:</p>
+
+<pre><code class="language-cpp">auto eur = Money&lt;Currency::EUR&gt;{3};
+auto usd = Money&lt;Currency::USD&gt;{5};
+	
+// Compiles files
+auto sum_eur = eur + eur;
+
+// Does not compile
+auto invalid = eur + usd;
+</code></pre>
+
+<p>It looks like the problem is solved. But by doing so, this solution creates tons of other problems, as we will see in the next section.</p>
+
+<h2 id="down-the-rabbit-hole">Down the rabbit hole</h2>
+
+<p>To notice the problems that arise with the above design, we need to look at how this class would integrate with the rest of the software. Looking at it in isolation is not enough: we will need to gradually add some more code around this class.</p>
+
+<h3 id="support-for-equality">Support for equality</h3>
+
+<p>Let us first add the support for equality. The original implementation provided by u/zokier in his proposal is limited to equality checks between amounts with the same currency.</p>
+
+<p>We can remove this limitation by playing with pattern matching on the currency type parameter of the Money class. We can make sure that comparing Money instances with different currencies always returns false, and otherwise correctly compares the amounts:</p>
+
+<pre><code class="language-cpp">template&lt;Currency SameCurrency&gt;
+bool operator==(Money&lt;SameCurrency&gt; lhs, Money&lt;SameCurrency&gt; rhs)
+{
+  return lhs.amount() == rhs.amount();
+}
+
+template&lt;Currency LeftCurrency, Currency RightCurrency&gt;
+bool operator==(Money&lt;LeftCurrency&gt; lhs, Money&lt;RightCurrency&gt; rhs)
+{
+  return false;
+}
+</code></pre>
+
+<p>It works because the most specialized overload will be preferred to the most general one. Now, our equality operator works across moneys amounts in different currencies:</p>
+
+<pre><code class="language-cpp">// Returns false: different currencies
+Money&lt;Currency::EUR&gt;{3} == Money&lt;Currency::USD&gt;{3};
+
+// Returns true: same currency and same amount
+Money&lt;Currency::EUR&gt;{3} == Money&lt;Currency::EUR&gt;{3};
+
+// Returns false: same currency but different amount
+Money&lt;Currency::EUR&gt;{3} == Money&lt;Currency::EUR&gt;{5};
+</code></pre>
+
+<p>So with a bit of pattern matching on types, we managed to implement equality on Money amount in any currency. It was not hard, but it shows a first sign of why this design is not that great.</p>
+
+<h3 id="what-just-happened">What just happened</h3>
+
+<p>By lifting currencies from values to type parameters, we split the concept of Money into several types, one for each currency. When implementing equality, we discovered that some operations do operate on Money amounts with different currencies. This should be a warning sign.</p>
+
+<p>If it so happens that most operations on Money do not require different types for different currencies (like equality), our new design would substantially increase <a href="https://www.quora.com/What-are-essential-and-accidental-complexity">accidental complexity</a>: the special case of add and made it every other money operation’s concern.</p>
+
+<p>For now, this is not that bad. We managed to circumvent this split in different types using a simple form of template meta-programming to implement our business logic. This came at the cost of just a bit of verbosity and additional complexity. But we might not be that lucky for other use cases.</p>
+
+<h3 id="storage-becomes-an-issue">Storage becomes an issue</h3>
+
+<p>Containers such as std::vector cannot store values of different types. This means that an std::vector will not be able to contain Money amounts expressed in different currencies.</p>
+
+<pre><code class="language-cpp">std::vector&lt;Money&lt;Currency::USD&gt;&gt; usds;
+
+// Compiles fine
+usds.push_back(Money&lt;Currency::USD&gt;{5});
+
+// Does not compile
+usds.push_back(Money&lt;Currency::EUR&gt;{3});
+</code></pre>
+
+<p>This is a real big damn huge problem. Storing moneys with different currencies in a single container is a real need. We might for instance be interested in representing positions in a portfolio, or just represent a wallet.</p>
+
+<p>This time, solving this problem is not that easy. Simple meta-programming tricks will not do. We could turn to <a href="http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/index.html">boost::hana</a> and its heterogenous containers. It is a great library, but is arguably a bit too complex for such a simple use case.</p>
+
+<p>The other solution would be to do some type erasure, but this would defeat the purpose of lifting the currencies as type parameters. We would lose both information and type-safety.</p>
+
+<h3 id="algorithms-are-out-of-reach">Algorithms are out of reach</h3>
+
+<p>Because we cannot easily store Money instances with different currencies together in the same container, we cannot easily run algorithms on them either.</p>
+
+<p>With currencies as type parameters, and as many Money types as there are currencies, answering the following needs is getting much more difficult:</p>
+
+<ul>
+  <li>Counting how many currencies appear in a collection of Money.</li>
+  <li>Summing the amounts of a collection of Money, by currencies.</li>
+</ul>
+
+<p>Again, we could turn to <a href="http://www.boost.org/doc/libs/1_61_0/libs/hana/doc/html/index.html">boost::hana</a> which has a nice collection of algorithms on heterogenous sequences. But again, this looks a bit overkill.</p>
+
+<h3 id="types-are-contagious">Types are contagious!</h3>
+
+<p>The problem is that this design choice is <strong>contagious</strong>. It affects any part of the program which uses the <code>Money</code> class. There is no such thing as encapsulation of types (*). Any client code will see the currency as type parameter. Any <strong>client code is coupled to this design decision</strong>.</p>
+
+<p>For instance, let us say we want a type to represent a <a href="https://en.wikipedia.org/wiki/Foreign_exchange_spot">Foreign Exchange Spot</a>, an exchange between two currencies at a given spot date. We are forced to parameterise our class on the two currencies:</p>
+
+<pre><code class="language-cpp">template&lt;Currency BuyCurrency, Currency SellCurrency&gt;
+class foreign_exchange_spot
+{
+   Date m_spot;
+   Money&lt;BuyCurrency&gt; m_buy;
+   Money&lt;SellCurrency&gt; m_sell;
+	
+   // ... construtor, operations ...
+};
+</code></pre>
+
+<p>The design of this new class is terrible on many aspects.</p>
+
+<p>From a technical standpoint, instead of having one currency type parameter, we have two. The number of types the compiler will need to instantiate will grow as the square of the number of currencies. More complex financial products will require even more.</p>
+
+<p>From a business logic standpoint, this is problematic as well. This kind of deal is fungible: we expect to store it in numbers and compress multiple instances of it into positions. Satisfying these needs is only made harder by the strong typing.</p>
+
+<p><em>(*) Actually there is. Sub-typing would buy us type erasure, but it would defeat the purpose of this design altogether. If we feel constraint to use type erasure, why not just drop this design entirely instead?</em></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Types are great tool at ensuring invariants in a program. But they are not the tools for all kinds of invariants. For instance, lifting the currencies as type parameters of the Money class gives us a design much too rigid and far to cumbersome to deal with.</p>
+
+<p>It might not look as interesting as first sight, but encountering a scenario in which a technique failed can actually teach us more than all the success stories on the same technique. Let us review some of the things we saw.</p>
+
+<h3 id="types-have-drawbacks">Types have drawbacks</h3>
+
+<p>We have seen a pretty extreme example of the kind of problem that static typing can cause if used excessively. Although in general it does not lead to that much horror, it is often a good idea to assess to the cost and benefits of introducing a type (as with any other technique, it is almost never free).</p>
+
+<p>Types represents a pretty strong form of coupling, whereby we force a client to comply with strict rules to interact with our code. This might be the desired effect. This might be justified. But it is not always a winning trade-off.</p>
+
+<p>Be sure to verify that the cost of adding type safety does not exceed the benefits.</p>
+
+<h3 id="type-safety-vs-flexibility">Type safety VS flexibility</h3>
+
+<p>Other technics exist which offer different kinds of trade-offs, such as reduced type-safety. These technics have their pros and cons too, but should not be sacrificed at the altar of type-safety.</p>
+
+<p>Technical limitations of the language might left us with a choice between practical software versus type-safety. Dropping type-safety might be the reasonable choice in some instance.</p>
+
+<p>In our specific case, the design of Martin Fowler, although it is not as type safe, is a much better alternative compared to lifting currencies as type parameters of the Money class. The class is much less cumbersome to deal with, and the resulting software is much more flexible.</p>
+
+<p>It all boils down to where we put the cursor of type safety. Too much of it, at the wrong spot, and the software turns rigid. Too little of it, and flexibility increases marginally at the cost of safety.</p>
+
+<h3 id="the-best-of-both-worlds-with-dependent-typing">The best of both worlds with dependent typing?</h3>
+
+<p>The alternative to compile time checks are runtime checks. In mainstream type systems, these runtimes checks comes at the cost of type-safety. This is due to value and types living in two separate universes.</p>
+
+<p>Languages with support for dependent typing (like Idris) are able to breach the gap between values and types and provide <strong>increased type-safety while avoiding a lot of the coupling costs associated to strong typing</strong>.</p>
+
+<p>We will explore more this topic in future posts.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-08-22T00:00:00+00:00">August 22, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Money+class+design%3A+why+not+having+currencies+as+type+parameters%3F%20%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html&title=Money+class+design%3A+why+not+having+currencies+as+type+parameters%3F" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F08%2F22%2Fmoney-class-design-2.html&t=Money class design: why not having currencies as type parameters?" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/08/17/money-class-design.html" title="A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/09/04/list-monad-np-complexity.html" title="List Monad connection with Non-deterministic Polynomial time complexity">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">List Monad connection with Non-deterministic Polynomial time complexity</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

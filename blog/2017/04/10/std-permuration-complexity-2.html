@@ -1,0 +1,965 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>How to improve std::is_permutation complexity - Double Ended Queue</title>
+<meta name="description" content="Exploring alternatives to the hopelessly inefficient std::is_permutation.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="How to improve std::is_permutation complexity">
+<meta property="og:url" content="/blog/2017/04/10/std-permuration-complexity-2.html">
+
+
+  <meta property="og:description" content="Exploring alternatives to the hopelessly inefficient std::is_permutation.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="How to improve std::is_permutation complexity">
+  <meta name="twitter:description" content="Exploring alternatives to the hopelessly inefficient std::is_permutation.">
+  <meta name="twitter:url" content="/blog/2017/04/10/std-permuration-complexity-2.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-04-10T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/04/10/std-permuration-complexity-2.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="How to improve std::is_permutation complexity">
+    <meta itemprop="description" content="Exploring alternatives to the hopelessly inefficient std::is_permutation.">
+    <meta itemprop="datePublished" content="2017-04-10T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">How to improve std::is_permutation complexity
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-04-10T00:00:00+00:00">April 10, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html&text=How+to+improve+std%3A%3Ais_permutation+complexity&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/04/10/std-permuration-complexity-2.html&title=How to improve std::is_permutation complexity"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/04/10/std-permuration-complexity-2.html&t=How to improve std::is_permutation complexity">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#alternate-implementations">Alternate implementations</a><ul><li><a href="#hash-based-implementation">Hash based implementation</a></li><li><a href="#ordering-based-implementation">Ordering based implementation</a></li><li><a href="#performance-improvements">Performance improvements</a></li></ul></li><li><a href="#requirement-on-types">Requirement on types</a><ul><li><a href="#value-types">Value types</a></li><li><a href="#regular-types">Regular types</a></li><li><a href="#hash-is-easier-to-implement">Hash is easier to implement</a></li><li><a href="#hash-complements-equal">Hash complements equal</a></li><li><a href="#value-composition">Value composition</a></li></ul></li><li><a href="#dear-stdhash-needs-some-love">Dear std::hash needs some love</a><ul><li><a href="#proofs-of-un-affection">Proofs of un-affection</a></li><li><a href="#standard-tuple">Standard Tuple</a></li><li><a href="#why-not-fix-it">Why not fix it?</a></li></ul></li><li><a href="#back-to-stdis_permutation">Back to std::is_permutation</a><ul><li><a href="#use-hash-in-stdis_permutation">Use hash in std::is_permutation</a></li><li><a href="#what-about-memory-usage">What about memory usage?</a></li><li><a href="#combining-alternatives">Combining alternatives</a></li></ul></li><li><a href="#conclusion-and-wishes-for-the-stl">Conclusion and wishes for the STL</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In our <a href="/blog/2017/04/04/std-permuration-complexity.html">previous post</a>, we talked about the <code>std::is_permutation</code> algorithm and its algorithm complexity issue and wee went over several use cases that seems like perfect matches for this algorithm for which we cannot really use it because of its complexity issues.</p>
+
+<p>Indeed, because of its quadratic complexity, we made the argument that std::is_permutation is almost impractical: its costs is not worth the trade-off of manually coding the alternative.</p>
+
+<p>Finally, we discuss three alternative of more efficient implementations, that each require some extra memory and some additional requirements on the inputs.</p>
+
+<p>In this post, we will discuss these implementations further, and the additional requirements they add on the inputs. The goal is to explore whether these additional requirements make sense and could be used as basis for an alternate implementation. We will end up by a proposal of evolution for <code>std::is_permutation</code> and some other parts of the STL as well.</p>
+
+<h2 id="alternate-implementations">Alternate implementations</h2>
+
+<p>Since the standard implementation of <code>std::is_permutation</code> is too slow to be usable in practice, we have to find some more efficient implementations for it.</p>
+
+<p>Our previous post listed three such alternatives. These alternatives depend on the operations available on the type std::is_permutation iterates over:</p>
+
+<ul>
+  <li>An array based approach for small vocabulary sizes (like ASCII strings)</li>
+  <li>An hash map based approach in case std::hash is available</li>
+  <li>An sort based approach in case a strict total ordering is available</li>
+</ul>
+
+<p>Since the array based approach is at the same time very specialized and very similar to the hash map based approach, we will only cover the approaches 2 and 3 below.</p>
+
+<h3 id="hash-based-implementation">Hash based implementation</h3>
+
+<p>If we have a hash available on the types we iterate over, the implementation of is_permutation can leverage it to perform fast searches inside a hash map. The implementation consists in:</p>
+
+<ul>
+  <li>Counting the number of occurrences of each elements in the left iterable</li>
+  <li>Counting the number of occurrences of each elements in the right iterable</li>
+  <li>Checking that these elements and occurrence counts match up</li>
+</ul>
+
+<p>We can be a bit more clever than this in our implementation, and <strong>use a single <code>unordered_map</code> instead of two</strong>. We count plus one for each element of the left iterable, and count minus one for the elements of the right iterable.</p>
+
+<pre><code class="language-cpp">template &lt;
+  typename LhsForwardIterator,
+  typename RhsForwardIterator,
+  typename Equal = std::equal_to&lt;typename LhsForwardIterator::value_type&gt;,
+  typename Hash = std::hash&lt;typename LhsForwardIterator::value_type&gt;
+&gt;
+bool is_permutation_hash(
+  LhsForwardIterator lhs_first, LhsForwardIterator lhs_last,
+  RhsForwardIterator rhs_first, RhsForwardIterator rhs_last,
+  Equal equal = Equal(),
+  Hash hash = Hash())
+{
+  using value_type = typename LhsForwardIterator::value_type;
+  std::unordered_map&lt;value_type, int, Hash, Equal&gt; frequencies;
+  
+  for (; lhs_first != lhs_last; ++lhs_first) frequencies[*lhs_first] += 1;
+  for (; rhs_first != rhs_last; ++rhs_first) frequencies[*rhs_first] -= 1;
+  
+  return std::all_of(begin(frequencies), end(frequencies),
+                     [](auto const&amp; p) { return p.second == 0; });
+}
+</code></pre>
+
+<p>This listing is naive in many ways, but has the merit not to require any scrolling. We can improve the solutions in many ways:</p>
+
+<ul>
+  <li>Early returning in case the size of both iterable do not match</li>
+  <li>Reserving the space inside the <code>unordered_map</code> to limit resizes</li>
+  <li>Aborting the second scan in case the key to decrement is not found</li>
+</ul>
+
+<p>These ideas are implemented in the following <a href="https://gist.github.com/deque-blog/dab4ccc71aadd9e2bdc41713d197ebe6">Gist GitHub</a>. And there are for sure many more refinements we could do, optimizations as well as cosmetic changes (like using ranges), but this is not the point of this post.</p>
+
+<p><em>Note: There is also a problem of packaging of the function <code>is_permutation_hash</code>. It takes up to six arguments, which is a first problem. The default arguments are the second problem: both the equal and the hash have to be provided or none should be. Both these problems should be dealt with in production code.</em></p>
+
+<h3 id="ordering-based-implementation">Ordering based implementation</h3>
+
+<p>If we have a strict total ordering available on the types we iterate over, the implementation of is_permutation can leverage it to sort both collections and compare them equal afterwards. Here is a naive implementation of such a strategy:</p>
+
+<pre><code class="language-cpp">template &lt;
+  typename LhsForwardIterator,
+  typename RhsForwardIterator,
+  typename Less = std::less&lt;typename LhsForwardIterator::value_type&gt;
+&gt;
+bool is_permutation_less(
+  LhsForwardIterator lhs_first, LhsForwardIterator lhs_last,
+  RhsForwardIterator rhs_first, RhsForwardIterator rhs_last,
+  Less less = Less())
+{
+  using value_type = typename LhsForwardIterator::value_type;
+  std::vector&lt;value_type&gt; lhs(lhs_first, lhs_last);
+  std::vector&lt;value_type&gt; rhs(rhs_first, rhs_last);
+  if (lhs.size() != rhs.size())
+    return false;
+  
+  std::sort(begin(lhs), end(lhs));
+  std::sort(begin(rhs), end(rhs));
+  return lhs == rhs;
+}
+</code></pre>
+
+<h3 id="performance-improvements">Performance improvements</h3>
+
+<p>Due do their lower algorithmic complexity, both these alternatives perform quite faster than their std::is_permutation counterpart.</p>
+
+<p>For 50,000 elements, the standard implementation lasts around 1.7 seconds in average on my laptop. Both alternatives are systematically below the 10 milliseconds mark. This is more than 2 order of magnitude faster.</p>
+
+<p>These implementations are naive and could be made much faster: minimal changes to the hash based implementation leads to go down the 5 milliseconds. Further improvements could be reached by using more appropriate data structures. For instance, a hash map implementation based on <a href="https://en.wikipedia.org/wiki/Linear_probing">linear probing</a> would be much more efficient since we do not delete any keys in such use case.</p>
+
+<h2 id="requirement-on-types">Requirement on types</h2>
+
+<p>All the implementations listed above add some additional constraints on the underlying types of the iterables provided to the <code>is_permutation</code> algorithm. The concern is whether these constraints would make sense in the general case.</p>
+
+<p>In this section, I will try to convince you that these constraints are justified in many cases. In particular, I will argue that implementing <code>std::hash</code> should be workable for most types, and as a consequence, that we should be able to rely on its presence in all STL algorithms manipulating value types.</p>
+
+<h3 id="value-types">Value types</h3>
+
+<p>We can safely assume that the two iterables provided to <code>is_permutation</code> will contain what is usually called value types.</p>
+
+<p>There are plenty of definitions available for value types. <a href="https://www.youtube.com/watch?v=W3xI1HJUy7Q">John Lakos</a> refers to them as matching some ethereal types. <a href="https://www.amazon.fr/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215">Eric Evans</a> refers to them as objects whose characteristics are derived from their attribute values.</p>
+
+<p>In any case, it would not make much sense to call <code>std::is_permutation</code> on iterables containing something else than value types. For instance, it makes no sense on the two other object categories distinguished by Eric Evans, Entity types and Services.</p>
+
+<h3 id="regular-types">Regular types</h3>
+
+<p>In his quite famous paper <a href="http://stepanovpapers.com/DeSt98.pdf">Fundamentals of Generic Programming</a>, Stepanov defines the concept of regular type as a type satisfying a set of constraints that makes it suitable for generic programming.</p>
+
+<p>These constraints happens to match pretty closely what we expect from a value type. The following <a href="http://stackoverflow.com/questions/13998945/what-is-a-regular-type-in-the-context-of-move-semantics">Stack Overflow</a> thread features a great answer from Sean Parent that adds some more constraints after the release of C++11.</p>
+
+<p>Among the list of constraints first listed by Stepanov stands the requirement for a total ordering. Among the additional suggested by Sean Parent stands the requirement for <code>std::hash</code> to be properly defined for the type.</p>
+
+<p>So the constraints required by both our alternative implementations do make some sense for value types. Let us now discuss which of strict total ordering and hash function would make more sense.</p>
+
+<h3 id="hash-is-easier-to-implement">Hash is easier to implement</h3>
+
+<p>For the simplest use cases, defining a hash function or an operator less on a type are both pretty simple.</p>
+
+<p>The lexicographic comparison works great to define the operator less on <code>std::tuple</code>, <code>struct</code> or <code>class</code>. Hash functions can be implemented in terms of of the hashes of the attributes and the use of <code>boost::hash_combine</code> to combine their result (and again, we can selection the lexicographic ordering for the order of combination).</p>
+
+<p>But there are cases in which <strong>defining a strict total ordering gets much harder</strong>. For instance, how would you efficiently define the operator less on an <code>unordered_map</code>? The order of the elements of a hash map is unspecified, making the lexicographic comparison unworkable.</p>
+
+<p>Defining a hash function does not require such lexicographic ordering to exist. We can define the hash of a <code>unordered_map</code> by summing the hash values of each pairs stored inside the map (this is in fact what a <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8u40-b25/java/util/AbstractMap.java#AbstractMap.hashCode%28%29">valid Java implementation</a> does). There are other definitions possible: any associative and commutative function could replace plus.</p>
+
+<p>I have no formal proof to back it up, but I would argue that providing a std::hash function should be workable in every places in with we can define <code>operator==</code> (while operator less is more problematic). For instance, Clojure has no problem providing a hash function by default for all its value types.</p>
+
+<h3 id="hash-complements-equal">Hash complements equal</h3>
+
+<p>The other reason why <code>std::hash</code> is easier to add as a type requirement is its absence of meaning. The hash function is <strong>only an implementation trick to improve the efficiency of our algorithms</strong>. We do not have to bother with its meaning, we only need to make sure it is consistent with <code>operator==</code>.</p>
+
+<p>This is not true for the operator less. Let us consider an example in which this distinction is important. Here is a very naive modelization of a color in RGB encoding:</p>
+
+<pre><code class="language-cpp">struct rgb_color
+{
+  int m_red;
+  int m_green;
+  int m_blue;
+};
+</code></pre>
+
+<p>We can easily define the <code>operator==</code> such that two colours are equal if all their RGB components are equal. This definition makes sense in the context of the domain.</p>
+
+<p>We can as easily define <code>std::hash</code>, by combining the hash of the red, green and blue integers. This definition does not have to make sense in the domain, it is merely an implementation detail.</p>
+
+<p>We can also define the ordering rather mechanically, using <code>std::tie</code>:</p>
+
+<pre><code class="language-cpp">bool operator&lt; (rgb_color const&amp; lhs, rgb_color const&amp; rhs)
+{
+  auto as_tuple = [](rgb_color const&amp; c) {
+    return std::tie(c.m_red, c.m_green, c.m_blue);
+  };
+  return as_tuple(lhs) &lt; as_tuple(rhs);
+}
+</code></pre>
+
+<p><strong>But it does not make much sense to define such ordering</strong>. Is there really a notion of order between colours? Why this one in particular?</p>
+
+<p>Sean Parent advices in this same <a href="http://stackoverflow.com/questions/13998945/what-is-a-regular-type-in-the-context-of-move-semantics">Stack Overflow answer</a> to <strong>reserve the operator less for when there is a natural ordering</strong>. And there seems to be no natural ordering in this context.</p>
+
+<h3 id="value-composition">Value composition</h3>
+
+<p><strong>Composition allows decomposition</strong>. There is no point is breaking down a problem into pieces if we cannot plug back the pieces together. Compositions is therefore one of the most (if not the most) important characteristic to seek in everyday software.</p>
+
+<p>This applies to value types. We get tremendous leverage if we can aggregate values into values and preserve their value-like concepts transparently (such as equality and hash) along the the way as we compose them.</p>
+
+<p>For instance, if an unordered_map (or vector) of values is a value, we can transparently replace a std::string by an arbitrary collection of std::string inside an STL algorithm (or container) leveraging hash, and get the job done with the same efficiency.</p>
+
+<p>Since the <code>std::hash</code> could be defined mechanically in most case, there is therefore a great value in supporting it for our most common ways to aggregate values (tuples, vectors and maps for instance) and to provide helpers to help us define it on our own types (via <code>std::tie</code> for instance).</p>
+
+<h2 id="dear-stdhash-needs-some-love">Dear std::hash needs some love</h2>
+
+<p>The STL does not seem to love <code>std::hash</code> that much. For reasons that I am unaware of, this lack of affection seems to be all over the Standard Template Library.</p>
+
+<h3 id="proofs-of-un-affection">Proofs of un-affection</h3>
+
+<p>For instance, <code>std::tuple</code>, <code>std::vector</code> and <code>std::map </code>define both equality and equivalence relations automatically. But none of them define <code>std::hash</code>, while they could rather easily.</p>
+
+<p>The same goes for <code>std::unordered_map</code>: it defines equality (but not operator less, probably for the reasons we listed above) but does not provide the associated specialization for <code>std::hash</code>.</p>
+
+<h3 id="standard-tuple">Standard Tuple</h3>
+
+<p>This lack of definition for <code>std::hash</code> is especially troubling in the context of <code>std::tuple</code>: defining <code>std::hash</code> on <code>std::tuple</code> would automatically offer a helper function to define it on our user defined types.</p>
+
+<p>Using <code>std::tie</code> could get us an implementation for our custom data types very succinctly. For our rgb_color, it could look like this:</p>
+
+<pre><code class="language-cpp">size_t operator()(rgb_color const&amp; c) const
+{
+  auto as_tuple = std::tie(c.m_red, c.m_green, c.m_blue);
+  return std::hash&lt;decltype(as_tuple)&gt;()(as_tuple);
+}
+</code></pre>
+
+<h3 id="why-not-fix-it">Why not fix it?</h3>
+
+<p>For all the reasons listed above and in the previous section (composition), I strongly believe that <code>std::hash</code> should be defined for the following types:</p>
+
+<ul>
+  <li><code>std::tuple</code>: this is the most important one for it is an enabler</li>
+  <li>Sequential containers: for consistency with <code>std::string</code> (also a container)</li>
+  <li>Associative containers: very useful since less is hard to define on hash maps</li>
+</ul>
+
+<p>Adding these would make for a good addition to the features of C++ (*) and would probably greatly help a lot of C++ developers in their daily job.</p>
+
+<p><em>(*) I did not go through all the standard to check if this was already proposed for C++20 (or already integrated in C++17). Maybe it already is.</em></p>
+
+<h2 id="back-to-stdis_permutation">Back to std::is_permutation</h2>
+
+<p>Let us assume for this section that the arguments above convinced you, and you are ready to believe that <code>std::hash</code> should be a given for value types. Let us discuss what it would imply for <code>std::is_permutation</code>.</p>
+
+<h3 id="use-hash-in-stdis_permutation">Use hash in std::is_permutation</h3>
+
+<p>If <code>std::hash</code> becomes available for most of our types, we could improve <code>std::is_permutation</code> such that:</p>
+
+<ul>
+  <li>It makes it use <code>std::hash</code> if available, making it O(N) <a href="https://en.wikipedia.org/wiki/With_high_probability">W.H.P</a>.</li>
+  <li>It falls back to its current implementation otherwise</li>
+</ul>
+
+<h3 id="what-about-memory-usage">What about memory usage?</h3>
+
+<p>The algorithms based on <code>std::hash</code> or operator less do need additional memory. Although we are most likely to suffer more from the quadratic complexity than from this O(N) space requirement, this drawback cannot just be ignored.</p>
+
+<p>It could very well be a problem in some use cases in which memory is rare. The STL could provide a specific quadratic implementation for such cases, that could be named <code>std::inplace_is_permutation</code> to be explicit.</p>
+
+<h3 id="combining-alternatives">Combining alternatives</h3>
+
+<p>The <a href="https://www.youtube.com/watch?v=svA89XpMghE">last CppChat</a> asked whether we should try to always automatically select the best implementation, or whether the user should have a way to select. We could make so that both approaches can be combined.</p>
+
+<p>For instance, <code>std::is_permutation</code> could be selecting its implementation based on some concepts or <code>constexpr if</code>. This selection process could take the form of a simple redirection to algorithms (with distinct names) that would implement the different policies (such as <code>std::inplace_is_permutation</code>).</p>
+
+<p>The rationale is that the default selection policy (with priorities inside the selection in case several branches are available) might not be the best choice for everyone. Providing different functions allows the user to make a conscious choice if he desires to do so.</p>
+
+<h2 id="conclusion-and-wishes-for-the-stl">Conclusion and wishes for the STL</h2>
+
+<p>We discussed two different implementations that offers much better algorithmic complexity than the standard implement of std::is_permutation.</p>
+
+<p>We choose the hash based implementation, based on the argument that it would make sense for most for all value types to support std::hash. Based on this assumption, we saw how we could improve std::is_permutation to take advantage of this.</p>
+
+<p>To summarise, here is a list of changes in the STL, that I think would make a lot of sense and improve the life of C++ developers in the process:</p>
+
+<ol>
+  <li>Add a <code>std::hash</code> specialization for <code>std::tuple</code></li>
+  <li>Add a <code>std::hash</code> specialization for all sequential containers</li>
+  <li>Add a <code>std::hash</code> specialization for all associative containers</li>
+  <li>Fix <code>std::is_permutation</code> to take advantage of <code>std::hash</code> if available</li>
+  <li>Provide a <code>std::inplace_is_permutation</code> as alternative implementation</li>
+</ol>
+
+<p>In particular, I think that the first proposal, the specialization of <code>std::hash</code> for <code>std::tuple</code>, would be both feasible and really useful. It would help developers define their own <code>std::hash</code> for custom data types.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-04-10T00:00:00+00:00">April 10, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=How+to+improve+std%3A%3Ais_permutation+complexity%20%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html&title=How+to+improve+std%3A%3Ais_permutation+complexity" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F04%2F10%2Fstd-permuration-complexity-2.html&t=How to improve std::is_permutation complexity" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/04/04/std-permuration-complexity.html" title="Lost in std::is_permutation complexity">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Lost in std::is_permutation complexity</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/04/14/std-permuration-complexity-3.html" title="Lost in std::is_permutation complexity (reddit answer)">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Lost in std::is_permutation complexity (reddit answer)</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

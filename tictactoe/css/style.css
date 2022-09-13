@@ -1,0 +1,35 @@
+#title
+{
+  display: inline-block;
+  color: white;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+.scores
+{
+	background-color: #222;
+	text-align: center;
+	width: 100%;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.top-button
+{
+	background-color: #222;
+    border: none;
+    color: #c0c0c0;
+    margin: 10px 1.2%;
+    text-align: center;
+    display: inline-block;
+    font-size: 36px;
+    font-weight: bold;
+    outline: none;
+}
+
+.top-button:hover
+{
+    color: white;
+}

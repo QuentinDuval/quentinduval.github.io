@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/interval-training/static/css/main.d5322daf.chunk.css",
+    "main.js": "/interval-training/static/js/main.98c2a248.chunk.js",
+    "runtime-main.js": "/interval-training/static/js/runtime-main.68adb5d8.js",
+    "static/js/2.40f753bc.chunk.js": "/interval-training/static/js/2.40f753bc.chunk.js",
+    "static/js/3.db786778.chunk.js": "/interval-training/static/js/3.db786778.chunk.js",
+    "index.html": "/interval-training/index.html",
+    "static/js/2.40f753bc.chunk.js.LICENSE.txt": "/interval-training/static/js/2.40f753bc.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.68adb5d8.js",
+    "static/js/2.40f753bc.chunk.js",
+    "static/css/main.d5322daf.chunk.css",
+    "static/js/main.98c2a248.chunk.js"
+  ]
+}

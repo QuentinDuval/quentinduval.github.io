@@ -1,0 +1,953 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Pythagorean Triples in Modern C++ - Double Ended Queue</title>
+<meta name="description" content="Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Pythagorean Triples in Modern C++">
+<meta property="og:url" content="/blog/2019/01/11/pythagorean-triples-cpp.html">
+
+
+  <meta property="og:description" content="Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Pythagorean Triples in Modern C++">
+  <meta name="twitter:description" content="Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community.">
+  <meta name="twitter:url" content="/blog/2019/01/11/pythagorean-triples-cpp.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-01-11T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2019/01/11/pythagorean-triples-cpp.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Pythagorean Triples in Modern C++">
+    <meta itemprop="description" content="Generating Pythagorean triples using linear algrebra in modern C++ as an answer to the heated discussions around std::ranges in the C++ community.">
+    <meta itemprop="datePublished" content="2019-01-11T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Pythagorean Triples in Modern C++
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2019-01-11T00:00:00+00:00">January 11, 2019</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html&text=Pythagorean+Triples+in+Modern+C%2B%2B&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2019/01/11/pythagorean-triples-cpp.html&title=Pythagorean Triples in Modern C++"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2019/01/11/pythagorean-triples-cpp.html&t=Pythagorean Triples in Modern C++">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#linear-algebra-and-pythagorean-triples">Linear algebra and Pythagorean triples</a></li><li><a href="#pythagorean-triples-in-modern-c">Pythagorean Triples in Modern C++</a><ul><li><a href="#stacking-matrices">Stacking matrices</a></li><li><a href="#transforming-several-vectors-at-once">Transforming several vectors at once</a></li><li><a href="#batching-linear-transformations">Batching linear transformations</a></li><li><a href="#implementation-with-xtensor">Implementation with xtensor</a></li><li><a href="#sticking-it-in-a-loop-or-elsewhere">Sticking it in a loop… or elsewhere</a></li></ul></li><li><a href="#what-about-performance">What about performance?</a><ul><li><a href="#runtime-performance">Runtime performance</a></li><li><a href="#build-times">Build times</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>The <a href="http://ericniebler.com/2018/12/05/standard-ranges/">post of Eric Niebler on standard ranges</a> and the answer post of Aras <a href="https://aras-p.info/blog/2018/12/28/Modern-C-Lamentations/">Modern C++ lamentations</a> generated quite a lot of heat in the C++ community lately.</p>
+
+<p>The discussion it triggered was quite interesting, with amazing answers such as the <a href="http://www.elbeno.com/blog">one of Ben Deane</a>, but no answer was as intriguing to me as the answer of Sean Parent, in his blog post <a href="https://sean-parent.stlab.cc/2018/12/30/cpp-ruminations.html">Modern C++ rumination</a>. In particular, this sentence “primitive Pythagorean triples can be generated efficiently using linear algebra”.</p>
+
+<p>So let’s try and write a somehow efficient and modern C++ Pythagorean Triples generator, based on linear algebra, and using the modern multi-dimensional array C++ library <a href="https://github.com/QuantStack/xtensor">xtensor</a> (inspired from the great numpy Python library).</p>
+
+<h2 id="linear-algebra-and-pythagorean-triples">Linear algebra and Pythagorean triples</h2>
+
+<p>The connection between linear algebra and Pythagorean Triples is described in this <a href="https://en.wikipedia.org/wiki/Formulas_for_generating_Pythagorean_triples">Wikipedia article</a>, so we do not need to go into the details here.</p>
+
+<p>For the sake of this article, we just need to know that the 3 following linear transformations, represented below as three matrices, generate 3 new Pythagorean triples from a known Pythagorean triple [a, b, c]:</p>
+
+<p>$\begin{pmatrix} a_1 \\ b_1 \\ c_1 \end{pmatrix} = \begin{pmatrix} -1 &amp; 2 &amp; 2 \\ -2 &amp; 1 &amp; 2 \\ -2 &amp; 2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>$\begin{pmatrix} a_2 \\ b_2 \\ c_2 \end{pmatrix} = \begin{pmatrix} 1 &amp; 2 &amp; 2 \\ 2 &amp; 1 &amp; 2 \\ 2 &amp; 2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>$\begin{pmatrix} a_3 \\ b_3 \\ c_3 \end{pmatrix} = \begin{pmatrix} 1 &amp; -2 &amp; 2 \\ 2 &amp; -1 &amp; 2 \\ 2 &amp; -2 &amp; 3 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \end{pmatrix}$</p>
+
+<p>For the rest of this article, we will use the following notation for matrices. A matrix will be represented as a “stack” of row vectors, where each vector is represented in square brackets. For instance, our representation of the 3 matrices above are:</p>
+
+<pre><code>    [[-1, 2, 2],        [[1, 2, 2],        [[1, -2, 2]
+A =  [-2, 1, 2],    B =  [2, 1, 2],    C =  [2, -1, 2]
+     [-2, 2, 3]]         [2, 2, 3]]         [2, -2, 3]]
+</code></pre>
+
+<p>Now, if we take the row vector V = [3, 4, 5], transpose it to make it a column vector Vt, and multiply it with the matrices A, B and C, we obtain the following new column vectors (written as row vectors to make it readable):</p>
+
+<pre><code>[15,  8, 17], [21, 20, 29], [5, 12, 13]
+</code></pre>
+
+<p>We can easily check that the triples generated are indeed valid Pythagorean triples.</p>
+
+<h2 id="pythagorean-triples-in-modern-c">Pythagorean Triples in Modern C++</h2>
+
+<p>Now that we know about linear algebra and Pythagorean triples, we can think about how to implement it. Instead of just doing it naively, we will add some some key refinements (where would be the fun otherwise?) to make our code both shorter, more elegant and more efficient as well.</p>
+
+<h3 id="stacking-matrices">Stacking matrices</h3>
+
+<p>Having a row vector V representing a Pythagorean triple, do we really need to perform 3 different matrix products with the 3 separate matrices A, B and C to get the 3 next Pythagorean triples?</p>
+
+<p>We don’t. Our first trick will be to stack the matrices A, B and C on top of each other to form one big matrix D:</p>
+
+<pre><code>    [[-1, 2, 2],
+     [-2, 1, 2],
+     [-2, 2, 3],
+     [1, 2, 2],
+D =  [2, 1, 2],
+     [2, 2, 3],
+     [1, -2, 2],
+     [2, -1, 2],
+     [2, -2, 3]]
+</code></pre>
+
+<p>Now, if multiply our column vector [3, 4, 5] with this matrix D, we get a column vector of size 9, which we can then transpose and split into 3 vectors of size 3.</p>
+
+<pre><code>                                                [[15, 8, 17]
+[15, 8, 17, 21, 20, 29, 5, 12, 13]  ----------&gt;  [21, 20, 29]
+                                      (split)    [ 5, 12, 13]]
+</code></pre>
+
+<p>Now, with one single matrix product, we can get our 3 next Pythagorean triples. While <ins>the complexity of the operation is exactly the same</ins> as doing 3 separate matrix products, the resulting code will be shorter and faster.</p>
+
+<h3 id="transforming-several-vectors-at-once">Transforming several vectors at once</h3>
+
+<p>In <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">Data Oriented Design in C++</a>, <a href="https://twitter.com/mike_acton">Mike Acton</a> said: <em>“when there is one, there are many”</em>. In short, when considering a particular operation, this operation rarely occurs only once. It often occurs many times, spread around a short time frame. In such cases, we often benefit from bulking these operations.</p>
+
+<p>For instance, and in the context of linear algebra, we will often be interested in applying the same transformation (like a rotation) to a bunch of points (like the points of a triangle) at once.</p>
+
+<p>In our case, we will be interested in generated the next Pythagorean triples for a bunch of previously computed Pythagorean triple (and not a single one in isolation):</p>
+
+<ul>
+  <li>We will multiply our matrix D with a single vector [3, 4, 5] and get three vectors back</li>
+  <li>We will then multiply our matrix D with these 3 previously computed vectors and get 9 vectors back</li>
+</ul>
+
+<p>And so on until we decide to stop generating triangles…</p>
+
+<h3 id="batching-linear-transformations">Batching linear transformations</h3>
+
+<p>So how do we bulk these linear transformations? We just concatenate our column vectors $V_1$, $V_2$ up to $V_n$ side by side as a matrix U and multiply our stacked matrix D by U.</p>
+
+<p>For instance, if we want to generate the next Pythagorean triples for the row vectors <code>[5, 12, 13]</code>, <code>[15, 8, 17]</code> and <code>[21, 20, 29]</code>, here is the matrix U we have to multiply the matrix D with:</p>
+
+<pre><code>    [[-1, 2, 2],
+     [-2, 1, 2],
+     [-2, 2, 3],
+     [1, 2, 2],        [[ 5, 15, 21]
+D =  [2, 1, 2],    U =  [12,  8, 20]
+     [2, 2, 3],         [13, 17, 29]]
+     [1, -2, 2],
+     [2, -1, 2],
+     [2, -2, 3]]
+</code></pre>
+
+<p>The result of this multiplication, correctly reshaped and transposed (cf the “stacking matrices” paragraph) will give us the expected result:</p>
+
+<pre><code>[[ 35  12  37]
+ [ 65  72  97]
+ [ 33  56  65]
+ [ 77  36  85]
+ [119 120 169]
+ [ 39  80  89]
+ [ 45  28  53]
+ [ 55  48  73]
+ [  7  24  25]]
+</code></pre>
+
+<p>We can then feed this matrix to the next iteration, multiplying them with our stacked matrix D to get the 27 next Pythagorean triples, and so on…</p>
+
+<h3 id="implementation-with-xtensor">Implementation with xtensor</h3>
+
+<p>The following function implements one iteration of the process of generating Pythagorean triples.</p>
+
+<p>It takes as input the previously generated Pythagorean triples (for instance [[3, 4, 5]]) and generates the next Pythagorean triples (for instance [[5, 12, 13], [15, 8, 17], [21, 20, 29]]). This next result can in turn be fed to the function again for the Pythagorean cycle of life to continue.</p>
+
+<pre><code class="language-cpp">#include &lt;xtensor/xtensor.hpp&gt;
+#include &lt;xtensor-blas/xlinalg.hpp&gt;
+
+xt::xarray&lt;int&gt; next_pytharogian_triples(xt::xarray&lt;int&gt; const&amp; previous_stage)
+{
+   static const xt::xarray&lt;int&gt; stacked_matrices = {
+      { –1, 2, 2 },
+      { –2, 1, 2 },
+      { –2, 2, 3 },
+      { 1, 2, 2 },
+      { 2, 1, 2 },
+      { 2, 2, 3 },
+      { 1, –2, 2 },
+      { 2, –1, 2 },
+      { 2, –2, 3 }
+   };
+
+   auto shape = previous_stage.shape();
+   xt::xarray&lt;int&gt; next_three = xt::transpose(xt::linalg::dot(stacked_matrices, xt::transpose(previous_stage)));
+   next_three.reshape({ 3 * shape[0], shape[1] });
+   return next_three;
+}
+</code></pre>
+
+<p>It makes use of the following xtensor elements:</p>
+
+<ul>
+  <li><code>stacked_matrices</code> is our matrix D, concatenation of matrices A, B and C</li>
+  <li><code>xt::linalg::dot</code> is the matrix product</li>
+  <li><code>xt::transpose</code> is the matrix transpose</li>
+  <li><code>reshape</code> decomposes the result of the multiplication by D in the results of what would have been the separate multiplication by the matrices A, B and C</li>
+</ul>
+
+<p>The code is pretty short, and quite comparable the equivalent Python numpy implementation:</p>
+
+<pre><code class="language-python">def next_pythagorean_triples(previous):
+    matrices = np.array(
+        [[–1, 2, 2],
+         [–2, 1, 2],
+         [–2, 2, 3],
+         [1, 2, 2],
+         [2, 1, 2],
+         [2, 2, 3],
+         [1, –2, 2],
+         [2, –1, 2],
+         [2, –2, 3]])
+
+    next_triples = np.transpose(matrices @ np.transpose(previous))
+    next_triples = next_triples.reshape((3 * previous.shape[0], previous.shape[1]))
+    return next_triples
+</code></pre>
+
+<p>(The <code>@</code> operator above is used for the matrix multiplication in numpy)</p>
+
+<h3 id="sticking-it-in-a-loop-or-elsewhere">Sticking it in a loop… or elsewhere</h3>
+
+<p>We can now integrate <code>next_pytharogian_triples</code> into an iterator, or a simple loop to generate as many triples as we wish. The one thing we cannot do quite yet is integrate it inside a coroutine (*) to generate an infinite stream of triples, as demonstrated below in Python:</p>
+
+<pre><code class="language-python">def pythagorean_triples():
+    current = np.array([[3, 4, 5]])                     # Initial seed
+    yield from current                                  # Yield first triple
+    while True:
+        current = next_pythagorean_triples(current)     # Next iteration
+        yield from current                              # Yield each triple
+</code></pre>
+
+<p>This creates a generator that lazily produces an infinite stream of Pytharogean triples like so:</p>
+
+<pre><code>[3 4 5]
+[15  8 17]
+[21 20 29]
+[ 5 12 13]
+[35 12 37]
+[65 72 97]
+[33 56 65]
+[77 36 85]
+...
+</code></pre>
+
+<p>We could also add some filtering (for example to only keep triples with values below 1000 if we are only interested in small triangles) and run the next iterate with the reduced set of triples:</p>
+
+<pre><code class="language-python">def pythagorean_triples(filter):
+    current = np.array([[3, 4, 5]])                     # Initial seed
+    yield from current                                  # Yield first triple
+    while current.shape[0]:                             # While work to do
+        current = next_pythagorean_triples(current)     # Next iteration
+        current = filter(current)                       # Filter desired triples
+        yield from current                              # Yield each triple
+</code></pre>
+
+<p>(*) As mentioned in <a href="https://medium.com/@jasonmeisel/ranges-code-quality-and-the-future-of-c-99adc6199608">Ranges, Code Quality, and the Future of C++</a>, coroutines might be more appropriate than ranges for lazy consumption of a stream of data. In Python, a language in which we have both, I find coroutines much easier to write and read than their range algorithm counterpart for use cases where both are usable. I suspect it will apply the same in C++.</p>
+
+<h2 id="what-about-performance">What about performance?</h2>
+
+<p>How does the linear algebra based implementation compares to a raw loop?</p>
+
+<h3 id="runtime-performance">Runtime performance</h3>
+
+<p>In Visual Studio 2017 Debug build, we can generate around 30,000 Pythagorean triples in less than 33 milliseconds. In Release build, this time goes down to 1,5 milliseconds (*). Said differently, it takes around 50 nanoseconds to generate a Pythagorean triple, which is amazingly fast!</p>
+
+<p>What happens if we do not batch our linear transformations (one separate multiplication for each input triple)? The performance drops to 638 milliseconds in Debug build (20 times slower) and 29 milliseconds in Release build (20 times slower). Batching linear operations does matter, and quite a lot!</p>
+
+<p>There are other linear algebra tricks we could have used as well, such as fast matrix exponentiation or eigenvector decomposition, which are useful if we want to get just a bunch of big Pythagorean triples really fast (and not enumerate all of them).</p>
+
+<p><em>(*) This is the time it would take for the naive raw loop algorithm to find around tens of Pythagorean triples.</em></p>
+
+<h3 id="build-times">Build times</h3>
+
+<p>In terms of build times, again in Visual Studio 2017, the Debug build takes around 2,4 seconds. The Release build takes also around 2,4 seconds.</p>
+
+<p>This can be seen as the curse of using header only libraries. But it also makes xtensor (as well as xtl and xtensor-blas used here as well) really good in term of performance (*).</p>
+
+<p><em>(*) As reference, the equivalent Python code, based on the pretty optimized numpy, takes around 2,6 milliseconds to run, almost twice the time needed for xtensor to complete the task.</em></p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-01-11T00:00:00+00:00">January 11, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Pythagorean+Triples+in+Modern+C%2B%2B%20%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html&title=Pythagorean+Triples+in+Modern+C%2B%2B" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2019%2F01%2F11%2Fpythagorean-triples-cpp.html&t=Pythagorean Triples in Modern C++" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2018/09/13/distributed-agreement-on-random-order.html" title="Distributed agreement on random order: Lamport Timestamps">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Distributed agreement on random order: Lamport Timestamps</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2019/06/17/trip-report-cppp19.html" title="CPPP19 Trip report - The first edition of the first french C++ conference">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">CPPP19 Trip report - The first edition of the first french C++ conference</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

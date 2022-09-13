@@ -1,0 +1,1059 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Why template parameters of dependent type names cannot be deduced, and what to do about it - Double Ended Queue</title>
+<meta name="description" content="C++ template parameters of dependent type names cannot be deduced. Let’s see why C++ cannot do much better considering its type system and some basic maths.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Why template parameters of dependent type names cannot be deduced, and what to do about it">
+<meta property="og:url" content="/blog/2017/10/12/dependent-type-deduction.html">
+
+
+  <meta property="og:description" content="C++ template parameters of dependent type names cannot be deduced. Let’s see why C++ cannot do much better considering its type system and some basic maths.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Why template parameters of dependent type names cannot be deduced, and what to do about it">
+  <meta name="twitter:description" content="C++ template parameters of dependent type names cannot be deduced. Let’s see why C++ cannot do much better considering its type system and some basic maths.">
+  <meta name="twitter:url" content="/blog/2017/10/12/dependent-type-deduction.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-10-12T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/10/12/dependent-type-deduction.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Why template parameters of dependent type names cannot be deduced, and what to do about it">
+    <meta itemprop="description" content="C++ template parameters of dependent type names cannot be deduced. Let’s see why C++ cannot do much better considering its type system and some basic maths.">
+    <meta itemprop="datePublished" content="2017-10-12T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Why template parameters of dependent type names cannot be deduced, and what to do about it
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-10-12T00:00:00+00:00">October 12, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html&text=Why+template+parameters+of+dependent+type+names+cannot+be+deduced%2C+and+what+to+do+about+it&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/10/12/dependent-type-deduction.html&title=Why template parameters of dependent type names cannot be deduced, and what to do about it"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/10/12/dependent-type-deduction.html&t=Why template parameters of dependent type names cannot be deduced, and what to do about it">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#introducing-the-problem">Introducing the problem</a><ul><li><a href="#dependent-names">Dependent names</a></li><li><a href="#dependent-type-names">Dependent type names</a></li><li><a href="#dependent-type-names-as-arguments">Dependent type names as arguments</a></li><li><a href="#hidden-dependent-type-names">Hidden dependent type names</a></li></ul></li><li><a href="#why-the-compiler-cannot-do-much-better">Why the compiler cannot do much better</a><ul><li><a href="#type-level-functions">Type level functions</a></li><li><a href="#injective-functions">Injective functions</a></li><li><a href="#type-level-functions-are-not-necessarily-injective">Type level functions are not necessarily injective</a></li><li><a href="#the-compiler-cannot-deduce-the-template-parameter-of-a-dependent-type">The compiler cannot deduce the template parameter of a dependent type</a></li><li><a href="#this-is-not-specific-to-c">This is not specific to C++</a></li></ul></li><li><a href="#how-to-circumvent-the-issue">How to circumvent the issue?</a><ul><li><a href="#relying-on-additional-parameters">Relying on additional parameters</a></li><li><a href="#explicit-template-specialization">Explicit template specialization</a></li><li><a href="#improving-the-design-by-removing-constraints">Improving the design by removing constraints</a></li><li><a href="#proxy-parameters">Proxy parameters</a></li><li><a href="#injective-type-level-functions-haskell-only">Injective type level functions (Haskell only)</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>Following the presentation <a href="https://cppcon2017.sched.com/event/BguD/a-type-by-any-other-name">a type by any other name</a> at the CppCon, a great talk that shows how to incrementally refactor code using tooling and type aliases, I got interested in one of the observation made by Jon Cohen:</p>
+
+<p><em>Template parameters of dependent type names cannot be deduced</em>.</p>
+
+<p>This short post aims at describing this issue and explaining why it is so. We will explain why C++ cannot do much better considering its type system and some basic mathematics. We will conclude by showing different ways to solve this issue, including one from Haskell.</p>
+
+<h2 id="introducing-the-problem">Introducing the problem</h2>
+
+<p>Before we dive into the explanations, we first have to describe the issue raised by Jon Cohen and introduce the notion of dependent names in C++.</p>
+
+<h3 id="dependent-names">Dependent names</h3>
+
+<p>Inside the definition of a template, the meaning of some identifiers might depend on one or several template parameters. For instance in the following code, the meaning of <code>const_iterator</code> depends on the type <code>T</code>:</p>
+
+<pre><code class="language-cpp">template&lt;typename T&gt;
+void f(Container&lt;T&gt; const&amp; cont)
+{
+   Container&lt;T&gt;::const_iterator it = ...; //Ambiguous (and will not compile)
+}
+</code></pre>
+
+<p>We call such identifiers <em>dependent names</em>.</p>
+
+<p>Because C++ syntax uses overloading, such a name could in theory refer to a static member as much as a type. This ambiguity is the reason why the code above does not compile.</p>
+
+<h3 id="dependent-type-names">Dependent type names</h3>
+
+<p>To get rid of the ambiguity, dependent names are not considered as referring to types <em>“unless the keyword typename is used or unless it was already established as a type name”</em> (from <a href="http://en.cppreference.com/w/cpp/language/dependent_name">cppreference.com</a>).</p>
+
+<p>This is why we have to add the <code>typename</code> keyword to make the code above valid:</p>
+
+<pre><code class="language-cpp">template&lt;typename T&gt;
+void f(Container&lt;T&gt; const&amp; cont)
+{
+   typename Container&lt;T&gt;::const_iterator it = ...; // OK, const_iterator refers to a type
+}
+</code></pre>
+
+<p><em>Note: This was a rather quick introduction to dependent names and dependent type names. The reader is encouraged to look at the <a href="http://en.cppreference.com/w/cpp/language/dependent_name">cppreference.com</a> or this <a href="https://eli.thegreenplace.net/2012/02/06/dependent-name-lookup-for-c-templates">blog post from Eli Bendersky</a> for more detailed information on the subject.</em></p>
+
+<p>From now on, we will refer to these dependent names qualified with <code>typename</code> as <em>dependent type names</em>.</p>
+
+<h3 id="dependent-type-names-as-arguments">Dependent type names as arguments</h3>
+
+<p>Dependent type names can appear inside the signature of function templates, as shown below in this over-constrained implementation of <code>for_each</code>:</p>
+
+<pre><code class="language-cpp">template&lt;typename T, typename Consumer&gt;
+void for_each(
+   typename std::vector&lt;T&gt;::const_iterator first, //dependent type on T
+   typename std::vector&lt;T&gt;::const_iterator last,  //dependent type on T
+   Consumer consumer)
+{
+   for (;first != last; ++first)
+      consumer(*first);
+}
+</code></pre>
+
+<p>While this code may look fine on the surface, there is a problem here. Upon calling <code>for_each</code>, the compiler will be able to deduce the type of the <code>iterator</code>, but not be able to infer the template parameter <code>T</code>.</p>
+
+<p>And so the following code, which looks perfectly valid, will not compile: the compiler will complain <em>“unable to deduce the template parameter T”</em>:</p>
+
+<pre><code class="language-cpp">std::vector&lt;int&gt; ints = {1, 2, 3};
+for_each(ints.begin(), ints.end(), [](int i) { // Does not compile
+   std::cout &lt;&lt; i &lt;&lt; '\n';
+});
+</code></pre>
+
+<p>The problem is what Jon Cohen referred as <strong>“template parameters of dependent type names cannot be deduced”</strong> in his talk. This kind of error will likely confuse more than one newcomer to C++.</p>
+
+<p>Why can’t the compiler figure out the type of <code>T</code>?</p>
+
+<h3 id="hidden-dependent-type-names">Hidden dependent type names</h3>
+
+<p>The previous example featured a case in which the dependent type name was pretty easy to spot. The <code>typename</code> and the <code>::const_iterator</code> appeared explicitly. But things get more complex when we introduce type aliases.</p>
+
+<p>For instance, we can write an alias template <code>container_t</code> to select a different container depending on the type of element we would like to store in it (we do not use <code>std::conditional_t</code> to show we are dealing with dependent type names):</p>
+
+<ul>
+  <li>If the type is copyable, we want to use a <code>std::vector</code></li>
+  <li>Otherwise we want to use a <code>std::list</code></li>
+</ul>
+
+<pre><code class="language-cpp">template&lt;class T&gt;
+using container_t =
+    typename std::conditional&lt;
+        std::is_copy_constructible&lt;T&gt;{}(),
+        std::vector&lt;T&gt;,
+        std::list&lt;T&gt;&gt;::type;
+</code></pre>
+
+<p>We can now define a function <code>f</code> which takes as parameter a <code>container_t</code>. As we can see, it gets really hard to spot that we are dealing with a dependent type name from the signature alone:</p>
+
+<pre><code class="language-cpp">template&lt;class T&gt;
+void f(container_t&lt;T&gt; const&amp; v) { /* ... */ }
+</code></pre>
+
+<p>But hidden or not, the problem still remains. The compiler will be unable to deduce the type of elements stored in the container:</p>
+
+<pre><code class="language-cpp">container_t&lt;int&gt; v;
+f(v);      // KO: Does not compile, compiler cannot deduce T
+f&lt;int&gt;(v); // OK: Compiles file
+</code></pre>
+
+<p>This is precisely the tricky case that Jon Cohen raised in his presentation, and this one will most likely annoy C++ beginners for quite a long time.</p>
+
+<p>Again, why can’t the compiler figure out the type of <code>T</code>?</p>
+
+<h2 id="why-the-compiler-cannot-do-much-better">Why the compiler cannot do much better</h2>
+
+<h3 id="type-level-functions">Type level functions</h3>
+
+<p>We can conceive a type name depending on a template parameter as the result of a function applied on the template parameter. The syntax is different, but it obey the same principle (*).</p>
+
+<p>For instance, here is the type-level function that computes the common type between two or more types in C++, followed by what would the syntax of a normal function call:</p>
+
+<pre><code class="language-cpp">using result_t = std::common_type_t&lt;t1, t2&gt;;
+
+// In principle similar to:
+auto result_t = std::common_type_t(t1, t2);
+</code></pre>
+
+<p>Similarly, the <code>const_iterator</code> dependent type name can be seen as the result of the application of a type-level function on the vector class template:</p>
+
+<pre><code class="language-cpp">using iterator_t = std::vector&lt;t1&gt;::const_iterator;
+
+// Could be rewritten as:
+using iterator_t = std::const_iterator_t&lt;std::vector&lt;t1&gt;&gt;;
+
+// In principle similar to:
+auto iterator_t = std::const_iterator_t(std::vector&lt;t1&gt;);
+</code></pre>
+
+<p><em>(*): The syntax for calling a type-level function is what <a href="https://twitter.com/odinthenerd">Odin Holmes</a> refers as the “unicorn call syntax” as a reference to the “uniform call syntax” C++ standard proposal. We just replace <code>using</code> by <code>auto</code> and angle brackets by parentheses to get the normal call syntax.</em></p>
+
+<h3 id="injective-functions">Injective functions</h3>
+
+<p>A function f is <em>injective</em> is for all input $x$ and $y$, $f(x) = f(y) \implies x = y$.</p>
+
+<p>In plain english, it means that feeding the function with different inputs lead to different outputs. For each outputs of the function, there is only one possible input that could have led to this output.</p>
+
+<p>One interesting consequence is that if a function is not injective, there is no way we can find back the input value that led to a specific output (since there might be several inputs available).</p>
+
+<p>If on the contrary a function is injective, we can build a reverse function on its image (the set of all possible outputs of the function) to find back the input element for a given output.</p>
+
+<h3 id="type-level-functions-are-not-necessarily-injective">Type level functions are not necessarily injective</h3>
+
+<p>Upon encountering a dependent type name, which as we mentioned could be viewed as a function operating on types, the compiler has unfortunately no guaranty that the function is injective.</p>
+
+<p>In fact, among the examples of type level functions that we talked about earlier, we already found at least an example of non injective function:</p>
+
+<pre><code class="language-cpp">// Clearly not injective
+using result_t = std::common_type_t&lt;t1, t2&gt;;
+
+// Is it really injective?
+using iterator_t = std::const_iterator_t&lt;std::vector&lt;T&gt;&gt;;
+</code></pre>
+
+<p>If we consider that <code>std::vector</code> has an additional template parameters for the allocator, the <code>const_iterator_t</code> type level function is clearly not injective either. We do not expect the iterator type to be different for different type of allocator.</p>
+
+<h3 id="the-compiler-cannot-deduce-the-template-parameter-of-a-dependent-type">The compiler cannot deduce the template parameter of a dependent type</h3>
+
+<p>The compiler is unable to ensure that a type-level function is injective (*). And so it cannot reasonably invert the type level function and deduce a parameter type <code>T</code> given only a type which depends on that parameter as there might be several valid <code>T</code> for this same output!</p>
+
+<p>Going back to our bad <code>for_each</code> function template, the compiler will not be able to deduce the template parameter <code>T</code> given only an iterator:</p>
+
+<pre><code class="language-cpp">template&lt;typename T, typename Consumer&gt;
+void for_each(
+   typename std::vector&lt;T&gt;::const_iterator first, //dependent type on T
+   typename std::vector&lt;T&gt;::const_iterator last,  //dependent type on T
+   Consumer consumer)
+{
+   for (;first != last; ++first)
+      consumer(*first);
+}
+</code></pre>
+
+<p>There might indeed be several <code>T</code> matching the <code>const_iterator</code> type provided as parameter: the compiler cannot know which overload to select.</p>
+
+<p><em>(*): This is not even taking into account the possibility of <a href="http://en.cppreference.com/w/cpp/language/template_specialization">explicit template specialization</a>, which means that even so we could ensure a type level function is injective today, we could not guaranty it would stay that way.</em></p>
+
+<h3 id="this-is-not-specific-to-c">This is not specific to C++</h3>
+
+<p>All languages that offer the possibility to compute types depending on some other value or types will face the same kind of issue. For instance, in Haskell, the same issue appears, although in a slightly different form.</p>
+
+<p>The following code declares a <code>typeclass</code> (an interface or type trait if you wish) named <code>Func</code>, with a template parameter <code>a</code>. This type class exposes a type alias <code>Res</code> which depends on the type parameter <code>a</code>.</p>
+
+<pre><code class="language-haskell">class Func a where
+  type Res a :: *
+</code></pre>
+
+<p>We provide two instances (specialization, or implementation of the interface, if you wish) of this type class for integer and string, which show how it looks like practically:</p>
+
+<pre><code class="language-haskell">instance Func Int where
+  type Res Int = Int -- Res Int is an alias for Int
+
+instance Func String where
+  type Res String = String -- Res String is an alias for String
+</code></pre>
+
+<p>The “equivalent” code (in very loose terms) in C++ would be something like:</p>
+
+<pre><code class="language-cpp">template&lt;typename T&gt;
+struct Func {};
+
+template&lt;&gt;
+struct Func&lt;int&gt; {
+   using Res = int;
+};
+
+template&lt;&gt;
+struct Func&lt;std::string&gt; {
+   using Res = std::string;
+};
+</code></pre>
+
+<p>If we try to define a function taking a <code>Res a</code> as input, we get a compilation error which says that we cannot deduce the type parameter <code>a</code> from <code>Res a</code>, in spirit the same error as we got in C++:</p>
+
+<pre><code class="language-haskell">-- Equivalent to
+-- void f(typename Func&lt;a&gt;::Res)
+
+f :: Res a -&gt; IO ()
+f _ = print "Does not compile (type `a` is ambiguous)"
+</code></pre>
+
+<p>The main difference with Haskell is that we get the compilation error at the very definition of the function, while the error occurs at the call site in C++.</p>
+
+<h2 id="how-to-circumvent-the-issue">How to circumvent the issue?</h2>
+
+<p>There are different ways we can resolve the ambiguity on the compiler side, by giving it some hints on which specialization should be selected. Let us review some of them.</p>
+
+<h3 id="relying-on-additional-parameters">Relying on additional parameters</h3>
+
+<p>While the compiler cannot deduce the template parameter of a dependent type name, it is still perfectly able to deduce a template parameter if it appears somewhere else in the signature of the function, as shown in this implementation of <code>std::accumulate</code>:</p>
+
+<pre><code class="language-cpp">template&lt;typename T, typename BinaryOp&gt;
+T accumulate(
+   typename std::vector&lt;T&gt;::const_iterator first,
+   typename std::vector&lt;T&gt;::const_iterator last,
+   T init,
+   BinaryOp op)
+{
+   for (;first != last; ++first)
+      init = op(init, *first);
+   return init;
+}
+</code></pre>
+
+<p>Thanks to the <code>init</code> parameter, the compiler is able to deduce the template parameter <code>T</code> and the following code compiles:</p>
+
+<pre><code class="language-cpp">std::vector&lt;int&gt; ints = {1, 2, 3};
+accumulate(ints.begin(), ints.end(), 0, [](int res, int i) {
+   return res + i;
+});
+</code></pre>
+
+<p>But, granted, we do not always have this luxury of having this additional parameter that makes sense.</p>
+
+<h3 id="explicit-template-specialization">Explicit template specialization</h3>
+
+<p>If we cannot rely on an additional parameter to help the compiler deduce a template parameter, we can always help the compiler and explicitly provide it the template parameter it cannot infer.</p>
+
+<p>We can for instance correct our previous example by explicitly requiring for the specialization of <code>for_each</code> for elements of type integers, and it will compile just fine:</p>
+
+<pre><code class="language-cpp">std::vector&lt;int&gt; ints = {1, 2, 3};
+for_each&lt;int&gt;(ints.begin(), ints.end(), [](int i) {
+   std::cout &lt;&lt; i &lt;&lt; '\n';
+});
+</code></pre>
+
+<p>In some instances, this might be very annoying or even impractical: what if the template parameter to explicitly specialize is not the first one?</p>
+
+<h3 id="improving-the-design-by-removing-constraints">Improving the design by removing constraints</h3>
+
+<p>In our specific case, we can generalize our <code>for_each</code> function to take the iterator type as template parameter, just like as the STL does:</p>
+
+<pre><code class="language-cpp">template&lt;typename Iterator, typename Consumer&gt;
+void for_each(Iterator first, Iterator last, Consumer consumer)
+{
+   for (;first != last; ++first)
+      consumer(*first);
+}
+</code></pre>
+
+<p>A good rule of thumb is to first try to fix our design by removing constraints before relying on the other tricks. Making the algorithm more generic (the less constraints, the more use cases an algorithm can satisfy) will usually removing the dependent type names along the way and thus get rid of the problem.</p>
+
+<h3 id="proxy-parameters">Proxy parameters</h3>
+
+<p>In some languages, such as Haskell, we cannot ask for an explicit template specialization: the template parameters have to be deduced from the arguments. The solution then is to fall back on the idea of providing the compiler an additional parameter, whose only purpose is to guide the compiler.</p>
+
+<p>This parameter does not carry any runtime value. It is parameterized on the type needed to guide the type deduction, and its only purpose is to carry this type. We usually call it a <strong>proxy parameter</strong>:</p>
+
+<pre><code class="language-cpp">template&lt;typename T&gt;
+struct proxy {}
+</code></pre>
+
+<p>Or, equivalently, in Haskell:</p>
+
+<pre><code class="language-haskell">data Proxy a = Proxy
+</code></pre>
+
+<p>Thanks to the proxy guiding type deduction, the following code now compiles fine:</p>
+
+<pre><code class="language-haskell">f :: Proxy a -&gt; Res a -&gt; IO ()
+f _ _ = print "Useless function, but compiles fine"
+</code></pre>
+
+<p>In some instances, this trick is useful in C++ as well, especially when explicit specialization is awkward (for instance if the template parameter to specialize is not the first one).</p>
+
+<h3 id="injective-type-level-functions-haskell-only">Injective type level functions (Haskell only)</h3>
+
+<p>The last solution is to find a way to inform the compiler that the type-level function is injective. As of today (October 12, 2017), this capability is not yet available in C++, but is available in Haskell.</p>
+
+<p>How? By explicitly requiring that the dependent type has to be a brand new type, specific to the instantiation of the type-class, and not an alias to an existing type (by using data instead of type in the declaration below).</p>
+
+<pre><code class="language-haskell">class Func a where
+  data Res a :: *
+</code></pre>
+
+<p>Here are two examples of instances of this type-class for integer and string. In each case, we are required to create a new type (<code>ResInt</code> and <code>ResString</code> here) as output to the type-level function <code>Res</code>:</p>
+
+<pre><code class="language-haskell">instance Func Int where
+  data Res Int = ResInt { wrappedInt :: Int }
+
+instance FuncInj String where
+  data Res String = ResString  { wrappedString :: String }
+</code></pre>
+
+<p>Now, because the Haskell compiler knows that the <code>Res</code> type-level function is injective, Haskell will be able to automatically deduced <code>a</code> from its dependent type and therefore will accept the function as valid:</p>
+
+<pre><code class="language-haskell">f :: Res a -&gt; ()
+f _ = ()
+</code></pre>
+
+<p>This is not the perfect solution: creating a new type is a sufficient condition for injectivity, but not a necessary one. So it is a bit over-constraining, but at least offers a solution to this annoying issue.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-10-12T00:00:00+00:00">October 12, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Why+template+parameters+of+dependent+type+names+cannot+be+deduced%2C+and+what+to+do+about+it%20%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html&title=Why+template+parameters+of+dependent+type+names+cannot+be+deduced%2C+and+what+to+do+about+it" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F10%2F12%2Fdependent-type-deduction.html&t=Why template parameters of dependent type names cannot be deduced, and what to do about it" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/09/20/transforming-data-into-types.html" title="Transforming data structures into types: an introduction to dependent typing and its benefits">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Transforming data structures into types: an introduction to dependent typing and its benefits</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/11/02/idris-pipes.html" title="IdrisPipes: a library for composable and effectful stream processing in Idris">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">IdrisPipes: a library for composable and effectful stream processing in Idris</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

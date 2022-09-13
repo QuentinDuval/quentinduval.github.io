@@ -1,0 +1,1020 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Catamorph your DSL (Deep Dive) - Double Ended Queue</title>
+<meta name="description" content="This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Catamorph your DSL (Deep Dive)">
+<meta property="og:url" content="/blog/2017/01/20/catamorph-dsl-deep-dive.html">
+
+
+  <meta property="og:description" content="This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Catamorph your DSL (Deep Dive)">
+  <meta name="twitter:description" content="This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).">
+  <meta name="twitter:url" content="/blog/2017/01/20/catamorph-dsl-deep-dive.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-01-20T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/01/20/catamorph-dsl-deep-dive.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Catamorph your DSL (Deep Dive)">
+    <meta itemprop="description" content="This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).">
+    <meta itemprop="datePublished" content="2017-01-20T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Catamorph your DSL (Deep Dive)
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-01-20T00:00:00+00:00">January 20, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html&text=Catamorph+your+DSL+%28Deep+Dive%29&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/01/20/catamorph-dsl-deep-dive.html&title=Catamorph your DSL (Deep Dive)"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/01/20/catamorph-dsl-deep-dive.html&t=Catamorph your DSL (Deep Dive)">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#open-type-recursion">Open type recursion</a></li><li><a href="#building-an-expression">Building an expression</a></li><li><a href="#getting-to-catamorphisms">Getting to catamorphisms</a><ul><li><a href="#functor-instance">Functor instance</a></li><li><a href="#fmap-at-each-level">FMAP at each level</a></li><li><a href="#generalization-to-all-functors">Generalization to all Functors</a></li></ul></li><li><a href="#revisiting-pretty-printing">Revisiting pretty printing</a></li><li><a href="#evaluation-and-dependencies">Evaluation and dependencies</a></li><li><a href="#optimized-combination-of-optimizations">Optimized combination of optimizations</a></li><li><a href="#partial--optimize--eval">Partial + Optimize = Eval</a></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>This post is a second of the series of post dedicated to notion of Catamorphisms and its application to build Domain Specific Languages (DSLs).</p>
+
+<p>Our last post introduced an Arithmetic DSL that allowed to build expression composed of operations like addition and multiplication integer constants and integers variables. On top of this DSL, we built several interpreter functions:</p>
+
+<ul>
+  <li>prn to pretty print our Arithmetic expressions</li>
+  <li>eval to compute the value of an expression, given the value of all variables</li>
+  <li>optimize to simplify and optimize our expression</li>
+  <li>partial to partially evaluate our expression, given the value of some variables</li>
+  <li>dependencies to retrieve not yet resolved variables from our expression</li>
+</ul>
+
+<p>At the end of the last post, we noticed that eval could be written in terms of partial and optimize. The impossibility to compose these interpreters efficiently showed us the limits of our model. Our design that coupled the traversal and the transformation on the Abstract Syntax Tree (AST) was simply not good enough.</p>
+
+<p>The post of today will introduce the notion of Catamorphisms as a nice way to:</p>
+
+<ul>
+  <li>Decouple the traversal from the actions to perform</li>
+  <li>Get efficient composition of our interpreters back</li>
+</ul>
+
+<h2 id="open-type-recursion">Open type recursion</h2>
+
+<p>One of the first step to do in order to get to Catamorphisms is to deconstruct the recursion. Practically, it means getting rid of the recursive nature of the data structure by introducing a template.</p>
+
+<pre><code class="language-hs">type Id = String
+data OpType = Add | Mul deriving (Show, Eq, Ord)
+
+data Expr
+  = Cst Int
+  | Var Id
+  | Op OpType [Expr]
+  deriving (Show, Eq, Ord)
+</code></pre>
+
+<p>Becomes the following, where recursion on <em>Expr</em> is replaced by the templated type <em>r</em>:</p>
+
+<pre><code class="language-hs">type Id = String
+data OpType = Add | Mul deriving (Show, Eq, Ord)
+
+data ExprR r
+  = Cst Int
+  | Var Id
+  | Op OpType [r]
+  deriving (Show, Eq, Ord)
+</code></pre>
+
+<p>This looks innocent, but this is a very powerful trick. We already covered a similar trick for functions in my very first blog post when we were concerned about dynamic programming.</p>
+
+<p>Back then, open recursion allowed us to plug memoization to our recurrence formula. Deconstructing our type recurrence relation will allow us to separate the recurrence from the action to perform during it.</p>
+
+<p>If you read this previous post, you know the drill. Our first step is to get back our naive recurrence by computing the fix point of our recurrence. For types, this is a bit more complex (as we cannot create infinite types) and is achieved using the following trick:</p>
+
+<pre><code class="language-hs">newtype Fix f = Fix { unFix :: f (Fix f) }
+
+-- Analog to Expr = ExprR Expr
+type Expr = Fix ExprR
+</code></pre>
+
+<p>Fortunately, there is a Haskell package on hackage that help you automating this, in the <a href="https://hackage.haskell.org/package/data-fix-0.0.3/docs/Data-Fix.html">data-fix package</a>.</p>
+
+<h2 id="building-an-expression">Building an expression</h2>
+
+<p>To construct an <em>Expr</em> instance, we need to adapt our “smart constructors” (Haskell’s name for factory functions) introduced in our previous post:</p>
+
+<pre><code class="language-hs">cst = Fix . Cst
+var = Fix . Var
+add = Fix . Op Add
+mul = Fix . Op Mul
+</code></pre>
+
+<p>Having introduced this layer of abstraction allows us to keep the exact same syntax as before to construct our expressions:</p>
+
+<pre><code class="language-hs">&gt; let e = add [ cst(1)
+              , cst(2)
+              , mul [cst(0), var("x"), var("y")]
+              , mul [cst(1), var("y"), cst(2)]
+              , add [cst(0), var("x") ]]
+</code></pre>
+
+<p>Although our expression type got more complex by the introduction of a template, we can still instantiate it as easily as we used to, as we do not need to know the exact constructors needed at construction.</p>
+
+<h2 id="getting-to-catamorphisms">Getting to catamorphisms</h2>
+
+<p>Let us start by demystifying the big word. A Catamorphism is a just a name for a recursion scheme. A kind of design pattern to decouple the traversal of a recursive data structure from the work to do inside the traversal.</p>
+
+<p>Our cataphormism implementation will make use of the open recursion we introduced in <em>ExprR</em> to implement a kind of post-order depth first search traversal.</p>
+
+<h3 id="functor-instance">Functor instance</h3>
+
+<p>Let us start by the first building block of the Catamorphism, making ExprR a Functor instance. It allows to apply a function on the type parameter r for the ExprR r. The Functor basically allows us to transform the type that represents the recurrence (for example to remove the recurrence).</p>
+
+<p>DerivingFunctor could have generated the Functor instance for us as follows, but doing manually is really instructive:</p>
+
+<pre><code class="language-hs">instance Functor ExprR where
+  fmap _ (Cst c) = Cst c
+  fmap _ (Var v) = Var v
+  fmap f (Op opType xs) = Op opType (map f xs)
+</code></pre>
+
+<p>Now, if we consider a function with a prototype <em>ExprR a -&gt; a</em>, we see that providing it to fmap will get us a function <em>ExprR (ExprR a) -&gt; ExprR a</em>. Somehow, using <em>fmap</em> is like navigating between levels of recursion.</p>
+
+<p>But we are not done yet. There is an unbound number of levels of recursions to deal with. Moreover, <em>fmap</em> does not quite fit our recursion: we have to take into account the <em>Fix</em> constructor wrapping each <em>ExprR</em>.</p>
+
+<h3 id="fmap-at-each-level">FMAP at each level</h3>
+
+<p>So we need to build a function that will apply our transformation through fmap, at each level of recursion. This function is the catamorphism function below which morphs a function <em>ExprF a -&gt; a</em> to a function <em>Expr -&gt; a</em>:</p>
+
+<pre><code class="language-hs">cataExpr :: (ExprR a -&gt; a) -&gt; Expr -&gt; a
+cataExpr algebra =
+  algebra
+  . fmap (cataExpr algebra)
+  . unFix
+</code></pre>
+
+<p>In simpler terms, it provides a way to lift a local transformation (that applies to one stage of the Abstract Syntax Tree) into a global transformation on the whole expression.</p>
+
+<p>It proceeds in three steps:</p>
+
+<ul>
+  <li>unFix allows to extract the ExprF from the Fix constructor</li>
+  <li>fmap (cataExpr algebra) recurs on the sub-trees: each sub expression becomes a a</li>
+  <li>The resulting ExprR a is given to the function algebra to finish the job</li>
+</ul>
+
+<h3 id="generalization-to-all-functors">Generalization to all Functors</h3>
+
+<p>We can generalize this cataExpr function to work on any fixed point of an open recursive data structure that is an instance of Functor. It means we can replace our ExprR by a Functor instance, as follows:</p>
+
+<pre><code class="language-hs">cata :: Functor f =&gt; (f a -&gt; a) -&gt; Fix f -&gt; a
+cata algebra =
+  algebra
+  . fmap (cata algebra)
+  . unFix
+</code></pre>
+
+<p>This is a bit abstract, so do not worry if you do not quite get this one. Just remember that applied to our ExprR, this function will resolve to the same cataExpr function we saw earlier.</p>
+
+<h2 id="revisiting-pretty-printing">Revisiting pretty printing</h2>
+
+<p>To best understand how catamorphisms work, examples are key. Let us start by reworking our first interpreter, the pretty printer, in terms of cata.</p>
+
+<p>One cool thing about using this recursion scheme is that we can reason locally: we only need to care about what happens at one given stage (one node of our AST). Namely, we know that pretty printing a:</p>
+
+<ul>
+  <li>Constant is calling show on the numeric value</li>
+  <li>Variable is returning the name of variable</li>
+  <li>Addition is concatenating the sub-expression textual representation with +</li>
+  <li>Multiplication is concatenating the sub-expression textual representation with *</li>
+</ul>
+
+<p>This translates almost directly into the following code. We can observe that algebra function is only concerned about implementing the local transformations listed above. The cata function takes entirely care of the recursion:</p>
+
+<pre><code class="language-hs">prn :: Expr -&gt; String
+prn = cata algebra where
+  algebra (Cst n) = show n
+  algebra (Var x) = x
+  algebra (Op Add xs) = "(+ " ++ unwords xs ++ ")"
+  algebra (Op Mul xs) = "(* " ++ unwords xs ++ ")"
+</code></pre>
+
+<p>To convince ourselves it works, we can test our function:</p>
+
+<pre><code class="language-hs">&gt; let e = add [ cst(1)
+              , cst(2)
+              , mul [cst(0), var("x"), var("y")]
+              , mul [cst(1), var("y"), cst(2)]
+              , add [cst(0), var("x") ]]
+
+&gt; prn e
+"(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
+</code></pre>
+
+<h2 id="evaluation-and-dependencies">Evaluation and dependencies</h2>
+
+<p>Let us continue our exploration of catamorphisms by rewriting our two next most straightforwards evaluators, eval and dependencies.</p>
+
+<p>Our eval function is based on an algebra function that only has to deal with integers:</p>
+
+<ul>
+  <li>The evaluation of constant and variables is just as before</li>
+  <li>Addition is a simple call to sum on the sub-expression results</li>
+  <li>Multiplication is a call to product on the sub-expression results</li>
+</ul>
+
+<pre><code class="language-hs">eval :: Env -&gt; Expr -&gt; Int
+eval env = cata algebra where
+  algebra (Cst n) = n
+  algebra (Var x) = env Map.! x
+  algebra (Op Add xs) = sum xs
+  algebra (Op Mul xs) = product xs
+</code></pre>
+
+<p>The dependencies function is based on an algebra function that is only concerned in joining sets of variables identifiers:</p>
+
+<ul>
+  <li>Variables terms have only one dependency: the variable itself</li>
+  <li>Operations have for dependencies the total dependencies of their sub-expressions</li>
+</ul>
+
+<pre><code class="language-hs">dependencies :: Expr -&gt; Set.Set Id
+dependencies = cata algebra where
+  algebra (Cst _) = Set.empty
+  algebra (Var x) = Set.singleton x
+  algebra (Op _ xs) = Set.unions xs
+</code></pre>
+
+<p>In both cases, and because cata takes care of the recursion, the implementation almost reflects the specification textually!</p>
+
+<h2 id="optimized-combination-of-optimizations">Optimized combination of optimizations</h2>
+
+<p>Let us now move on the fun part, decomposing our optimization functions bit by bit, before recombining them with great efficiency. We will adapt the optimize function we introduced in our previous post, but with two big differences:</p>
+
+<p>We extracted the algebra from the recursion: to actually run the optimizations, these functions should be given as argument to cata.</p>
+
+<p>Optimizations for Add and Mul are separated: this is to reflect possible real situations in which two teams (and two sets of functions) are specialized and focused on dealing one complex optimization each.</p>
+
+<pre><code class="language-hs">optimizeAdd :: ExprR Expr -&gt; Expr
+optimizeAdd op@(Op Add _) = optimizeOp op 0 (+)
+optimizeAdd e = Fix e
+
+optimizeMul :: ExprR Expr -&gt; Expr
+optimizeMul op@(Op Mul xs)
+  | not (null (dropWhile (/= cst 0) xs)) = cst 0
+  | otherwise = optimizeOp op 1 (*)
+optimizeMul e = Fix e
+
+optimizeOp :: ExprR Expr -&gt; Int -&gt; (Int -&gt; Int -&gt; Int) -&gt; Expr
+optimizeOp (Op optType xs) neutral combine =
+  let (constants, vars) = partition isCst xs
+      constantsVal = map (\(Fix (Cst x)) -&gt; x) constants
+      sumCst = foldl' combine neutral constantsVal
+  in case vars of
+      []  -&gt; cst sumCst
+      [y] | sumCst == neutral -&gt; y
+      ys  | sumCst == neutral -&gt; Fix (Op optType ys)
+      ys  -&gt; Fix (Op optType (cst sumCst : ys))
+</code></pre>
+
+<p>We already know how to run these optimizations inefficiently in two tree traversals. Thanks to our previous labour though, we can do much better. Because the algebra are not coupled to the traversal, we combine two algebra into a single algebra before running one single traversal.</p>
+
+<p>We introduce below the means to compose our algebras:</p>
+
+<ul>
+  <li><em>comp</em> combines two algebra by function composition with <em>unFix</em></li>
+  <li><em>compAll</em> combines several algebra by reducing with comp over them</li>
+</ul>
+
+<pre><code class="language-hs">type Algebra f = f (Fix f) -&gt; Fix f
+
+comp :: Algebra f -&gt; Algebra f -&gt; Algebra f
+comp f g = f . unFix . g
+
+compAll :: Foldable t =&gt; t (Algebra f) -&gt; Algebra f
+compAll fs = foldr1 comp fs
+</code></pre>
+
+<p>Using these composition functions, we can write an efficient optimize function:</p>
+
+<pre><code class="language-hs">optimize :: Expr -&gt; Expr
+optimize = cata (optimizeMul `comp` optimizeAdd)
+</code></pre>
+
+<p>We did manage to combine several actions in a single traversal. This is a quite important feature which might remind you of our traversal combinators for simple ranges in this post.</p>
+
+<p>This ability to compose easily will allow us to build modular yet efficient software as we will see in the next section.</p>
+
+<h2 id="partial--optimize--eval">Partial + Optimize = Eval</h2>
+
+<p>Let us take back from where we failed in the last post. We will now build an efficient evaluation function from three different building blocks:</p>
+
+<ul>
+  <li>A partial evaluation algebra to replace the known variables by constants</li>
+  <li>Our addition optimization and multiplication optimization algebra</li>
+  <li>Our dependencies interpreter that identifies remaining unknowns</li>
+</ul>
+
+<p>Our partial evaluation algebra function will be named replaceKnownVars. It replaces variables bound in its environment argument by their value:</p>
+
+<pre><code class="language-hs">replaceKnownVars :: Env -&gt; ExprR Expr -&gt; Expr
+replaceKnownVars env = go where
+  go e@(Var v) =
+    case Map.lookup v env of
+      Just val -&gt; cst val
+      Nothing -&gt; Fix e
+  go e = Fix e
+</code></pre>
+
+<p>To finish up the work, we just need to assemble the pieces together:</p>
+
+<ul>
+  <li><em>partial</em> combines the replacement of known variables with the optimization steps</li>
+  <li><em>eval</em> runs a partial evaluation, checks whether the expression was reduced to a constant and reports an error with remaining dependencies if it was not</li>
+</ul>
+
+<pre><code class="language-hs">partial :: Env -&gt; Expr -&gt; Expr
+partial env = cata (compAll [optimizeMul, optimizeAdd, replaceKnownVars env])
+
+eval :: Env -&gt; Expr -&gt; Int
+eval env expr =
+  case partial env expr of
+    (Fix (Cst n)) -&gt; n
+    e -&gt; error $ "Missing vars: " ++ show (dependencies e)
+</code></pre>
+
+<p>That’s it! Three steps in one traversal in case of success, and a second traversal in case of error, all obtained from modular and independently testable pieces of software.</p>
+
+<p><em>Note: you can notice there another advantage of working with catamorphisms: pattern matching does not have to be concerned with every possible cases. Since the recursion is handled outside, algebra that transform the AST can make use of the default case.</em></p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next</h2>
+
+<p>This concludes our introduction of catamorphisms in Haskell.</p>
+
+<p>We went through the mechanisms needed to introduce this recursion scheme, and demonstrated how it could be applied to combine several tree recursions into a single traversal.</p>
+
+<p>We discovered how using this technique might improve the modularity and testability of our code, with minimum expenses in terms of efficiency.</p>
+
+<p>The next posts will focus on discussing the limits of this technics, some of its trade-offs and show how it translates in some other languages.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-01-20T00:00:00+00:00">January 20, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Catamorph+your+DSL+%28Deep+Dive%29%20%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html&title=Catamorph+your+DSL+%28Deep+Dive%29" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F01%2F20%2Fcatamorph-dsl-deep-dive.html&t=Catamorph your DSL (Deep Dive)" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/01/17/catamorph-dsl-intro.html" title="Catamorph your DSL (Introduction)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Catamorph your DSL (Introduction)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/01/23/catamorph-dsl-tradeoffs.html" title="Catamorph your DSL (Trade-offs)">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Catamorph your DSL (Trade-offs)</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

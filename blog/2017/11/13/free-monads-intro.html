@@ -1,0 +1,1222 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Free Monads: from the basics to composable and effectful stream processing - Double Ended Queue</title>
+<meta name="description" content="Let’s embark in a journey, from Free Monad basics to more advanced examples such as stream processing as done in IdrisPipes.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Free Monads: from the basics to composable and effectful stream processing">
+<meta property="og:url" content="/blog/2017/11/13/free-monads-intro.html">
+
+
+  <meta property="og:description" content="Let’s embark in a journey, from Free Monad basics to more advanced examples such as stream processing as done in IdrisPipes.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Free Monads: from the basics to composable and effectful stream processing">
+  <meta name="twitter:description" content="Let’s embark in a journey, from Free Monad basics to more advanced examples such as stream processing as done in IdrisPipes.">
+  <meta name="twitter:url" content="/blog/2017/11/13/free-monads-intro.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-11-13T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/11/13/free-monads-intro.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Free Monads: from the basics to composable and effectful stream processing">
+    <meta itemprop="description" content="Let’s embark in a journey, from Free Monad basics to more advanced examples such as stream processing as done in IdrisPipes.">
+    <meta itemprop="datePublished" content="2017-11-13T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Free Monads: from the basics to composable and effectful stream processing
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-11-13T00:00:00+00:00">November 13, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html&text=Free+Monads%3A+from+the+basics+to+composable+and+effectful+stream+processing&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/11/13/free-monads-intro.html&title=Free Monads: from the basics to composable and effectful stream processing"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/11/13/free-monads-intro.html&t=Free Monads: from the basics to composable and effectful stream processing">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#free-monads---prelude--motivation">Free Monads - Prelude &amp; Motivation</a><ul><li><a href="#monads-as-environment-of-execution">Monads as environment of execution</a></li><li><a href="#free-monads--ast-transformations">Free Monads &amp; AST transformations</a></li></ul></li><li><a href="#free-monads---the-basics">Free Monads - The Basics</a><ul><li><a href="#a-password-guessing-game">A password guessing game</a></li><li><a href="#defining-the-free-monad-ast">Defining the Free Monad AST</a></li><li><a href="#examples">Examples</a></li><li><a href="#emitting-instructions">Emitting instructions</a></li><li><a href="#free-monads---chaining-instructions">Free Monads - Chaining instructions</a></li><li><a href="#refactoring-to-use-our-free-monad">Refactoring to use our Free Monad</a></li><li><a href="#interpreter">Interpreter</a></li></ul></li><li><a href="#free-monads---transforming-computations">Free Monads - Transforming computations</a><ul><li><a href="#a-demonstration-robot">A demonstration robot</a></li><li><a href="#integrating-our-bot-commands">Integrating our Bot Commands</a></li><li><a href="#examples-1">Examples</a></li><li><a href="#other-ideas-of-transformation">Other ideas of transformation</a></li></ul></li><li><a href="#using-free-monads---example-of-idrispipes">Using Free Monads - Example of IdrisPipes</a><ul><li><a href="#the-link-with-streaming">The link with streaming</a></li><li><a href="#idrispipes-instruction-set">IdrisPipes instruction set</a></li><li><a href="#emitting-sequencing-combining">Emitting, Sequencing, Combining</a></li><li><a href="#running-a-pipe---interpreter">Running a pipe - Interpreter</a></li></ul></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In this post, we will embark in a journey from the basics of Free Monads and interpreters, to more advanced examples, up to how to implement the core of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>. Through this exercise, we will illustrate some aspects that makes the Free Monad interesting.</p>
+
+<p><em>This post does not require any previous knowledge of Free Monads. We will start simple, with a first simple example of Free Monad, and slowly introduce more advanced concepts, to finally dive into the internals of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a></em></p>
+
+<h2 id="free-monads---prelude--motivation">Free Monads - Prelude &amp; Motivation</h2>
+
+<p>We will start with a quick recap on Monads, and a first introduction to what Free Monads are and what makes them special.</p>
+
+<h3 id="monads-as-environment-of-execution">Monads as environment of execution</h3>
+
+<p>In Haskell and Idris, Monads are a idiomatic way to establish a specific environment of execution for our code, by allowing us to modify the rules of the languages inside the Monad:</p>
+
+<ul>
+  <li>Changing the rules of composition (the Monad itself)</li>
+  <li>Changing the available primitives (selecting available effects)</li>
+  <li>Allowing for more than one interpretation of a computation(*)</li>
+</ul>
+
+<p>Free Monads allow us to get one step further, and allow us to transform, optimize or combine our computations by manipulating the instructions they are made of.</p>
+
+<p><em>(*) By using Monad typeclasses instead of concrete Monads. One implementation can interact with the production environment (a real database, etc.), while another can interact with test components (in-memory database, etc.), as described in our previous article about <a href="/blog/2017/07/06/hexagonal-architecture-free-monad.html">Hexagonal Architecture</a>.</em></p>
+
+<h3 id="free-monads--ast-transformations">Free Monads &amp; AST transformations</h3>
+
+<p>Free Monads are special kinds of Monads which produce an <strong>Abstract Syntax Tree</strong> upon evaluation, a data structure for a recipe to execute. Instead of performing side-effects, they only emit instructions.</p>
+
+<p>Nothing really happens until an interpreter reads these instructions to interact with the world (or further transform them until we reach a point where we interact with the world).</p>
+
+<p>This offers us a great flexibility in terms of evaluating the Abstract Syntax Tree. The recipe is completely decoupled from the evaluation of the recipe: we can switch back-ends, writing several interpreters to produce different effects out of the same AST.</p>
+
+<p>This also offer us a great flexibility in terms of consultation or modification of the Abstract Syntax Tree. We can modify our Abstract Syntax Tree, transform it, remove or add some instructions inside it, or even <strong>combine several trees together</strong> (which is key for building a pipe-like library as we will see).</p>
+
+<h2 id="free-monads---the-basics">Free Monads - The Basics</h2>
+
+<p>To get a first feel for Free Monads, let’s implement a small password guessing function and refactor it to use a Free Monad instead of the IO Monad directly.</p>
+
+<p><em>Note: The examples below are all in Idris, but are almost portable in Haskell as-is with some minor syntax differences. We use Idris here for convenience: it supports pretty printing lambdas, allowing us to see the AST produced more easily (see <a href="/blog/2017/06/14/idris-improvements.html">10 things Idris improved over Haskell</a>).</em></p>
+
+<h3 id="a-password-guessing-game">A password guessing game</h3>
+
+<p>We will consider the following function, named <code>password</code>. It asks a user for a password in the console, and fails after reaching the maximal number of attempt allowed:</p>
+
+<pre><code class="language-haskell">password : Nat -&gt; (String -&gt; Bool) -&gt; IO Bool
+password maxAttempt valid = recur 1 where
+  recur n = do
+    putStrLn "Password:"     -- Ask the user for a password
+    attempt &lt;- getLine       -- Read the password entered by the user
+    if valid attempt         -- In case of valid password:
+      then do
+        putStrLn ("Successful login after " ++ show n ++ " attempt(s).")
+        pure True
+      else do                -- In case of invalid passord:
+        putStrLn ("Login failed: " ++ show n ++ " attempt(s).")
+        if n &lt; maxAttempt
+          then recur (n + 1) -- * Try again with one less attempt
+          else pure False    -- * Stop after reaching maximal number of attempt
+</code></pre>
+
+<p>We can run this function inside the REPL. Here is a trace of the console, in a scenario in which we successfully log in the system at the second attempt, with the password “Scotty”:</p>
+
+<pre><code class="language-text">Password:
+Spock
+Login failed: 1 attempt(s).
+Password:
+Scotty
+Successful login after 2 attempt(s).
+</code></pre>
+
+<p>Now, this function is rather rigid and hardly testable. Our goal will be to transform it to use a Free Monad, in order to separate the recipe from the evaluation (and later on manipulate its AST).</p>
+
+<h3 id="defining-the-free-monad-ast">Defining the Free Monad AST</h3>
+
+<p>The first step in defining a Free Monad is to define the structure of its Abstract Syntax Tree. To do so, we need to identify a set of instructions which allows us to write a function such as password.</p>
+
+<p>As for all Monads, all <strong>pure computations are automatically supported</strong> inside a Free Monad. The AST only needs to encode the instructions which corresponds to the additional desired effects. If we look at our function above, there are only two of them:</p>
+
+<ul>
+  <li>Printing a message in the console</li>
+  <li>Reading a line from the console</li>
+</ul>
+
+<p>Here is one such AST, named <code>IOSpec</code>, which supports these two instructions:</p>
+
+<pre><code class="language-haskell">data IOSpec a
+  = ReadLine (String -&gt; IOSpec a)
+  | PrintLine String (IOSpec a)
+  | Pure a
+</code></pre>
+
+<ul>
+  <li><code>ReadLine</code> represents the instruction of reading a line. It contains a continuation which represents the set of instructions to execute after getting the string from the console.</li>
+  <li><code>Writeline</code> represents the instruction of writing a line. It contains the string to print and the set of instructions to execute after the printing is done.</li>
+  <li><code>Pure</code> is the marker for the end of the computation. It carries inside the result of the overall computation.</li>
+</ul>
+
+<h3 id="examples">Examples</h3>
+
+<p>Below are some examples of <code>IOSpec</code> Abstract Syntax Tree and their corresponding semantic. This should help you better understand how the instructions of our AST work together:</p>
+
+<pre><code class="language-haskell">-- Read a line and return it
+ReadLine (\x =&gt; Pure x)
+
+-- Print a line "Hello" and return 5
+WriteLine "Hello" (Pure 5)
+
+-- Read a line and print it twice, and return 5
+ReadLine (\x =&gt; WriteLine x (WriteLine x (Pure 5)))
+</code></pre>
+
+<p>Now, obviously, writing an AST by hand is not such a great experience. To make it feasible to write reasonable sized function producing such an AST, we will need two more ingredients:</p>
+
+<ul>
+  <li>Functions to factorize the creation of such instructions</li>
+  <li>A Monad instance to sequence the instructions: a Free Monad</li>
+</ul>
+
+<h3 id="emitting-instructions">Emitting instructions</h3>
+
+<p>We will start with the first ingredient, i.e. functions to easily create fragments of our AST. We need two here, one for each of our basic instructions, printing a line and writing a line:</p>
+
+<pre><code class="language-haskell">readLine : IOSpec String
+readLine = ReadLine (\s =&gt; Pure s)
+ 
+prnLine : String -&gt; IOSpec ()
+prnLine s = WriteLine s (Pure ())
+</code></pre>
+
+<p>These two functions create <code>ReadLine</code> and <code>PrintLine</code> instructions whose respective continuations do the simplest thing that makes sense:</p>
+
+<ul>
+  <li><code>readLine</code> produces a computation that reads a line and returns it unchanged (the continuation wraps the acquired string inside <code>Pure</code>)</li>
+  <li><code>prnLine</code> produces a computation that prints a line and returns an empty tuple afterwards (the continuation returns the empty tuple wrapped in <code>Pure</code>)</li>
+</ul>
+
+<h3 id="free-monads---chaining-instructions">Free Monads - Chaining instructions</h3>
+
+<p>The second ingredient is to make it easy to combine two AST into a single one, sequencing the instructions of one AST after the other. For instance, in order to print the line returned by <code>readline</code>, we need a <code>PrintLine</code> instruction to be injected in the continuation of the <code>ReadLine</code> instruction:</p>
+
+<pre><code class="language-haskell">-- Reading a line (readLine)
+ReadLine (\s =&gt; Pure s)
+
+-- Printing a line (\x =&gt; prnLine x)
+\x =&gt; WriteLine x (Pure ())
+
+-- Chaining them together (printing the line read)
+ReadLine (\x =&gt; WriteLine x (Pure ()))
+</code></pre>
+
+<p>We can implement a <code>Monad</code> instance for <code>IOSpec</code> that will do this sequencing of instruction for us. This will let us profit from the convenient do-notation of Haskell and Idris. The implementation is quite simple (*):</p>
+
+<ul>
+  <li>It looks for the last instruction of the left operand (a <code>Pure</code> instruction)</li>
+  <li>And chains to it a new set of instruction that depends on the value <code>Pure</code> contains</li>
+</ul>
+
+<pre><code class="language-haskell">implementation Monad IOSpec where
+  (&gt;&gt;=) ma f = recur ma where
+    recur (Pure a) = f a
+    recur (ReadLine cont) = ReadLine (recur . cont)
+    recur (WriteLine s next) = WriteLine s (recur next)
+</code></pre>
+
+<p>We can play in the REPL to get a better feel of how it works:</p>
+
+<pre><code class="language-haskell">-- Read a line and print it immediately
+REPL&gt; readLine &gt;&gt;= \x =&gt; prnLine x
+ReadLine (\x =&gt; WriteLine x (Pure ()))
+
+-- Read a line and print it with an exclamation mark
+REPL&gt; readLine &gt;&gt;= \x =&gt; let y = x ++ "!" in prnLine y
+ReadLine (\x =&gt;
+  WriteLine (prim__concat x "!") (Pure ()))
+</code></pre>
+
+<p><em>(*) This implementation is incomplete and requires a <code>Functor</code> and <code>Applicative</code> to be defined, as well as some trickeries with assert_total (for Idris). These are <a href="https://gist.github.com/deque-blog/c0fb76fe69a91596715f3b08e08aaa1a">provided here</a> as reference. There are also some issues in terms of efficiency, which will not be addressed here.</em></p>
+
+<h3 id="refactoring-to-use-our-free-monad">Refactoring to use our Free Monad</h3>
+
+<p>Equipped with our factories for instructions, and a Free Monad to combine them, we can refactor our password function to emit an IOSpec AST instead of performing <code>IO</code> actions directly.</p>
+
+<p>This refactoring does not require much changes:</p>
+
+<ul>
+  <li>We replace <code>IO</code> by <code>IOSpec</code></li>
+  <li>We replace <code>putStrLn</code> by <code>prnline</code></li>
+  <li>We replace <code>getLine</code> by <code>readLine</code></li>
+</ul>
+
+<p>And this is it. Here is the resulting function after transformation:</p>
+
+<pre><code class="language-haskell">password : Nat -&gt; (String -&gt; Bool) -&gt; IOSpec Bool
+password maxAttempt valid = recur (S Z) where
+  recur n = do
+    prnLine "Password:"  -- `prnLine` instead of `putStrLn`
+    attempt &lt;- readLine  -- `readLine` instead of `getLine`
+    if valid attempt
+      then do
+        prnLine ("Successful login after " ++ show n ++ " attempt(s).")
+        pure True
+      else do
+        prnLine ("Login failed: " ++ show n ++ " attempt(s).")
+        if n &lt; maxAttempt
+          then recur (n + 1)
+          else pure False
+</code></pre>
+
+<p>Now, and upon evaluating this function in the REPL, we get an enormous AST out of it, which correspond to the recipe of our <code>password</code> checking logic (<a href="https://gist.github.com/deque-blog/d32977edcf4100a448260ff582cf6161#file-passwordeval-idr">linked here</a> as reference). The last remaining part is to write some interpreters for this AST.</p>
+
+<h3 id="interpreter">Interpreter</h3>
+
+<p>We refactored a function performing <code>IO</code> directly, into a function that emits an AST containing the assembly instructions that matches our level of abstraction. For this sequence of instructions to be useful, we need an interpreter to translate it into a lower level language (*).</p>
+
+<p>To complete our example, we will write an <code>interpreter</code> that transforms a computation expressed in the <code>IOSpec</code> Free Monad into a <code>IO</code> computation to execute it. Our interpreter will simply:</p>
+
+<ul>
+  <li>Transform each <code>ReadLine</code> into a <code>getLine</code> call</li>
+  <li>Transform each <code>WriteLine</code> into a <code>putStrLn</code> call</li>
+  <li>Replace continuations with a <code>IO</code> Monad bind operator (i.e. sequence them)</li>
+</ul>
+
+<pre><code class="language-haskell">interpret : IOSpec r -&gt; IO r
+interpret (Pure a) = pure a
+interpret (ReadLine cont) = do
+  l &lt;- getLine
+  interpret (cont l)
+interpret (WriteLine s next) = do
+  putStrLn s
+  interpret next
+</code></pre>
+
+<p><em>(*) We can define other kind of interpreters as well, some to test our function and feed it with fake inputs, some to transform it into another data structure. Interpreters do not even have to evaluate the instructions per say, they can also simply transform the data structure.</em></p>
+
+<h2 id="free-monads---transforming-computations">Free Monads - Transforming computations</h2>
+
+<p>Until know, nothing we did was specific to Free Monads. As mentioned before, it is perfectly possible to have several interpretations of the same computation with regular Monads (for instance, using typeclasses).</p>
+
+<p>We will now look at some additional nice things that we can do with Free Monads, leading us one step closer to understanding how to build a pipe library in Haskell or Idris.</p>
+
+<h3 id="a-demonstration-robot">A demonstration robot</h3>
+
+<p>Let us say that we want to do a nice live demonstration of our program, in which we have a bot that types characters in the console instead of us, feeding our <code>password</code> function with inputs (and giving us back control after the bot is out of instructions to execute).</p>
+
+<p>We can represent the commands our bot is allowed to do as follows:</p>
+
+<pre><code class="language-haskell">data TestBotAction
+  = Typing String
+  | Thinking String
+
+data TestBot = MkTestBot (List TestBotAction)
+</code></pre>
+
+<ul>
+  <li><code>Typing</code> represents our bot typing a line in our console application</li>
+  <li><code>Thinking</code> represents our bot thinking out loud, halting and waiting for a notification to continue</li>
+</ul>
+
+<p>Here is an example of instructions for our bot, in which it tries “Spock” as a first password, then thinks, then tries “Scotty”, before giving up on guessing the password:</p>
+
+<pre><code class="language-haskell">botSequence : TestBot
+botSequence = MkTestBot
+   [ Typing "Spock"
+   , Thinking "Trying again... (press enter to continue)"
+   , Typing "Scotty"
+   , Thinking "Nore more ideas. I give up."]
+</code></pre>
+
+<p>We will now see how we can combine this sequence of instruction with our <code>password</code> function, yielding another sequence of instructions.</p>
+
+<h3 id="integrating-our-bot-commands">Integrating our Bot Commands</h3>
+
+<p>Free Monads allow us to work on a computation by playing with its AST. So we can alter a computation expressed in the IOSpec monad (such as our password function) by inserting into it new IOSpec instructions corresponding our bot commands.</p>
+
+<p>Here is one way to integrate our bot commands into an IOSpec computation:</p>
+
+<ul>
+  <li>We will match a <code>Typing</code> bot command with a <code>ReadLine</code> instruction and transform it into
+    <ul>
+      <li>A <code>PrintLine</code> instruction to print the text entered by the bot</li>
+      <li>A fixed text value to feed into the continuation of <code>ReadLine</code></li>
+    </ul>
+  </li>
+  <li>We will transform a <code>Thinking</code> bot command into a:
+    <ul>
+      <li>A <code>PrintLine</code> instruction to print the thoughts of the bot</li>
+      <li>A <code>ReadLine</code> instruction used to wait for notification (and discarding the value read)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The following pipe operator implements this transformation (understanding the whole code is not essential – you can focus on understanding the principle):</p>
+
+<pre><code class="language-haskell">(.|) : TestBot -&gt; IOSpec r -&gt; IOSpec r
+(.|) (MkTestBot actions) prog = pull actions prog where
+  mutual -- To define mutually recursive functions
+ 
+    pull : List TestBotAction -&gt; IOSpec r -&gt; IOSpec r
+    pull actions (Pure r) = Pure r
+    pull actions (WriteLine s next) = do
+      prnLine s          -- Print the line to display (such as "Password:")
+      pull actions next  -- Keep on traversing the IOSpec computation
+    pull actions (ReadLine cont) =
+      push actions cont -- Give control to bot actions
+ 
+    push : List TestBotAction -&gt; (String -&gt; IOSpec r )-&gt; IOSpec r
+    push [] cont = ReadLine cont
+    push (Typing x::xs) cont = do
+      prnLine x         -- Display the value typed by the bot
+      pull xs (cont x)  -- Send `x` to the main program, and give it control back
+    push (Thinking x::xs) cont = do
+      prnLine x         -- Print the thoughts of our bot
+      readLine          -- Wait for a line (notification to continue)
+      push xs cont      -- Keep going
+</code></pre>
+
+<ul>
+  <li><code>pull</code> traverses an <code>IOSpec</code> computation until it meets a <code>ReadLine</code> instruction, at which point it yields control to the push to insert some bot commands</li>
+  <li><code>push</code> integrates bot commands until it meets a <code>Typing</code> bot command, at which point it gives the bot’s string to the <code>IOSpec</code> computation and resumes it</li>
+</ul>
+
+<p>The overall implementation produces a new <code>IOSpec</code> computation, based on the initial <code>IOSpec</code> computation, and transformed to replace <code>ReadLine</code> instructions by the values provided by the bot.</p>
+
+<h3 id="examples-1">Examples</h3>
+
+<p>Since combining our bot commands with an <code>IOSpec</code> computation results in a new <code>IOSpec</code> computation, we can use our previous <code>interpreter</code> to evaluate the resulting AST (*).</p>
+
+<pre><code class="language-haskell">runBot : IO Bool
+runBot = interpret (botSequence .| password 3 (== "Scotty"))
+view raw
+</code></pre>
+
+<p>Here is the console output that correspond to running this <code>runBot</code> function:</p>
+
+<pre><code class="language-text">Password:
+Spock
+Login failed: 1 attempt(s).
+Password:
+Trying again... (press enter to continue)
+
+Scotty
+Successful login after 2 attempt(s).
+</code></pre>
+
+<p>It is interesting to note that the bot waits for us to press enter (the empty line after “Trying again”. It would also have given us back control for the last password attempt would “Scotty” been invalid.</p>
+
+<p>It is also interesting to look at the resulting AST after the transformation. You will note that it does not contain any traces left of <code>ReadLine</code> instructions: it has been transformed into a AST consisting only of print line instructions.</p>
+
+<p><em>(*) The closure property (staying in the same type) is a powerful way of abstraction, as we already talked about in our previous articles about <a href="/blog/2017/09/13/monoids.html">Monoids</a>.</em></p>
+
+<h3 id="other-ideas-of-transformation">Other ideas of transformation</h3>
+
+<p>Playing with our bot is just one example of transforming an AST generated by a Free Monad to enrich, transform or combine computations. There are plenty of other transformations we can do (with limits in terms of practicality) such as:</p>
+
+<ul>
+  <li>Combining two computations, like injecting some instructions of one computation in another</li>
+  <li>Compiling the AST of a high-level computation into a lower-level AST</li>
+  <li>Aspect Oriented Programming, like adding logs around specific instructions automatically (*)</li>
+</ul>
+
+<p>As we will see in the next section, implementing a pipe library such as <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> will involves making use of Free Monads and the transformation (1) listed above.</p>
+
+<p><em>(*) Note though, that some of these transformation might just be much easier to do by playing with Monad type-classes instead. But Free Monads can be abstracted behind Monad type-classes as well, and is in fact recommended in many articles such as <a href="http://degoes.net/articles/modern-fp">this one</a> from <a href="https://twitter.com/jdegoes">@jdegoes</a>.</em></p>
+
+<h2 id="using-free-monads---example-of-idrispipes">Using Free Monads - Example of IdrisPipes</h2>
+
+<p>We covered the basics of Free Monads, and showed how we could play with an AST to transform and enrich a computation. We are now ready to explore a more involved example: the implementation of a stream processing library such as <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>.</p>
+
+<h3 id="the-link-with-streaming">The link with streaming</h3>
+
+<p>In our previous example, we combined an <code>IOSpec</code> computation with the commands of a bot, replacing some of the occurrence of the <code>ReadLine</code> with other instructions (such as printing a line). But there are plenty of other transformation we could have done as well.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>For instance, we could also combine two <code>IOSpec</code> computations x and y together to build a new x .</td>
+      <td>y computation, by plugging the <code>PrintLine</code> instructions of x to the <code>ReadLine</code> instructions y.</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>A <code>ReadLine</code> instruction in y would ask (or <code>await</code>) for a string coming from x</li>
+  <li>A <code>PrintLine</code> instruction in x would send (or <code>yield</code>) a string to y‘s <code>ReadLine</code> instruction</li>
+</ul>
+
+<pre><code class="language-haskell">data IOSpec a
+  = ReadLine (String -&gt; IOSpec a) -- Await a value
+  | PrintLine String (IOSpec a)   -- Yield a value
+  | Pure a
+</code></pre>
+
+<p>Now, if we rename <code>ReadLine</code> by <code>Await</code>, <code>PrintLine</code> by <code>Yield</code> and <code>IOSpec</code> by <code>Pipe</code>, we get the basic idea behind the implementation of a streaming library:</p>
+
+<pre><code class="language-haskell">data PipeLight a
+  = Await (String -&gt; PipeLight a)
+  | Yield String (PipeLight a)
+  | Pure a
+</code></pre>
+
+<p>This PipeLight AST only allows for strings to be streamed, it does not support additional side-effects, terminations and so on, but gives the idea behind the implementation of <a href="https://hackage.haskell.org/package/conduit">Haskell Conduit</a>, <a href="https://hackage.haskell.org/package/pipes">Haskell pipes</a> or <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>.</p>
+
+<h3 id="idrispipes-instruction-set">IdrisPipes instruction set</h3>
+
+<p>The actual instruction set of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> and its corresponding AST is obviously a bit more complex than the one described above. We need to integrate effects, the ability to await or yield different types of values, handle early termination, and more:</p>
+
+<pre><code class="language-haskell">data PipeM : (a, b, r1 : Type) -&gt; (m : Type -&gt; Type) -&gt; (r2 : Type) -&gt; Type where
+  Pure    : r2 -&gt; PipeM a b r1 m r2                                 -- Lift a value into the pipe
+  Action  : m (Inf (PipeM a b r1 m r2)) -&gt; PipeM a b r1 m r2        -- Interleave an effect
+  Yield   : Inf (PipeM a b r1 m r2) -&gt; b -&gt; PipeM a b r1 m r2       -- Yield a value and next continuation
+  Await   : (Either r1 a -&gt; PipeM a b r1 m r2) -&gt; PipeM a b r1 m r2 -- Yield a continuation (expecting a value)
+</code></pre>
+
+<p>The instruction set is slightly enriched:</p>
+
+<ul>
+  <li><code>Await</code> expects an <code>Either</code> value to support early termination of the upstream pipe</li>
+  <li><code>Action</code> allows us to perform effects of type m inside the pipe</li>
+</ul>
+
+<p>The type parameters of <code>PipeM</code> are also a bit more involved:</p>
+
+<ul>
+  <li><code>a</code> is the type of the values flowing in from the upstream (left pipe)</li>
+  <li><code>b</code> is the type of the values flowing out to downstream (right pipe)</li>
+  <li><code>m</code> is the Monad the pipe runs in</li>
+  <li><code>r2</code> is the type of the returned value of the pipe</li>
+  <li><code>r1</code> is the type of the upstream pipe return value (left pipe)</li>
+</ul>
+
+<p>Overall, the syntax may look a bit different (due to the use of Inf and the use of Generalized Algebraic Data Types), but the basic idea is the same.</p>
+
+<h3 id="emitting-sequencing-combining">Emitting, Sequencing, Combining</h3>
+
+<p>As we saw through the example of <code>IOSpec</code>, we need to add a few ingredients to make the construction of an AST practical. We need factory functions for the common instructions, and a Monad instance for sequencing instructions. In <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a>:</p>
+
+<ul>
+  <li><code>yield</code>, <code>await</code> and <code>lift</code> (from the Monad transformation type-class) are the factory functions</li>
+  <li>The Monad instance of <code>PipeM</code> is available in <a href="https://github.com/QuentinDuval/IdrisPipes/blob/master/src/Pipes/Core.idr">Pipes.Core</a></li>
+</ul>
+
+<p>Finally, the <code>.|</code> pipe operator allows us to combine two pipes into one, by plugging together the <code>Yield</code> of the left pipe to the <code>Await</code> of the right pipe:</p>
+
+<pre><code class="language-haskell">(.|) : (Monad m) =&gt; PipeM a b r1 m r2 -&gt; PipeM b c r2 m r3 -&gt; PipeM a c r1 m r3
+(.|) = pull where
+  mutual
+ 
+    pull : (Monad m) =&gt; PipeM a b r1 m r2 -&gt; PipeM b c r2 m r3 -&gt; PipeM a c r1 m r3
+    pull up (Yield next c) = Yield (up `pull` next) c         -- Yield downstream
+    pull up (Action a) = lift a &gt;&gt;= \next =&gt; up `pull` next   -- Produce effect downstream
+    pull up (Await cont) = up `push` cont                     -- Ask upstream for a value
+    pull up (Pure r) = Pure r
+ 
+    push : (Monad m) =&gt; PipeM a b r1 m r2 -&gt; (Either r2 b -&gt; PipeM b c r2 m r3) -&gt; PipeM a c r1 m r3
+    push (Await cont) down = Await (\a =&gt; cont a `push` down)   -- Await upstream
+    push (Action a) down = lift a &gt;&gt;= \next =&gt; next `push` down -- Produce effect upstream
+    push (Yield next b) down = next `pull` down (Right b)       -- Give back control downstream
+    push (Pure r) down = Pure r `pull` down (Left r)            -- Termination, send pipe result downstream
+</code></pre>
+
+<ul>
+  <li><code>pull</code> traverses the downstream <code>PipeM</code> computation until it meets an <code>Await</code> instruction, at which point it gives the control to the upstream pipe (via <code>push</code>) to insert its own instructions</li>
+  <li><code>push</code> inserts the upstream instruction until it meets a <code>Yield</code> instruction, at which point it connects it to the downstream pipe’s <code>Await</code> instruction and gives back control downstream</li>
+</ul>
+
+<p>You can note that the type signature of the <code>.|</code> operator makes sure that we cannot plug together pipes that would not connect together in terms of values exchanged.</p>
+
+<h3 id="running-a-pipe---interpreter">Running a pipe - Interpreter</h3>
+
+<p>At this point, the last missing piece is the interpreter, the function that runs a pipeline, and execute the streaming recipe it represents. As described in our previous article on <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipe</a>, we can only running a complete pipeline, i.e. a self sufficient pipe which does not await or yield anything.</p>
+
+<p><a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> defines a type alias to represent such pipes. An <code>Effect</code> is an alias over <code>PipeM</code>, where <code>Void</code> is used in place of the type of the values flowing in and out of the pipeline (*):</p>
+
+<pre><code class="language-haskell">Effect : (m: Type -&gt; Type) -&gt; (r: Type) -&gt; Type
+Effect m r = PipeM Void Void Void m r
+</code></pre>
+
+<p>Because we cannot construct a value of type Void, the interpreter of a complete pipeline only has to deal with two instructions:</p>
+
+<ul>
+  <li>An <code>Action</code> to execute some side effect, followed by a continuation</li>
+  <li>The <code>Pure</code> instruction for the termination of the computation</li>
+  <li>While the other instructions lead to an absurd statement</li>
+</ul>
+
+<pre><code class="language-haskell">runPipe : (Monad m) =&gt; Effect m r -&gt; m r
+runPipe (Pure r) = pure r                         -- Done executing the pipe, return the result
+runPipe (Action a) = a &gt;&gt;= \p =&gt; runPipe p        -- Execute the action, run the next of the pipe
+runPipe (Yield next b) = absurd b                               -- Absurd
+runPipe (Await cont) = runPipe $ Await (either absurd absurd)   -- Absurd
+</code></pre>
+
+<p><em>(*) The <code>Source</code> and <code>Sink</code> are similarly defined, with <code>Void</code> in place of the type for the values flowing in for the <code>Source</code>, and the values flowing out for the <code>Sink</code>.</em></p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next</h2>
+
+<p>At this point, you should now enough about Free Monads to understand the concept and even build your own. You should have a basic idea of what Free Monads are about, what an interpreter is, and why it might be interesting for you to look further at Free Monads.</p>
+
+<p>You should also know enough about the implementation of <a href="https://github.com/QuentinDuval/IdrisPipes">IdrisPipes</a> to read its implementation in full, understand it, and maybe even contribute to it if you are interested.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-11-13T00:00:00+00:00">November 13, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Free+Monads%3A+from+the+basics+to+composable+and+effectful+stream+processing%20%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html&title=Free+Monads%3A+from+the+basics+to+composable+and+effectful+stream+processing" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F11%2F13%2Ffree-monads-intro.html&t=Free Monads: from the basics to composable and effectful stream processing" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/11/02/idris-pipes.html" title="IdrisPipes: a library for composable and effectful stream processing in Idris">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">IdrisPipes: a library for composable and effectful stream processing in Idris</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/12/01/test-polymorphic-haskell.html" title="Answering r/haskell: How to unit test code that uses polymorphic interfaces?">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Answering r/haskell: How to unit test code that uses polymorphic interfaces?</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

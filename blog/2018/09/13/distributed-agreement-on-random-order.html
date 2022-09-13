@@ -1,0 +1,1033 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Distributed agreement on random order: Lamport Timestamps - Double Ended Queue</title>
+<meta name="description" content="If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Distributed agreement on random order: Lamport Timestamps">
+<meta property="og:url" content="/blog/2018/09/13/distributed-agreement-on-random-order.html">
+
+
+  <meta property="og:description" content="If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Distributed agreement on random order: Lamport Timestamps">
+  <meta name="twitter:description" content="If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…">
+  <meta name="twitter:url" content="/blog/2018/09/13/distributed-agreement-on-random-order.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2018-09-13T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2018/09/13/distributed-agreement-on-random-order.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Distributed agreement on random order: Lamport Timestamps">
+    <meta itemprop="description" content="If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…">
+    <meta itemprop="datePublished" content="2018-09-13T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Distributed agreement on random order: Lamport Timestamps
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2018-09-13T00:00:00+00:00">September 13, 2018</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html&text=Distributed+agreement+on+random+order%3A+Lamport+Timestamps&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2018/09/13/distributed-agreement-on-random-order.html&title=Distributed agreement on random order: Lamport Timestamps"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2018/09/13/distributed-agreement-on-random-order.html&t=Distributed agreement on random order: Lamport Timestamps">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#ordering-events-in-a-distributed-system">Ordering events in a distributed system</a></li><li><a href="#lamport-timestamp-algorithm">Lamport timestamp algorithm</a></li><li><a href="#absurtity-begins---shuffling-a-sentence-using-lamport-timestamps">Absurtity begins - Shuffling a sentence using Lamport timestamps</a><ul><li><a href="#a-wasteful-way-to-shuffle">A wasteful way to shuffle</a></li><li><a href="#architecturing-the-mess">Architecturing the mess</a></li></ul></li><li><a href="#a-practical-implementation-of-absurdity">A practical implementation of absurdity</a><ul><li><a href="#a-word-on-elixir">A word on Elixir</a></li><li><a href="#what-is-an-actor">What is an actor?</a></li><li><a href="#the-plan">The plan</a></li><li><a href="#starting-a-worker">Starting a worker</a></li><li><a href="#querying-for-the-history">Querying for the history</a></li><li><a href="#receiving-events">Receiving events</a></li><li><a href="#receiving-logs">Receiving logs</a></li><li><a href="#the-remaining-pieces-of-infrastructure">The remaining pieces of infrastructure</a></li></ul></li><li><a href="#testing-eventual-stupidity">Testing eventual stupidity</a><ul><li><a href="#example-of-random-shuffling">Example of random shuffling</a></li><li><a href="#the-fascinating-bit">The fascinating bit</a></li></ul></li><li><a href="#conclusion-and-what-to-read-next">Conclusion and what to read next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p><em>If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle. We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task…</em></p>
+
+<p>It is quite astonishing that some very simple algorithms are able to solve what seem to be very complicated problems. Take the ordering of events in a distributed system.</p>
+
+<p>We cannot accurately synchronize clocks between several devices. And yet, there is a simple and beautiful algorithm which allows to define a total ordering on the events occurring in these devices: <a href="https://en.wikipedia.org/wiki/Lamport_timestamps">Lamport timestamps</a>.</p>
+
+<p>Today’s post is dedicated to illustrating this algorithm through a simple (and arguably completely absurd) example, all implemented in Elixir.</p>
+
+<h2 id="ordering-events-in-a-distributed-system">Ordering events in a distributed system</h2>
+
+<p>Say we want to process a bunch of event in a distributed system which works in a multi-leader setting:</p>
+
+<ul>
+  <li>There are several nodes of the cluster on which we can process events</li>
+  <li>Event are processed and request are answered before every other leader is notified</li>
+  <li>Leaders asynchronously notify of these events to all the other nodes</li>
+</ul>
+
+<p>We would like all the nodes of the cluster to eventually agree on an total order on the events, a total order that is consistent which what actually happened in the system (i.e. that makes sense in terms of causality):</p>
+
+<ul>
+  <li>For two events E1 and E2 on the same node, if E1 was processed before E2, all nodes must agree that E1 happened before E2</li>
+  <li>For two events E1 on node N1 and E2 on node N2, if N2 had knowledge of E1 (via notification from N1) when E2 was processed, all nodes must agree that E1 happened before E2</li>
+</ul>
+
+<p>The Lamport timestamps algorithm (also known as Lamport clock) is an astonishingly simple and clever algorithm that gives us just that.</p>
+
+<h2 id="lamport-timestamp-algorithm">Lamport timestamp algorithm</h2>
+
+<p>The algorithm itself is very simple to follow. It only requires each node to maintain a counter (also known as a logical clock) and update it as follow:</p>
+
+<p><strong>Upon receiving an event E on node N:</strong></p>
+
+<ul>
+  <li>Increment the logical clock of the node <code>Clock(N)</code> by 1</li>
+  <li>Log this event E with <code>Time(E) = Clock(N)</code> and <code>Origin(E) = N</code></li>
+</ul>
+
+<p><strong>To send a replicate of an event E that occurred on node N:</strong></p>
+
+<ul>
+  <li>Send the full log of the event E with its time <code>Time(E)</code> and origin <code>Origin(E)</code></li>
+</ul>
+
+<p><strong>Upon receiving a event log replica E with Time(E) and Origin(E):</strong></p>
+
+<ul>
+  <li>Update the logical clock of the receiving node <code>Clock(N)</code> to: <code>1 + max(Clock(N), Time(E))</code></li>
+</ul>
+
+<p>After a while, all nodes will have the same event logs. At this point, to retrieve an ordered history of the events, we just need to ask any node for its log of event, and sort them by their time and then their origin.</p>
+
+<p><em>Note: For a more detailed description of the algorithm and its not-that-obvious implications in terms of ordering and capture of causality, you can refer to <a href="https://en.wikipedia.org/wiki/Lamport_timestamps">Wikipedia</a> or better, look at the <a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf">original publication</a>.</em></p>
+
+<h2 id="absurtity-begins---shuffling-a-sentence-using-lamport-timestamps">Absurtity begins - Shuffling a sentence using Lamport timestamps</h2>
+
+<p>As explained earlier, Lamport timestamps allow us to totally order a sequence of event in a distributed multi-leader system, in such a way that it respects causality. We will consider the specific case of such a system to illustrate the algorithm.</p>
+
+<h3 id="a-wasteful-way-to-shuffle">A wasteful way to shuffle</h3>
+
+<p>For the rest of this post, we will build a simplistic distributed multi-leader in-memory buzzword compliant data store, where events being processed are insertion commands. We will insert in this data store all the words of a given sentence, distributing our writes evenly among its different nodes.</p>
+
+<p>We will then demonstrate how Lamport timestamps make sure that our nodes eventually agree on the order of word insertions in the system.</p>
+
+<p>Now, if our nodes agree on an order of insertion of the words of a sentence, they agree on the order of the words of the sentence. In other words, and thanks to Lamport timestamps, the nodes of our distributed in-memory data store will eventually agree on a given random shuffling of the words of the sentence.</p>
+
+<p>If we succeed in this task, we will have succeeded in building what easily qualifies as one of the world most wasteful way to random shuffle – and without any good random properties built-in.</p>
+
+<p>Yes, this is absurd. But also quite fun.</p>
+
+<h3 id="architecturing-the-mess">Architecturing the mess</h3>
+
+<p>To build our eccentric random shuffler, we need a bit of infrastructure. In addition to our N database replicate (which we will call workers), we will need:</p>
+
+<ul>
+  <li>A <strong>load balancer</strong>: to dispatch the insertion of words among our workers</li>
+  <li>A <strong>pub / sub messaging system</strong>: to replicate the logs of one node to other nodes</li>
+</ul>
+
+<p>This is how it will work. We will send all our insertion request through the load balancer, which will be in charge of dispatching these requests among the workers. Workers will send their replicate log through the PubSub messaging system to broadcast it to all other workers asynchronously:</p>
+
+<p><img src="/assets/images/shufflinginfrastructure.png" alt="shuffling_infrastructure" /></p>
+
+<p>At the end of our experiment, we will ask each of our workers for their individual version of the history of event (and to do so, our load balancer will also need to be able to list of all the workers) and make sure they agree.</p>
+
+<h2 id="a-practical-implementation-of-absurdity">A practical implementation of absurdity</h2>
+
+<p>We now have a stupid task to do, and a perfect architecture to do it. We just miss the perfect language for the task: Elixir.</p>
+
+<h3 id="a-word-on-elixir">A word on Elixir</h3>
+
+<p><a href="https://elixir-lang.org/">Elixir</a> is a dynamically typed functional programming language built on top of <a href="https://en.wikipedia.org/wiki/BEAM_(Erlang_virtual_machine)">BEAM</a>, the virtual machine of <a href="https://www.erlang.org/">Erlang</a>. Thanks to this, it inherits from the powerful capabilities of Erlang and its actor model in terms of fault tolerance and parallelism.</p>
+
+<p>Elixir also have a strong similitude with <a href="https://clojure.org/">Clojure</a>. It puts the emphasis on being able to easily manipulate data rather than forcing data into types (I just wished it would have inherited from the amazing persistent vector of Clojure). It also has a <a href="https://8thlight.com/blog/patrick-gombert/2013/11/26/lispy-elixir.html">powerful meta-programming model through macros</a>.</p>
+
+<p>Today, we will mostly use Elixir for its ability to easily instantiate actors, which will be of great help to build our distributed over-engineered sentence shuffling algorithm.</p>
+
+<h3 id="what-is-an-actor">What is an actor?</h3>
+
+<p>We will let aside here the <a href="https://en.wikipedia.org/wiki/Actor_model">formal definition of actors</a> (which is a really good read) and go straight to the implementation of actors in Elixir.</p>
+
+<p>Actors are asynchronous independent light-weight processes, that each have their own state (and <a href="https://www.erlang-solutions.com/blog/erlang-garbage-collector.html">garbage collection</a>), and can only communicate with other actors by sending messages or reacting to messages sent to them (in particular, actors cannot share state).</p>
+
+<p>They are like objects (instances, not classes) that each run asynchronously and whose method calls are replaced by message passing. To “run a method”, we send a message containing the name of the method and the value of its arguments. To get back a result, we wait for an answer message.</p>
+
+<h3 id="the-plan">The plan</h3>
+
+<p>We will now implement our random-shuffling workers as actors, maintaining a state of the event they know about, and communicating with the external world (such as other actors) through messages.</p>
+
+<p>These worker actors will need to react to the following kind of messages:</p>
+
+<ul>
+  <li>A <code>add</code> message to insert of a new word in the data base</li>
+  <li>A <code>get_history</code> message to retrieve the history of event as seen by the worker</li>
+  <li>A <code>replication_log</code> message to transmit the replication log to others worker</li>
+</ul>
+
+<p>Our worker actors will also need to emit <code>replication_log</code> messages (and not only react to them), as well as maintaining a logical clock to implement the Lamport timestamp algorithm.</p>
+
+<h3 id="starting-a-worker">Starting a worker</h3>
+
+<p>Our first task is to do what needs to be done to correctly instantiate new workers and initialize their state. The following code defines the equivalent of a constructor for an actor (*), the <code>init</code> method:</p>
+
+<pre><code class="language-elixir">def init(_) do
+  PubSub.subscribe(@replication_log_topic, self())
+  {:ok, %State{ name: self(), clock: 1, eventLog: [] }}
+end
+</code></pre>
+
+<p>The init method is called at the instantiation of an actor, to perform the appropriate side effects at initialization and return the initial state of the actor. In our case, at startup, our worker:</p>
+
+<ul>
+  <li>Needs to subscribes to the replication log notifications (line 1)</li>
+  <li>Init its state (line 2) with an logical clock starting at 1 and an empty event log</li>
+</ul>
+
+<p>The event log represents what happened in the system, as viewed by the worker. Each log entry in this log contain the payload of an event, tagged with the time at which the event was processed, and its origin (where it was first processed). Here is the Elixir data type corresponding to a <code>LogEntry</code>:</p>
+
+<pre><code class="language-elixir">defmodule LogEntry do
+  defstruct origin: nil, time: 0, event: nil
+end
+</code></pre>
+
+<p><em>(*) In fact, this is the method used to initialize the state of a specific kind of actors, <a href="https://hexdocs.pm/elixir/GenServer.html">GenServers</a>. This detail is not relevant here, but you are encouraged to follow the <a href="https://elixir-lang.org/getting-started/mix-otp/genserver.html">Elixir tutorial</a> or the <a href="http://erlang.org/doc/man/gen_server.html">Erlang docs</a> for more information.</em></p>
+
+<p><em>Note: There is actually more logic to be done in the constructor, like getting the old history back (if a worker pops after events started flowing). We skipped this here for simplicity.</em></p>
+
+<h3 id="querying-for-the-history">Querying for the history</h3>
+
+<p>Now that we are able to instantiate an actor, let us see how we can communicate with it. As seen earlier, actors can only communicate by sending messages to each other.</p>
+
+<p>To handle and answer a given request in a actor, we need to implement a given callback (*) for this type of message. Technically, here is the code we need to react to the <code>get_history</code> message:</p>
+
+<pre><code class="language-elixir">def handle_call(:get_history, _from, worker) do
+  sortedLog = Enum.sort_by(worker.eventLog, fn event -&gt; {event.time, event.origin} end)
+  {:reply, sortedLog, worker}
+end
+</code></pre>
+
+<p>Let’s take it step by step. First, the prototype. The function <code>handle_call</code> is the name of the callback we must implement, and it takes 3 parameters:</p>
+
+<pre><code class="language-elixir">def handle_call(:get_history, _from, worker) do
+  …
+end
+</code></pre>
+
+<ul>
+  <li>The message received: here we pattern match on the <code>:get_history</code> constant</li>
+  <li>The origin of the message: the argument named <code>_from</code></li>
+  <li>The state of the actor at reception of the message: the argument named <code>worker</code></li>
+</ul>
+
+<p>Now let us look at the content of the function. We recognize the Lamport timestamp total ordering we talked about earlier: the history of event is obtained by sorting the event log by time and then origin.</p>
+
+<pre><code class="language-elixir">sortedLog = Enum.sort_by(worker.eventLog, fn event -&gt; {event.time, event.origin} end)
+</code></pre>
+
+<p>The callback <code>handle_call</code> must then return a tuple of 3 elements (the last line of a function is always the returned piece of data of a function):</p>
+
+<pre><code class="language-elixir">{:reply, sortedLog, worker}
+</code></pre>
+
+<ul>
+  <li>At the first position: whether or not the message was successfully handled (<code>:ok</code> for success)</li>
+  <li>As the second position: the answer to the request, the sorted event log</li>
+  <li>As the third position: the new state of the worker, which we keep unchanged here</li>
+</ul>
+
+<p>Assembled together, this callback will make our workers react to the get_history message by answering a sorted event log (the history as the worker sees it), and keep the state of the actor unchanged.</p>
+
+<p><em>(*) There are three main callbacks in a GenServer actor, named handle_call, handle_cast, and handle_info. handle_call is for synchronous requests, those for which the caller expects an answer.</em></p>
+
+<h3 id="receiving-events">Receiving events</h3>
+
+<p>To handle the insertion of a word of a sentence, we need to react to the <em>add</em> message. As before, we need to implement <code>handle_call</code>, but this time pattern matching on a message starting with the constant <code>:add</code> and containing a word as a payload:</p>
+
+<pre><code class="language-elixir">def handle_call({:add, event}, _from, worker) do
+  logEntry = %LogEntry{
+    origin: worker.name,
+    time: worker.clock,
+    event: event
+  }
+  newWorkerState = %{ worker |
+    clock: worker.clock + 1,
+    eventLog: [logEntry | worker.eventLog]
+  }
+  PubSub.broadcast(@log_replication_topic, {:replication_log, logEntry})
+  {:reply, :ok, newWorkerState }
+end
+</code></pre>
+
+<p>There are three main parts in this function. First we create a new log entry for the event we just received, tagged with the worker clock and the worker name:</p>
+
+<pre><code class="language-elixir">logEntry = %LogEntry{
+  origin: worker.name,
+  time: worker.clock,
+  event: event
+}
+</code></pre>
+
+<p>Then we construct the new worker state by appending the new entry in the log, and incrementing the logical clock of the worker by one:</p>
+
+<pre><code class="language-elixir">newWorkerState = %{ worker |              # Update worker state
+  clock: worker.clock + 1,                # – increment clock by one
+  eventLog: [logEntry | worker.eventLog]  # – prepend log entry to event log
+}
+</code></pre>
+
+<p>Finally, we broadcast this new log entry to all other workers, before answering positively (<code>:ok</code> for success) to the request:</p>
+
+<pre><code class="language-elixir">PubSub.broadcast(@log_replication_topic, {:replication_log, logEntry})
+</code></pre>
+
+<h3 id="receiving-logs">Receiving logs</h3>
+
+<p>Now for our last message, the replication log message. This time, we have to catch messages starting with <code>:replication_log</code> and containing a log entry payload:</p>
+
+<pre><code class="language-elixir">def handle_info({:replication_log, logEntry}, worker) do
+  newWorkerState =
+    if logEntry.origin == worker.name do
+      worker
+    else
+      %{ worker |
+        clock: max(worker.clock, logEntry.time) + 1,
+        eventLog: [logEntry | worker.eventLog] }
+    end
+  {:noreply, newWorkerState }
+end
+</code></pre>
+
+<p>Because we use a broadcast for the replication log, this function first has to check whether or not the worker is in fact the emitter of the replication log (<code>logEntry.origin == worker.name</code>).</p>
+
+<p>In case the emitter is the receiver, the function does nothing. On the other hand, if the emitter is some other worker, it implements the Lamport timestamp logic:</p>
+
+<pre><code class="language-elixir">%{ worker |
+  clock: max(worker.clock, logEntry.time) + 1,
+  eventLog: [logEntry | worker.eventLog] }
+</code></pre>
+
+<ul>
+  <li>The replicated log entry is appended to the log of the worker</li>
+  <li>The worker clock is updated according to Lamport timestamp’s algorithm</li>
+</ul>
+
+<p><em>Note: The astute code reader might have noticed we used <code>handle_info</code> instead of <code>handle_call</code>. This is no mistake. I will refer you to the <a href="https://hexdocs.pm/elixir/GenServer.html">GenServer</a> documentation regarding why it is so.</em></p>
+
+<h3 id="the-remaining-pieces-of-infrastructure">The remaining pieces of infrastructure</h3>
+
+<p>At this point, our worker is fully implemented, but for some technical details we skipped here for clarity. You can find the <a href="https://gist.github.com/deque-blog/7da616a7a3037a9da11be0fbdac01eb4">full code here</a> if you are interested.</p>
+
+<p>To run our tests, we only miss our Pub/Sub messaging infrastructure and our Load Balancer. Fortunately, Elixir has quite a good ecosystem and there are some high quality libraries available, such as Phoenix.PubSub. A few lines of code to wrap them (you can find the <a href="https://gist.github.com/deque-blog/4fc11e6c548f9d986df620f1c8b1c2e0">full code here</a>) and we get our infrastructure for free.</p>
+
+<p>The whole project is <a href="https://github.com/QuentinDuval/Clocks">available on GitHub</a>.</p>
+
+<h2 id="testing-eventual-stupidity">Testing eventual stupidity</h2>
+
+<p>All of this work has not been in vain: it is now time to test our eccentric shuffling algorithm.</p>
+
+<h3 id="example-of-random-shuffling">Example of random shuffling</h3>
+
+<p>Here is an example of sorted event log I got after sending the words of the sentence “hello my dear friend how are you in this glorious and beautiful day ?” to our eccentric shuffling algorithm:</p>
+
+<pre><code class="language-elixir">[
+  %Worker.LogEntry{event: "friend", origin: #PID&lt;0.183.0&gt;, time: 1},
+  %Worker.LogEntry{event: "dear", origin: #PID&lt;0.184.0&gt;, time: 1},
+  %Worker.LogEntry{event: "my", origin: #PID&lt;0.185.0&gt;, time: 1},
+  %Worker.LogEntry{event: "hello", origin: #PID&lt;0.186.0&gt;, time: 1},
+  %Worker.LogEntry{event: "how", origin: #PID&lt;0.186.0&gt;, time: 5},
+  %Worker.LogEntry{event: "are", origin: #PID&lt;0.185.0&gt;, time: 6},
+  %Worker.LogEntry{event: "in", origin: #PID&lt;0.183.0&gt;, time: 7},
+  %Worker.LogEntry{event: "you", origin: #PID&lt;0.184.0&gt;, time: 7},
+  %Worker.LogEntry{event: "glorious", origin: #PID&lt;0.185.0&gt;, time: 9},
+  %Worker.LogEntry{event: "this", origin: #PID&lt;0.186.0&gt;, time: 9},
+  %Worker.LogEntry{event: "beautiful", origin: #PID&lt;0.183.0&gt;, time: 11},
+  %Worker.LogEntry{event: "and", origin: #PID&lt;0.184.0&gt;, time: 11},
+  %Worker.LogEntry{event: "today", origin: #PID&lt;0.186.0&gt;, time: 12},
+  %Worker.LogEntry{event: "?", origin: #PID&lt;0.185.0&gt;, time: 14}
+]
+</code></pre>
+
+<p>In other words, all workers ended up agreeing on this random shuffling:</p>
+
+<p><em>“friend dear my hello how are in you glorious this beautiful and day ?”</em></p>
+
+<p>This, of course, is just one example of random shuffling of our original sentence. You can test other example by yourself: the code is available in <a href="https://github.com/QuentinDuval/Clocks">GitHub</a>.</p>
+
+<h3 id="the-fascinating-bit">The fascinating bit</h3>
+
+<p>What is interesting (and fascinating for me) is that, whatever the random order we end up having, <strong>all the workers will eventually always agree</strong> on the same. In fact, we can even write <a href="https://github.com/QuentinDuval/Clocks/blob/master/test/clocks_test.exs">unit tests on it</a>, and it will be green:</p>
+
+<pre><code class="language-elixir">Eventually.assertUntil 100, 5, fn() -&gt;
+  same_history =
+    Dispatcher.get_workers()
+      |&gt; Enum.map(fn w -&gt; Worker.get_history(w) end)
+      |&gt; all_equal
+  assert same_history == true
+end
+</code></pre>
+
+<p>We therefore managed to build a buzzword compliant, distributed sentence shuffling algorithm, all based on Lamport timestamp algorithm. Amazing, right?</p>
+
+<h2 id="conclusion-and-what-to-read-next">Conclusion and what to read next</h2>
+
+<p>Beside having some random fun, I hope this post gave you the desire to read the original publication of Lamport: <a href="https://amturing.acm.org/p558-lamport.pdf">Time, Clocks, and the Ordering of Events in a Distributed System</a>, which is truly an amazing paper to read.</p>
+
+<p>This notion of ordering is obviously quite useful in distributed systems. For instance, generalizations of Lamport clocks, such as vector clocks, allow to identify concurrent modifications in a distributed systems, which is tremendously useful to resolve write conflicts (although <a href="https://www.datastax.com/dev/blog/why-cassandra-doesnt-need-vector-clocks">they are not without problems</a>).</p>
+
+<p>The paper also shows an interesting application of Lamport timestamps, to implement a replicated state machine. This limited consensus algorithm is not fault tolerant (and is completely supplanted by algorithms such as <a href="http://www.tcs.hut.fi/Studies/T-79.5001/reports/2012-deSouzaMedeiros.pdf">Zookeeper Atomic Broadcast</a> or <a href="http://files.catwell.info/misc/mirror/raft/raft.pdf">Raft</a>) but nevertheless quite smart and interesting to read.</p>
+
+<p>Read this paper, try Elixir as well, you won’t regret it.</p>
+
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-09-13T00:00:00+00:00">September 13, 2018</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Distributed+agreement+on+random+order%3A+Lamport+Timestamps%20%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html&title=Distributed+agreement+on+random+order%3A+Lamport+Timestamps" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2018%2F09%2F13%2Fdistributed-agreement-on-random-order.html&t=Distributed agreement on random order: Lamport Timestamps" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2018/07/28/cost-of-ignoring-errors.html" title="Small programming faults can overflow an entire system">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Small programming faults can overflow an entire system</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2019/01/11/pythagorean-triples-cpp.html" title="Pythagorean Triples in Modern C++">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Pythagorean Triples in Modern C++</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

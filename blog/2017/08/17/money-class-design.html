@@ -1,0 +1,1152 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs. - Double Ended Queue</title>
+<meta name="description" content="Let’s look at the Money class implementations found in Kent Beck, Martin Fowler and Ward Cunningham work, and propose a new one based on dependent typing.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.">
+<meta property="og:url" content="/blog/2017/08/17/money-class-design.html">
+
+
+  <meta property="og:description" content="Let’s look at the Money class implementations found in Kent Beck, Martin Fowler and Ward Cunningham work, and propose a new one based on dependent typing.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.">
+  <meta name="twitter:description" content="Let’s look at the Money class implementations found in Kent Beck, Martin Fowler and Ward Cunningham work, and propose a new one based on dependent typing.">
+  <meta name="twitter:url" content="/blog/2017/08/17/money-class-design.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-08-17T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/08/17/money-class-design.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.">
+    <meta itemprop="description" content="Let’s look at the Money class implementations found in Kent Beck, Martin Fowler and Ward Cunningham work, and propose a new one based on dependent typing.">
+    <meta itemprop="datePublished" content="2017-08-17T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-08-17T00:00:00+00:00">August 17, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html&text=A+study+of+4+Money+class+designs%2C+featuring+Martin+Fowler%2C+Kent+Beck+and+Ward+Cunningham+designs.&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/08/17/money-class-design.html&title=A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs."
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/08/17/money-class-design.html&t=A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs.">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation">Motivation</a></li><li><a href="#martins-fowler-money-class">Martin’s Fowler money class</a><ul><li><a href="#how-it-works">How it works</a></li><li><a href="#sample-implementation">Sample implementation</a></li><li><a href="#critical-analysis">Critical analysis</a></li><li><a href="#improvements-using-optionals">Improvements using optionals</a></li><li><a href="#still-room-left-for-improvement">Still room left for improvement</a></li></ul></li><li><a href="#kent-becks-money-class">Kent Beck’s money class</a><ul><li><a href="#how-it-works-1">How it works</a></li><li><a href="#implementation-ast">Implementation (AST)</a></li><li><a href="#evaluator-implementation">Evaluator implementation</a></li><li><a href="#critics">Critics</a></li></ul></li><li><a href="#fixing-the-money-expression">Fixing the Money expression</a><ul><li><a href="#how-it-works-2">How it works</a></li><li><a href="#implementation">Implementation</a></li><li><a href="#critics-1">Critics</a></li></ul></li><li><a href="#improving-on-martin-fowlers-money-class-with-idris">Improving on Martin Fowler’s Money class with Idris</a><ul><li><a href="#the-hole-in-our-type-systems">The hole in our type systems</a></li><li><a href="#translating-haskell-to-idris">Translating Haskell to Idris</a></li><li><a href="#preconditions-as-types">Preconditions as types</a></li><li><a href="#runtime-checks">Runtime checks</a></li><li><a href="#critics-2">Critics</a></li></ul></li><li><a href="#conclusion">Conclusion</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>I started to read the <a href="https://www.amazon.fr/Test-Driven-Development-Kent-Beck/dp/0321146530">Test Driven Development: by example</a> book (by Kent Beck). It offers a perspective on TDD that is far from being the dogmatic perspective that is taught by some trainers. It is a really good back and I highly encourage you to read it.</p>
+
+<p>But <strong>this post is not about TDD</strong>. There are plenty of blog posts already available online for this. This post is about the main example used by Kent Beck in this book, <strong>the Money class</strong>.</p>
+
+<p>In this post, we will look at this Money class implementation and compare it with the other approaches available in the literature, such as the one of <a href="https://twitter.com/martinfowler">Martin Fowler</a>. Through this study, we will:</p>
+
+<ul>
+  <li>Discuss the approach provided in <a href="https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_1?ie=UTF8&amp;qid=1502550798&amp;sr=8-1&amp;keywords=Patterns+of+Enterprise+Application+Architecture">PEAA</a> and some related implementation</li>
+  <li>Unveil the hidden defect behind the implementation of <a href="https://www.amazon.fr/Test-Driven-Development-Kent-Beck/dp/0321146530">TDD: by example</a></li>
+  <li>Provide a different implementation of the same idea which fixes this defect</li>
+  <li>Show how dependent typing and Idris provide new ways to design the Money class</li>
+</ul>
+
+<p>Our goal is to explore the trade-offs behind each of these 4 approaches. This journey will lead us to discuss about the <strong>hole in our mainstream type systems</strong> and how dependent typing solves it.</p>
+
+<p><em>This post features C++, Haskell and Idris. The post is written such that the knowledge of these languages is not a prerequisite, but you will likely learn a bit about these languages. Similarly, the discussion is not exclusive to these languages and is easily generalisable.</em></p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>The Money class is one of these popular class that appears almost everywhere you look. Martin Fowler talks about it in <a href="https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_1?ie=UTF8&amp;qid=1502550798&amp;sr=8-1&amp;keywords=Patterns+of+Enterprise+Application+Architecture">PEAA</a>, it is the main example of <a href="https://www.amazon.fr/Test-Driven-Development-Kent-Beck/dp/0321146530">Test Driven Development: by example</a> and is often taken as example in a lot of <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Domain Driven Design</a> talks.</p>
+
+<p>The goal is to <strong>design a type that encapsulate an amount together with its currency</strong>. We want to provide a safe way to do arithmetic on amounts, and avoid the kind of bug that arise when summing double values with different units (such as EUR and USD) and get angry customers.</p>
+
+<p>Unlike units in the metric system though, the <strong>conversion rates are constantly changing</strong> and depend on external sources (such as rate curves on the stock exchange). Converting EUR in USD is therefore not as easy as converting kilometres in meters.</p>
+
+<p>Given these constraints, how can we implement a class that represents an amount of money with its currency? Interestingly, the literature provides different solutions on it.</p>
+
+<h2 id="martins-fowler-money-class">Martin’s Fowler money class</h2>
+
+<p>Our first candidate for a Money class is the one proposed by Martin Fowler in his book, <a href="https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_1?ie=UTF8&amp;qid=1502550798&amp;sr=8-1&amp;keywords=Patterns+of+Enterprise+Application+Architecture">Patterns of Enterprise Application Architecture</a>. To keep things short, we will focus on the safe arithmetic part and ignore the <em>allocate</em> part of his design.</p>
+
+<h3 id="how-it-works">How it works</h3>
+
+<p>We group a currency and an amount inside the same class / structure. We create methods to add moneys together, multiply them by a constant, and compare them for equality.</p>
+
+<ul>
+  <li>Equality is easy: two Money instances are equal if both their amount and currency are equal</li>
+  <li>Multiplying by a constant is easy: we multiply the amount by the provided constant</li>
+  <li>Adding Money instances is tricky: we have to deal with the possibility of different currencies</li>
+</ul>
+
+<p>The solution proposed in <a href="https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_1?ie=UTF8&amp;qid=1502550798&amp;sr=8-1&amp;keywords=Patterns+of+Enterprise+Application+Architecture">PEAA</a> by Martin Fowler is to assert that the two currencies are equal inside the implementation of the addition. The literature also contains variations on the same scheme (*).</p>
+
+<p>In short, adding currencies of different currencies is forbidden by the API. It becomes a precondition of calling the add method, and so the client is responsible:</p>
+
+<ul>
+  <li>To check that the currencies are equal before calling add</li>
+  <li>To convert the amounts to the same currency if needed</li>
+</ul>
+
+<p>In this design, <strong>the type system will not help</strong> the client. Performing these checks in on the client, and forgetting about them will result in a runtime error, hopefully caught at testing time.</p>
+
+<p><em>(*) For instance, the book <a href="https://www.amazon.com/Patterns-Principles-Practices-Domain-Driven-Design/dp/1118714709/ref=sr_1_1?ie=UTF8&amp;qid=1502637607&amp;sr=8-1&amp;keywords=patterns+principles+practices">Patterns, Principles and Practices of Domain-Driven Design</a> encourages to throw an exception if the currencies are different (instead of an assertion).</em></p>
+
+<h3 id="sample-implementation">Sample implementation</h3>
+
+<p>Here is a possible implementation of this Money class design in Haskell.</p>
+
+<p>We start by defining of the data structure Money. It contains two fields, currency and amount, and a default implementation of the == operator:</p>
+
+<pre><code class="language-haskell">data Money = Money {    -- Declares a Money class with:
+  amount   :: Amount,   -- * an amount field
+  currency :: Currency  -- * a currency field
+} deriving (Show, Eq)   -- * and equality on all fields
+</code></pre>
+
+<p>We then write a function to add two Money instances together. If you are not familiar with Haskell, the prototype of the function below says “take two instances of Money and return a Money instance”:</p>
+
+<pre><code class="language-haskell">add :: Money -&gt; Money -&gt; Money
+</code></pre>
+
+<p>We can then complete the definition of the function. The implementation throws an exception when the currencies of the two Money instances <code>m1</code> and <code>m2</code> are different:</p>
+
+<pre><code class="language-haskell">add :: Money -&gt; Money -&gt; Money
+add m1 m2 = 
+  if currency m1 != currency m2                   -- If the two currencies are different
+    then error "Currencies should be equal"       -- * Throws an exception
+    else Money { amount = amount m1 + amount m2   -- * Else return a new Money instance
+               , currency = currency m1 }         --   which is the sum of the two inputs
+</code></pre>
+
+<p>For reference, and if you are unfamiliar with Haskell and more accustomed to OOP, the following C++ implementation is the equivalent implementation:</p>
+
+<pre><code class="language-cpp">class Money {
+  Amount m_amount;
+  Currency m_currency;
+	
+public:
+  Money(Amount const&amp; amount, Currency const&amp; currency)
+    : m_amount(amount)
+    , m_currency(currency)
+  {}
+		
+  friend bool operator==(Money const&amp; lhs, Money const&amp; rhs) = default;
+  friend bool operator!=(Money const&amp; lhs, Money const&amp; rhs) = default;
+
+  Amount amount() const { return m_amount; }
+  Currency currency() const { return m_currency; }
+};
+
+Money add(Money const&amp; lhs, Money const&amp; rhs)
+{
+  if (lhs.currency() != rhs.currency())
+    throw std::logic_error("Currency should be equal");
+  return Money(lhs.amount() + rhs.amount(), lhs.currency());
+}
+</code></pre>
+
+<h3 id="critical-analysis">Critical analysis</h3>
+
+<p>The pattern is quite simple and allows to group together a value and its currency (its unit). The complete pattern also uses a dedicated Amount type (like a big Decimal, instead of doubles, for better precision). As it stands, this pattern is already quite an improvement over using doubles (without unit) as money amounts (*).</p>
+
+<p>Quite an improvement already, but it is not perfect.</p>
+
+<p>The main critic on this design is the <strong>poor declarative nature of the error handling</strong>. The type signature of add does not indicate it can fail. The polymorphic nature of the operation is hidden too. As a result, the client of the API is left the burden of the checking the precondition manually, with <strong>no help from the type system</strong>.</p>
+
+<p>The exception-based implementation can also be criticized for using exceptions to deal with a non-exceptional situation: adding currencies of different currencies is the most common case. It might lead to the client code catching the exceptions to implement its control flow: basically, as glorified gotos.</p>
+
+<p>Overall, this implementation of Money encapsulates some of the concerns associated to the representation of amounts, but lets one concern leaks away: the safety of operations such as add.</p>
+
+<p><em>(*) Using doubles to represent amounts of money is still unfortunately found pretty much in the wild, especially in legacy applications, in which it becomes really hard to refactor.</em></p>
+
+<h3 id="improvements-using-optionals">Improvements using optionals</h3>
+
+<p>We can make the error handling more explicit by making it appear in the type signature of add. We can even force the client code to do a check of validity of the operation.</p>
+
+<p>Nowadays, most languages define an optional type that encodes the presence of absence of something. In C++, this type is called <code>std::optional</code>. In Scala, it is called <code>Option</code>. In Haskell, it is called <code>Maybe</code>.</p>
+
+<p>We can use it to return an optional Money from add:</p>
+
+<pre><code class="language-haskell">add :: Money -&gt; Money -&gt; Maybe Money
+add m1 m2 = 
+  if currency m1 != currency m2             -- If the two currencies are different
+    then Nothing                            -- * Return an empty result
+    else Just $ Money {                     -- * Else return a new Money instance
+          amount = amount m1 + amount m2,   --   which is the sum of the two inputs
+          currency = currency m1 }
+</code></pre>
+
+<p>Now, the type signature correctly indicates that add may fail to return a new Money instance. Better yet, the client has to verify the return value and check whether the operation went gracefully or not.</p>
+
+<p>Finally, we now avoid to use exceptions to deal with what is a non-exceptional situation, making it an explicit part of our domain logic.</p>
+
+<h3 id="still-room-left-for-improvement">Still room left for improvement</h3>
+
+<p>Despite the improvements we did, the Money class as it stands still has some annoying defects. Our add operation is <strong>now asymmetric</strong>. It returns an optional Money instance. In some languages such as Haskell, it means we cannot use the operator +.</p>
+
+<p>Another annoying issue is that the checks of validity of the add operations occur after add has been called. It would be more intuitive to force the verification of the precondition before calling the function.</p>
+
+<p>We will see how to address these issues in the last section of this post.</p>
+
+<h2 id="kent-becks-money-class">Kent Beck’s money class</h2>
+
+<p>We will now look at the different design of the Money class, which comes directly from <a href="https://www.amazon.fr/Test-Driven-Development-Kent-Beck/dp/0321146530">Test Driven Development: by example</a> (written by Kent Beck). This design takes a rather different stance than the previous design: instead of forbidding cross-currency addition, it embraces it.</p>
+
+<h3 id="how-it-works-1">How it works</h3>
+
+<p>The simple yet powerful idea (*) that lies behind the design exposed by Kent Beck is to separate the specification of the addition from its evaluation. Adding money instance with different currencies does not sum them immediately: it <strong>builds an expression that represents the sum</strong>.</p>
+
+<p>Building something that represents the sum is in fact the only reasonable way to proceed. Indeed, adding the two amounts eagerly by forcing a currency conversion would be terrible:</p>
+
+<ul>
+  <li>We would have to arbitrarily choose a currency to convert into</li>
+  <li>We would have to arbitrarily choose a rate curve (on which a market?) to get the rates</li>
+  <li>We would introduce a side-effect is what looks to be a pure computation</li>
+  <li>It would <strong>destroy information</strong>: 3 EUR + 5 USD is a different information than 9.15 USD (**)</li>
+</ul>
+
+<p>Instead, in the design of Kent Beck, adding two amounts results in building an expression that represents the sum of the two amounts. For instance, adding 3 EUR and 5 USD results in the following abstract syntax tree (AST):</p>
+
+<pre><code>     (+)
+    /   \
+3 EUR   5 USD
+</code></pre>
+
+<p>To evaluate the AST in any destination currency we want, we build an <strong>evaluator</strong> that needs to have access to a source of data that provides the conversion rates between the different currencies involved. The evaluation is decoupled from the specification. So much decoupled in fact, that it can be performed later, or never, or even several times, with different rate curves, etc.</p>
+
+<p><em>(*) Often, truly powerful ideas are simple in their very essence as they touch to the core of the concepts we try to model.</em></p>
+
+<p><em>(**) Summing the amounts early has for effect to collapse the information at a given point in time. Delaying the addition keeps the information independent of time, allowing several evaluations at different points in time.</em></p>
+
+<h3 id="implementation-ast">Implementation (AST)</h3>
+
+<p>Our Haskell implementation will distinguish between two notions:</p>
+
+<ul>
+  <li><strong>Money expression</strong>: an un-realized abstract syntax tree (MoneyExpr in the code)</li>
+  <li><strong>Money</strong>: a known amount with a known currency, the result of the evaluation of a MoneyExpr</li>
+</ul>
+
+<p>We will keep our Money data structure from the previous implementation:</p>
+
+<pre><code class="language-haskell">data Money = Money {    -- Declares a Money class with:
+  amount   :: Amount,   -- * an amount field
+  currency :: Currency  -- * a currency field
+} deriving (Show, Eq)   -- * and equality on all fields
+</code></pre>
+
+<p>We then create a <code>MoneyExpr</code> type for a money expression, which defines our AST. For those unfamiliar with Haskell, the pipe operator <code>|</code> represents a disjunction (OR). The code below says that a MoneyExpr is either an known amount <code>KnownAmount</code>, or an addition of several sub-expression <code>MoneyAdd</code> or a multiplication of a sub-expression <code>MoneyMult</code>.</p>
+
+<pre><code class="language-haskell">data MoneyExpr                  -- An Money expression made of EITHER:
+  = KnownAmount Money           -- * A known amount and currency (base case)
+  | MoneyAdd [MoneyExpr]        -- * A sum of several money expression
+  | MoneyMul MoneyExpr Double   -- * A money expression multiplied by a factor
+  deriving (Show, Eq)
+</code></pre>
+
+<p>We then implement our function such that they build the AST instead of directly computing sums and products:</p>
+
+<ul>
+  <li>Adding will create a new MoneyAdd node.</li>
+  <li>Multiplying by a constant will create a MoneyMult node.</li>
+</ul>
+
+<pre><code class="language-haskell">-- Given these expressions
+let a = money 30 "USD"
+let b = money 25 "EUR"
+let c = money 1000 "JPY"
+
+-- Add the different currencies
+add (add a (multiply b 2)) c
+
+-- It returns the following AST:
+MoneyAdd
+  [ MoneyAdd
+    [ KnownAmount (Money {amount = 30.0, currency = "USD"})
+    , MoneyMul (KnownAmount (Money {amount = 25.0, currency = "EUR"})) 2.0]
+  , KnownAmount (Money {amount = 1000.0, currency = "JPY"})]
+</code></pre>
+
+<p>Graphically, the resulting AST of the code above would look like this:</p>
+
+<pre><code>         (+)
+        /   \
+      (+)   1000 JPY
+     /   \
+30 USD   (*2)
+          |
+        25 EUR
+</code></pre>
+
+<p>The only missing piece now is the evaluator.</p>
+
+<h3 id="evaluator-implementation">Evaluator implementation</h3>
+
+<p>The <code>MoneyExpr</code> represents a sum of money amounts expressed in different currencies. At some point though, the client code will be interested in converting all the amounts in a target currency (for instance to compare it with another amount in this currency). This is the job of the evaluator.</p>
+
+<p>The evaluator will need a way to access conversion rates from a source of data (such as a rate curve on a given market). We can abstract this behind a function that returns a rates from a currency conversion:</p>
+
+<pre><code class="language-haskell">-- Abstracts the access to a source of data which provides
+-- the rate associated to a conversion between 2 currencies
+Conversion -&gt; Maybe Rate
+</code></pre>
+
+<p>The evaluator will also need as input the money expression to evaluate and the target currency to convert into. This gives us the following prototype for our evaluator, which we name of <code>evalMoneyIn</code>:</p>
+
+<pre><code class="language-haskell">evalMoneyIn ::                -- Evaluate an Money expression
+  (Conversion -&gt; Maybe Rate)  -- * Given a way to retrieve a rate
+  -&gt; MoneyExpr                -- * A money expression to evaluate
+  -&gt; Currency                 -- * And a destination currency
+  -&gt; Maybe Money              -- Returns a known amount (or fails)
+</code></pre>
+
+<p>Here is how the function can be used, where <code>findRate</code> represents the function that gives access to the rates, and <code>moneyExpr</code> is a money expression:</p>
+
+<pre><code class="language-haskell">-- Successful evaluation
+evalMoneyIn findRate moneyExpr "USD"
+&gt; Just (Money {amount = 100.0, currency = "USD"})
+
+-- Failing evaluation
+evalMoneyIn findRate moneyExpr "USD"
+&gt; Nothing
+</code></pre>
+
+<p>The implementation details of the evaluator would require going into some Haskell core abstractions, and is outside the scope of this post, but is provided as reference in this <a href="https://gist.github.com/deque-blog/fed5c7def19a4c75908d37377a8b8e31">GitHub Gist</a>.</p>
+
+<h3 id="critics">Critics</h3>
+
+<p>It is important to notice that this design <strong>encapsulates more concerns</strong> than the previous design did. It handles cross currency addition and also handles the conversions between currencies in a declarative way.</p>
+
+<p>As a functional programming enthusiast and a Lisp lover, this design has a lot of appeal for me. If you ever implemented a small Lisp interpreter, I bet you like this design as much as I do.</p>
+
+<p>Unfortunately, <strong>this design is flawed</strong>. The equality operator is broken. Depending on the way you assemble the expressions, two equivalent expressions may have very different AST:</p>
+
+<pre><code class="language-haskell">let x = add (add a (multiply b 2)) c  -- (a + b * 2) + c 
+let y = add a (add (multiply b 2) c)  -- a + (b * 2 + c)
+
+x == y                                -- Testing equality
+&gt; False                               -- Not what we expect
+</code></pre>
+
+<p>Graphically, these two equivalent expression will have the following AST:</p>
+
+<pre><code>         (+)                     (+)
+        /   \                   /   \
+      (+)   1000 JPY       30 USD   (+)
+     /   \                         /   \
+30 USD   (*2)                    (*2)  1000 JPY
+          |                       |
+        25 EUR                  25 EUR
+</code></pre>
+
+<p>The problem with this implementation is that it <strong>keeps too much information about the initial expression</strong>. So much that it becomes sensible to factors such as operator precedence. We will fix this in the next section.</p>
+
+<h2 id="fixing-the-money-expression">Fixing the Money expression</h2>
+
+<p>Separating the specification from the evaluation of an addition of Money allowed us to support cross-currency addition, quite an interesting feature. But our previous implementation is broken with regards to equality. In this section, we will fix this defect, and go back to the old idea of Money Bag from <a href="https://twitter.com/WardCunningham">Ward Cunningham</a>.</p>
+
+<h3 id="how-it-works-2">How it works</h3>
+
+<p>This implementation keeps the Kent Beck’s design we presented in the previous section. We keep the decoupling between the specification of an addition and its evaluation. We keep the evaluator.</p>
+
+<p>The only difference is the data representation of a money expression. We drop the AST (which captured too much information as we have seen) and use an <strong>associative container</strong> (a map) instead. This map associates each currency to its corresponding amount.</p>
+
+<p>Now, adding money expressions is a simple matter of <strong>merging their associated map</strong>. And multiplying a money expression consists in multiplying the amount of each currency.</p>
+
+<p>Use associative contains correctly fixes our previous defect with equality: two money expressions are equal if their keys are the same and if each keys is associated to the same value.</p>
+
+<h3 id="implementation">Implementation</h3>
+
+<p>The API remains mostly unchanged. The implementation details are quite different though. We will look at the main changes.</p>
+
+<p>First, we drop the AST in favor of a map. We also rename the Money expression into <code>MoneyBag</code>, in honor of Ward Cunningham, but also because it is closer to what it now is:</p>
+
+<pre><code class="language-haskell">newtype MoneyBag                    -- A Money Bag is a wrapper around
+  = MoneyBag (Map Currency Amount)  -- * A map from currency to amount
+  deriving (Show, Eq)               -- Equality is automatically generated
+</code></pre>
+
+<p>Adding two money bags is implemented as the union of two maps:</p>
+
+<pre><code class="language-haskell">add :: MoneyBag -&gt; MoneyBag -&gt; MoneyBag
+add (MoneyBag m1) (MoneyBag m2) = MoneyBag (unionWith (+) m1 m2)
+</code></pre>
+
+<p>Multiplying a money bag with a constant consists in mapping over each amount:</p>
+
+<pre><code class="language-haskell">multiply :: MoneyBag -&gt; Double -&gt; MoneyBag
+multiply (MoneyBag m) f = MoneyBag (fmap (* f) m)
+</code></pre>
+
+<p>The evaluator is quite simple too (3 lines of code). It consists in collapsing the map into a one that only contains a single currency key, the one we want to convert too. Again, this is outside the scope of this post, but the implementation is nevertheless provided as reference in this <a href="https://gist.github.com/deque-blog/9ee91432af94905cfbb5b3da4fbcb4e5">GitHub Gist</a>.</p>
+
+<h3 id="critics-1">Critics</h3>
+
+<p>This design has basically the same advantages than the Kent Beck’s design. It also handles cross currency addition and handles the conversions between currencies in a declarative way.</p>
+
+<p>But now it works with equality. It also offers a more compact data representation in most cases (same currencies are collapsed). The only drawback is that multiplication has to scan over all the currencies (*).</p>
+
+<p>Compared to the Martin Fowler’s design, it remains heavier. It consumes more memory and more CPU, at the price of managing addition in a truly encapsulated way. This is a trade-off.</p>
+
+<p><em>(*) This could be fixed by adding the factor as a separate field, delaying its application until the very moment it is needed (evaluation time and merging of money bags)</em></p>
+
+<h2 id="improving-on-martin-fowlers-money-class-with-idris">Improving on Martin Fowler’s Money class with Idris</h2>
+
+<p>In the original Money class design of Martin Fowler, the client code is expected to check that both amounts have the same currency before calling add on them.</p>
+
+<p>The main problem in this design is that the type system does not offer any help. It does not enforce this constraint and failing to check the precondition is not caught at compile time. The probability of error is high and the client is left without support.</p>
+
+<p>Let us see how Idris and its dependent typing feature might help us provide a type safe version of the Martin Fowler’s Money class, such that failing to check the precondition will not compile.</p>
+
+<h3 id="the-hole-in-our-type-systems">The hole in our type systems</h3>
+
+<p>The type system of most mainstream languages is <strong>unable to express relations and constraints between several arguments</strong> of a function. Even in Haskell, it is hard to express a precondition that involves several arguments with a type, such that the compiler might verify it for us.</p>
+
+<p>Idris is not bound to the same limitation. Its type system allows to build types that express relations between several values, or several arguments of the same function. For instance, we can write a type that represents the fact that two money instances have the same currency.</p>
+
+<p>Put differently, we can <strong>express preconditions on our functions as types</strong>, allowing the compiler to verify for us that these preconditions are satisfied before calling the function.</p>
+
+<h3 id="translating-haskell-to-idris">Translating Haskell to Idris</h3>
+
+<p>Let us go back to our initial implementation of <code>add</code> in Haskell and translate it into Idris. Idris being pretty close to Haskell syntax, this is a rather simple task:</p>
+
+<pre><code class="language-haskell">record Money where      -- Definition of Money
+  constructor MkMoney   -- * With a constructor named MkMoney
+  currency : Currency   -- * Containing a currency
+  amount : Amount       -- * And an amount of money
+
+-- Definition of `add` which takes 2 Money instances and returns a new one
+add : (m1, m2 : Money) -&gt; Money
+add m1 m2 = MkMoney (currency m1) (amount m1 + amount m2)
+</code></pre>
+
+<p>For now, this implementation is incorrect if the two money instances we try to sum together, <code>m1</code> and <code>m2</code>, have different currencies. Indeed, the new Money instance is constructed from the currency of <code>m1</code> and we have no assert to ensure both money arguments have the same currency.</p>
+
+<h3 id="preconditions-as-types">Preconditions as types</h3>
+
+<p>To fix this, we can enrich the prototype of the function <code>add</code> to ask for a proof (the argument <code>prf</code> below) that the money arguments have the same currency:</p>
+
+<pre><code class="language-haskell">add :
+  (m1, m2 : Money)                    -- Arguments of the function: 2 Money instances
+  -&gt; {auto prf : SameCurrency m1 m2}  -- Proof that m1 and m2 have the same currency
+  -&gt; Money                            -- Return type: a new Money instance
+</code></pre>
+
+<p>In this function prototype, <code>SameCurrency m1 m2</code> is a type which represents a constraint between the arguments <code>m1</code> and <code>m2</code> of the function. And in Idris, we can effectively build this type such that being able to instantiate this type is equivalent to proving that the constraint is satisfied (*).</p>
+
+<p>The <code>auto</code> keyword tells Idris to look for implicit proofs in the neighborhood of the function. Thanks to this, the following code will compile just fine, and does not require us to provide a proof of its correctness:</p>
+
+<pre><code class="language-haskell">-- Compile just fine: same currencies
+add (MkMoney "EUR" 1) (MkMoney "EUR" 2)
+</code></pre>
+
+<p>The following code will correctly be rejected at compile time, Idris being unable to find a proof that the two currencies “EUR” and “USD” are equal:</p>
+
+<pre><code class="language-haskell">-- Does not compile: different currencies
+add (MkMoney "EUR" 1) (MkMoney "USD" 2)
+</code></pre>
+
+<p>It is important to observe the distinguishing characteristic of Idris there: a type can refer to the other arguments that appear in the prototype of a function.</p>
+
+<p><em>(*) Note: you can refer to my <a href="/blog/2017/07/01/idris-bowling-kata.html">previous article</a> on building a type safe Bowling Kata for more detailed information on how to write proofs in Idris.</em></p>
+
+<h3 id="runtime-checks">Runtime checks</h3>
+
+<p>In our previous examples, Idris is able to find an implicit proof that two currencies are either equal or not equal by looking at their values at compile time. For values that are only known at runtime though, Idris cannot do miracles.</p>
+
+<p>We have to provide in our API a function to construct a proof that two money instances known at runtime satisfy the precondition on their currency:</p>
+
+<pre><code class="language-haskell">sameCurrency :                  -- Predicate function
+  (m1, m2 : Money)              -- * Taking two instances of Money
+  -&gt; Dec (SameCurrency m1 m2)   -- Returning a proof or a contradiction
+</code></pre>
+
+<p>We will not go in details into what <code>Dec</code> means here, but you can think of it as something that either returns <em>“Yes and here is the proof”</em> or <em>“No, and here is a contradiction”</em>. The implementation of this function is outside the scope of this post, but is provided as reference in this <a href="https://gist.github.com/deque-blog/3ab28028c16895eba4536a188d70b1e6">GitHub Gist</a>.</p>
+
+<p>What matters is that the client code is now forced to call <code>sameCurrency</code> before being able to call <code>add</code> on runtime values. In fact, the it will only be able to call <code>add</code> if <code>sameCurrency</code> returns <code>YES</code>. Indeed, add requires a <code>SameCurrency m1 m2</code> instance to be available in its environment of evaluation. This is only possible if either:</p>
+
+<ul>
+  <li>Idris can find an implicit proof that it holds (for values known at compile time)</li>
+  <li>The proof is constructed successfully by <code>sameCurrency</code> (upon returning YES)</li>
+</ul>
+
+<p>This sounds like magic, but this is no fairy tale. Type systems such as the one of Idris allow to <strong>ensure that our if statements are correct at compile time</strong>.</p>
+
+<h3 id="critics-2">Critics</h3>
+
+<p>This last design shares some important characteristics with the one proposed by Martin Fowler in <a href="https://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_1?ie=UTF8&amp;qid=1502550798&amp;sr=8-1&amp;keywords=Patterns+of+Enterprise+Application+Architecture">PEAA</a>. It is lightweight, and does not support adding amounts with different currencies. It basically shares the same pros and cons as the one from Martin Fowler.</p>
+
+<p>The main difference is type-safety: the client code is now ensured to do the appropriate precondition checks before adding amounts. Failing to do the appropriate checks will result in a compilation error.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The design space of a common class such as Money is surprisingly large. There does not seem to be a single best answer for all situations.</p>
+
+<p>Depending on the required capabilities, such as being able to sum amounts of different currencies, an the performance constraints, it might be more advantageous to chose either the Money or the MoneyBag implementation.</p>
+
+<p>As an opening, we also saw how new type systems with a support for dependent typing, such as the one of Idris, can offer yet more design choices and more compile time guarantees.</p>
+
+<p><em>EDIT: I published a new blog post to explain why lifting currencies as type parameters of the Money class would not bring the same benefits as the Idris solution <a href="">here</a>.</em></p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-08-17T00:00:00+00:00">August 17, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=A+study+of+4+Money+class+designs%2C+featuring+Martin+Fowler%2C+Kent+Beck+and+Ward+Cunningham+designs.%20%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html&title=A+study+of+4+Money+class+designs%2C+featuring+Martin+Fowler%2C+Kent+Beck+and+Ward+Cunningham+designs." class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F08%2F17%2Fmoney-class-design.html&t=A study of 4 Money class designs, featuring Martin Fowler, Kent Beck and Ward Cunningham designs." class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/08/04/idris-transducers-2.html" title="Implementing Clojure-like Transducers in Idris: advanced transducers">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Implementing Clojure-like Transducers in Idris: advanced transducers</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/08/22/money-class-design-2.html" title="Money class design: why not having currencies as type parameters?">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Money class design: why not having currencies as type parameters?</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

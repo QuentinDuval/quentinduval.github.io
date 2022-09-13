@@ -1,0 +1,927 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Quickcheck is fun, deal with it - Double Ended Queue</title>
+<meta name="description" content="QuickCheck’s generators can be leveraged for other purposes than just Property Based Testing. Let’s embrace the absurd world of generating random stuff!">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Quickcheck is fun, deal with it">
+<meta property="og:url" content="/blog/2017/02/17/quick-check-is-fun.html">
+
+
+  <meta property="og:description" content="QuickCheck’s generators can be leveraged for other purposes than just Property Based Testing. Let’s embrace the absurd world of generating random stuff!">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Quickcheck is fun, deal with it">
+  <meta name="twitter:description" content="QuickCheck’s generators can be leveraged for other purposes than just Property Based Testing. Let’s embrace the absurd world of generating random stuff!">
+  <meta name="twitter:url" content="/blog/2017/02/17/quick-check-is-fun.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-02-17T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/02/17/quick-check-is-fun.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Quickcheck is fun, deal with it">
+    <meta itemprop="description" content="QuickCheck’s generators can be leveraged for other purposes than just Property Based Testing. Let’s embrace the absurd world of generating random stuff!">
+    <meta itemprop="datePublished" content="2017-02-17T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Quickcheck is fun, deal with it
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-02-17T00:00:00+00:00">February 17, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html&text=Quickcheck+is+fun%2C+deal+with+it&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/02/17/quick-check-is-fun.html&title=Quickcheck is fun, deal with it"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/02/17/quick-check-is-fun.html&t=Quickcheck is fun, deal with it">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#generating-random-valid-code">Generating random valid code</a></li><li><a href="#ending-the-infix-vs-prefix-debate">Ending the infix VS prefix debate</a><ul><li><a href="#a-first-infix-pretty-printer">A first infix pretty printer</a></li><li><a href="#improving-the-infix-pretty-printer">Improving the infix pretty printer</a></li><li><a href="#game-set-and-match">Game, set and match</a></li></ul></li><li><a href="#this-madness-is-over">This madness is over</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In our <a href="/blog/2017/02/14/quick-check-experiments.html">previous post</a>, we played with QuickCheck on an arithmetic DSL and used it to check and discover properties on its associated interpreters.</p>
+
+<p>Through these experiments, we explored some of the classic usage of QuickCheck and demonstrated through some examples:</p>
+
+<ul>
+  <li>Its ability to reveal some design defects</li>
+  <li>Its ability to test high level relations between functions</li>
+  <li>Its ability to increase our knowledge by proving us wrong</li>
+  <li>Its ability to check that some property can be falsified</li>
+</ul>
+
+<p>It does not seem fair however to associate QuickCheck with serious testing business only. QuickCheck is really a fun library to use. You might have already found out that we can leverage its generators for many other purpose than just Property Based Testing.</p>
+
+<p>This post is dedicated to do justice to QuickCheck by exploring some of those more exotic use cases of QuickCheck. Do not expect anything serious in this post: we will embrace the absurd world of generating random stuff.</p>
+
+<p><em>Note: This post is built on top of our <a href="/blog/2017/02/14/quick-check-experiments.html">previous post</a>. The experiments we will conduct with QuickCheck will feature the same arithmetic DSL. You might want to read this previous post first.</em></p>
+
+<h2 id="generating-random-valid-code">Generating random valid code</h2>
+
+<p>Generating random stuff is always quite a bit of fun. Why not break the boredom of doing serious test, by leveraging our generators to do stupid random things?</p>
+
+<p>You surely noticed our <code>prn</code> interpreter was pretty printing our arithmetic expression in a LISP like syntax. Generating random Clojure function is not very far away:</p>
+
+<ul>
+  <li>We have a <code>genExpr</code> function to create random arithmetic expressions</li>
+  <li>Our <code>prn</code> interpreter can pretty print an expression in Clojure</li>
+  <li>Our <code>dependencies</code> interpreter can list the bound variables</li>
+</ul>
+
+<p>We can easily create a generator of function names which satisfy good code convention: not too short, not too long, and (most importantly) not too understandable.</p>
+
+<pre><code class="language-hs">genName :: Gen String
+genName = do
+  n &lt;- elements [5..10]
+  replicateM n (elements ['a'..'z'])
+</code></pre>
+
+<p>We can assemble our function by pretty printing the arithmetic expression, print the dependencies inside brackets (for the parameters for the function), prefixed by a function name, and surround the whole with parentheses:</p>
+
+<pre><code class="language-hs">toClojureFunction :: String -&gt; Expr -&gt; String
+toClojureFunction name e =
+  unwords
+    ["(defn", name,
+     "[" ++ unwords (Set.toList $ dependencies e) ++ "]",
+     prn e, ")"]
+</code></pre>
+
+<p>We now have everything we need to generate Clojure functions containing optimized (we would not like to produce inefficient code) arithmetic expressions:</p>
+
+<pre><code class="language-hs">clojureFunctionGen :: Int -&gt; Gen String
+clojureFunctionGen size =
+  toClojureFunction
+    &lt;$&gt; genName
+    &lt;*&gt; fmap optimize (genExpr size)
+
+generate (clojureFunctionGen 30)
+&gt; "(defn ptvkegely [c j m n t u y] (+ -64 m c t y n j u) )"
+</code></pre>
+
+<p>We can check that our random generated function is valid Clojure code by firing up a Clojure REPL and play with it.</p>
+
+<pre><code class="language-clj">(defn ptvkegely [c j m n t u y] (+ -64 m c t y n j u))
+=&gt; #'user/ptvkegely
+
+(ptvkegely 1 2 3 4 5 6 7)
+=&gt; -36
+</code></pre>
+
+<p>Did you know that 64, the square of 8, negated and added to the sum of numbers from 1 to 7, was equal to 36, the square of 6? The proof that QuickCheck can be both fun and instructive.</p>
+
+<p><em>Note: if your company pays you by the line, you know have a way to create an incredible amount of valid code in a very short amount of time.</em></p>
+
+<h2 id="ending-the-infix-vs-prefix-debate">Ending the infix VS prefix debate</h2>
+
+<p>Since we are already on the LISP subject, we can take this opportunity to solve the long lasting developer debate. Which is better, infix or prefix notation?</p>
+
+<p>Since we have arithmetic expressions generators at hand, we can devise a fair experiments based on statistics:</p>
+
+<ul>
+  <li>We create a infix pretty printer of arithmetic expression <code>prnInfix</code></li>
+  <li>We use QuickCheck to generate a bunch of arithmetic expressions</li>
+  <li>We serialize each of these expressions with <code>prn</code> and <code>prnInfix</code></li>
+</ul>
+
+<p>Because every developer’s life goal is to golf his code, the winner will be the format that results in the shortest string representation in average.</p>
+
+<h3 id="a-first-infix-pretty-printer">A first infix pretty printer</h3>
+
+<p>Let us start by creating our <code>prnInfix</code> pretty printer. We need to be careful with the parentheses. We would not want our pretty printer to modify the meaning of our arithmetic expressions.</p>
+
+<p>As a first approximation, we could use the following strategy:</p>
+
+<ul>
+  <li>Systematically surround the arguments of a multiplication with parentheses</li>
+  <li>Do not add parentheses for the arguments of an addition</li>
+</ul>
+
+<p>This lead us to the following implementation in which we use catamorphisms for concision (if you are not familiar with this recursion scheme, you can read <a href="/blog/2017/01/17/catamorph-dsl-intro.html">our series dedicated to it</a>).</p>
+
+<pre><code class="language-hs">prnInfix :: Expr -&gt; String
+prnInfix = cata infixAlg where
+
+  infixAlg (Op Add xs) = concat (intersperse " + " xs)
+  infixAlg (Op Mul xs) = concat (intersperse " * " (map parens xs))
+  infixAlg (Cst n) = show n
+  infixAlg (Var v) = v
+  
+  parens x = "(" ++ x ++ ")"
+</code></pre>
+
+<p>We can try our implementation on a complex enough example, to see if it leads to acceptable results:</p>
+
+<pre><code class="language-hs">let e = add [ cst(1)
+            , cst(2)
+            , mul [cst(0), var("x"), var("y")]
+            , mul [cst(1), var("y"), add [cst(2), var("x")]]
+            , add [cst(0), var("x") ]]
+  
+prn e
+&gt; "(+ 1 2 (* 0 x y) (* 1 y (+ 2 x)) (+ 0 x))"
+
+prnInfix e
+&gt; "1 + 2 + (0) * (x) * (y) + (1) * (y) * (2 + x) + 0 + x"
+</code></pre>
+
+<p>Quite disappointing to say the least. With that much noise induced by unnecessary parentheses, the infix notation clearly stands no chance. We will need to improve on our heuristic to have an entertaining fight.</p>
+
+<h3 id="improving-the-infix-pretty-printer">Improving the infix pretty printer</h3>
+
+<p>To witness a fair fight, we need our <code>prnInfix</code> to use much less parentheses. We note that a multiplication only needs to add parentheses around sub-expressions that correspond to additions.</p>
+
+<p>Catamorphisms are not a powerful enough recursion scheme to do this. We need to turn to Paramorphisms, which are Catamorphisms with context information. The context information will provide us with the sub-expression we need to make the right parenthesizing choice:</p>
+
+<pre><code class="language-hs">para :: (ExprR (a, Expr) -&gt; a) -&gt; Expr -&gt; a
+para alg = alg . fmap (para alg &amp;&amp;&amp; id) . unFix
+</code></pre>
+
+<p>Based on this construct, we can define our pretty printer to leverage the context to only add parentheses around parameters that correspond to addition sub-expressions:</p>
+
+<ul>
+  <li>The parensPlus handles the parentheses around multiplication sub-expressions</li>
+  <li>The addition discards the additional context (and never adds parentheses)</li>
+  <li>The simple terms are computed the same as before</li>
+</ul>
+
+<pre><code class="language-hs">prnInfix :: Expr -&gt; String
+prnInfix = para infixAlg where
+
+  infixAlg (Op Add xs) = concat (intersperse " + " (map fst xs))
+  infixAlg (Op Mul xs) = concat (intersperse " * " (map parensPlus xs))
+  infixAlg (Cst n) = show n
+  infixAlg (Var v) = v
+
+  parensPlus (s, Fix (Op Add _)) = "(" ++ s ++ ")"
+  parensPlus (s, _) = s
+</code></pre>
+
+<p>We can test our new improved pretty printer and check the improvement. In our test expression, there is no unnecessary parentheses left for us to see:</p>
+
+<pre><code class="language-hs">let e = add [ cst(1)
+            , cst(2)
+            , mul [cst(0), var("x"), var("y")]
+            , mul [cst(1), var("y"), add [cst(2), var("x")]]
+            , add [cst(0), var("x") ]]
+  
+prn e
+&gt; "(+ 1 2 (* 0 x y) (* 1 y (+ 2 x)) (+ 0 x))"
+
+prnInfix e
+&gt; "1 + 2 + 0 * x * y + 1 * y * (2 + x) + 0 + x" 
+</code></pre>
+
+<p>Our infix pretty printer is now fairly equipped for a fair contest.</p>
+
+<h3 id="game-set-and-match">Game, set and match</h3>
+
+<p>Our challengers are ready. The crowd is waiting. We only need to implement our contest. Here is how the game will be structured:</p>
+
+<ul>
+  <li>We generate a thousand of random expressions using QuickCheck</li>
+  <li>Each expression is optimised before being pretty printed</li>
+  <li>We return the sum of sizes for both <code>prn</code> and <code>prnInfix</code> (their scores)</li>
+</ul>
+
+<p>A lower score means the pretty printer produced smaller string representations for the expression. The lowest score will thus designate our winner.</p>
+
+<p>To finish up, our contest function will take as parameter the complexity of the arithmetic expressions to pretty print:</p>
+
+<pre><code class="language-hs">data ContestResult = ContestResult {
+    prefixScore :: Int ,
+    infixScore  :: Int }
+  deriving (Show)
+
+runContest :: Int -&gt; IO ()
+runContest size = do
+  expressions &lt;- generate (replicateM 1000 (genExpr size))
+  let run printer = sum $ map (length . printer . optimize) expressions
+  print $ ContestResult (run prn) (run prnInfix)
+</code></pre>
+
+<p>The results shows the quite stunning performance of the prefix notation, winner by quite a large margin:</p>
+
+<pre><code class="language-hs">runContest 30
+&gt; ContestResult {prefixScore = 31951, infixScore = 42293}
+
+runContest 100
+&gt; ContestResult {prefixScore = 87662, infixScore = 125822}
+</code></pre>
+
+<ul>
+  <li>25% characters less for <code>prn</code> for expressions of complexity 30</li>
+  <li>30% characters less for <code>prn</code> for expressions of complexity 100</li>
+</ul>
+
+<p>We would not want to conclude too fast and declare that prefix notation completely owns the infix notation. Instead, we hope the reader will come to this same conclusion by himself/herself.</p>
+
+<h2 id="this-madness-is-over">This madness is over</h2>
+
+<p>We are done: these random stupid experiments are over (for now). I cannot know if you found such experiments funny or even remotely enjoyable.</p>
+
+<p>But I thought it was useful to cover one of the aspects of programming that maybe does not appear enough at work: we can have great fun doing crazy things. The experiments listed above were done in-between more serious work, just to try stupid things.</p>
+
+<p>We must realize we have the luxury of having both powerful hardware and software available for us, at relatively cheap prices. We can use them for fun as much as for work. And who knows, we might even learn something in the process.</p>
+
+<p>With this post, we concluded our series of five posts on QuickCheck. We tried to give a board spectrum of what QuickCheck and Property Based testing is about, how it can be implemented, and how we can use it for both serious tests and less serious experiments.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-02-17T00:00:00+00:00">February 17, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Quickcheck+is+fun%2C+deal+with+it%20%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html&title=Quickcheck+is+fun%2C+deal+with+it" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F02%2F17%2Fquick-check-is-fun.html&t=Quickcheck is fun, deal with it" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/02/14/quick-check-experiments.html" title="Experimenting with QuickCheck on a DSL">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Experimenting with QuickCheck on a DSL</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/02/27/building-clojure-game-1.html" title="Building a Clojurescript game">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Building a Clojurescript game</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

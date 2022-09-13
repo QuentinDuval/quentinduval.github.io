@@ -1,0 +1,892 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>List Monad connection with Non-deterministic Polynomial time complexity - Double Ended Queue</title>
+<meta name="description" content="A problem is in NP if it can be solved by an algorithm that runs in polynomial time on a non-deterministic Turing Machine, a computer that can “guess” which path to take toward the right answer when given a choice.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="List Monad connection with Non-deterministic Polynomial time complexity">
+<meta property="og:url" content="/blog/2017/09/04/list-monad-np-complexity.html">
+
+
+  <meta property="og:description" content="A problem is in NP if it can be solved by an algorithm that runs in polynomial time on a non-deterministic Turing Machine, a computer that can “guess” which path to take toward the right answer when given a choice.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="List Monad connection with Non-deterministic Polynomial time complexity">
+  <meta name="twitter:description" content="A problem is in NP if it can be solved by an algorithm that runs in polynomial time on a non-deterministic Turing Machine, a computer that can “guess” which path to take toward the right answer when given a choice.">
+  <meta name="twitter:url" content="/blog/2017/09/04/list-monad-np-complexity.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-09-04T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/09/04/list-monad-np-complexity.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        TeX: {
+          equationNumbers: {
+            autoNumber: "AMS"
+          }
+        },
+        tex2jax: {
+        inlineMath: [ ['$', '$'] ],
+        displayMath: [ ['$$', '$$'] ],
+        processEscapes: true,
+      }
+    });
+    MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+          alert("Math Processing Error: "+message[1]);
+        });
+    </script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="List Monad connection with Non-deterministic Polynomial time complexity">
+    <meta itemprop="description" content="A problem is in NP if it can be solved by an algorithm that runs in polynomial time on a non-deterministic Turing Machine, a computer that can “guess” which path to take toward the right answer when given a choice.">
+    <meta itemprop="datePublished" content="2017-09-04T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">List Monad connection with Non-deterministic Polynomial time complexity
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-09-04T00:00:00+00:00">September 4, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html&text=List+Monad+connection+with+Non-deterministic+Polynomial+time+complexity&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/09/04/list-monad-np-complexity.html&title=List Monad connection with Non-deterministic Polynomial time complexity"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/09/04/list-monad-np-complexity.html&t=List Monad connection with Non-deterministic Polynomial time complexity">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation">Motivation</a></li><li><a href="#non-deterministic-computation--list-monad">Non-deterministic computation = List Monad</a><ul><li><a href="#i-see-a-monad-in-your-sat-proof">I see a Monad in your SAT proof</a></li><li><a href="#back-to-list-monad-tutorial">Back to List Monad tutorial</a></li><li><a href="#from-exponential-to-non-deterministic-polynomial-complexity">From exponential to non-deterministic polynomial complexity</a></li><li><a href="#estimating-the-non-determistic-complexity-of-an-algorithm">Estimating the non-determistic complexity of an algorithm</a></li><li><a href="#example-of-sat">Example of SAT</a></li></ul></li><li><a href="#conclusion">Conclusion</a></li><li><a href="#full-code-of-sat-evaluator">Full code of SAT evaluator</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>A problem is in NP (Non-deterministic Polynomial time complexity) if it can be solved by an algorithm that runs in polynomial time on a non-deterministic Turing Machine, a computer that can “guess” which path to take toward the right answer when given a choice.</p>
+
+<p>I never quite built a good intuition on what it means. What does it mean to guess? If such a powerful computer could guess, why could it not guess the right answer to the problem right from the start? Why would it have to go through a polynomial number of steps?</p>
+
+<p>This short post will show connect the List Monad with non-deterministic Turing machines, to build some intuition on NP, how a non-deterministic Turing machine behaves, and it would feel to program one such computer, thanks to Haskell.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>I recently found this <a href="https://www.youtube.com/watch?v=eHZifpgyH_4">great video</a> from <a href="http://erikdemaine.org/">Erik Demaine</a>, a short but quite entertaining overview of P, NP and NP-completeness complexity classes.</p>
+
+<p>At <a href="https://www.youtube.com/watch?v=eHZifpgyH_4#t=8m50s">8 minutes 50 seconds</a> in the video, he explains why the <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">Boolean Satisfiability Problem</a> (SAT) is in NP. Here is the content for his board after the explanation:</p>
+
+<pre><code>guess: x1 = True or False
+guess: x2 = True or False
+...
+guess: xN = True or False
+check if formula on (x1, x2 ... xN) is True or False
+</code></pre>
+
+<p>Now, if you know about the List Monad, you should see it right there, in front of you. This insight might give you an idea of what “a non-deterministic computer guess” could be. If not, this post might be of interest to you.</p>
+
+<h2 id="non-deterministic-computation--list-monad">Non-deterministic computation = List Monad</h2>
+
+<p>A lot of Monad tutorials start with the Maybe and List monads. Most good tutorials will also mention that the List Monad models <strong>non-deterministic computations</strong>. It sounds like it must somehow be connected to the NP non-deterministic Turing machine. Let us see how.</p>
+
+<h3 id="i-see-a-monad-in-your-sat-proof">I see a Monad in your SAT proof</h3>
+
+<p>To understand the similarities between the board of Erik Demaine and the List Monad, let us translate the SAT NP proof from Erik Demaine into Haskell code. Thanks to the List monad, the translation is pretty simple.</p>
+
+<p>Here is the original board he wrote:</p>
+
+<pre><code>guess: x1 = True or False
+guess: x2 = True or False
+...
+guess: xN = True or False
+check if formula on (x1, x2 ... xN) is True or False
+</code></pre>
+
+<p>Below is our Haskell version. We added a function name, introduced an or to stop at the first result, but mostly, our task was to replace occurrences of “guess” by the bind <code>&lt;-</code> operator:</p>
+
+<pre><code class="language-haskell">satExample :: Bool
+satExample = or $ do
+  x1 &lt;- [True, False] -- "guess" is replaced by bind (&lt;-)
+  x2 &lt;- [True, False]
+  {- ... -}
+  xN &lt;- [True, False]
+  pure (formula x1 x2 {- ... -} xN)
+</code></pre>
+
+<p>So our List Monad bind operator is analog to the “guess” of a non-deterministic Turing Machine.</p>
+
+<h3 id="back-to-list-monad-tutorial">Back to List Monad tutorial</h3>
+
+<p>Now that we have seen the similarities, let us look for an online Monad tutorial and check the definition it provides for non-deterministic computation. If we pick this one from <a href="https://www.schoolofhaskell.com/school/starting-with-haskell/basics-of-haskell/13-the-list-monad">FP complete</a>, we can read:</p>
+
+<blockquote> [..] non-deterministic computation. It’s the kind of computation that, instead of producing a single result, might produce many.</blockquote>
+
+<p>The connection with the definition of NP is not direct, but pretty close. A non-deterministic computation returns several results.</p>
+
+<p>A non-deterministic Turing Machine is able to magically pick a “good” result among theses results, by guessing which one will lead to one “yes” outcome (there might be many).</p>
+
+<h3 id="from-exponential-to-non-deterministic-polynomial-complexity">From exponential to non-deterministic polynomial complexity</h3>
+
+<p>Let us go back to our translation of the SAT NP proof in Haskell:</p>
+
+<pre><code class="language-haskell">satExample :: Bool
+satExample = or $ do
+  x1 &lt;- [True, False] -- "guess" is replaced by bind (&lt;-)
+  x2 &lt;- [True, False]
+  {- ... -}
+  xN &lt;- [True, False]
+  pure (formula x1 x2 {- ... -} xN)
+</code></pre>
+
+<p>Executed on a conventional computer, this function will explore the search space of all potential variable assignments for <code>x1</code>, <code>x2</code> up to <code>xN</code>, and stop at the first one for which the formula returns a positive answer. This code has therefore an exponential time complexity.</p>
+
+<p>But on a non-deterministic computer, each guess can be performed in constant time. And these guesses correspond to the bind operator of the <code>List</code> Monad. So, provided formula runs in linear time, the non-deterministic complexity of our <code>satExample</code> algorithm is linear.</p>
+
+<h3 id="estimating-the-non-determistic-complexity-of-an-algorithm">Estimating the non-determistic complexity of an algorithm</h3>
+
+<p>Generalising to all decision problems (problems whose answer is either True or False) and to non deterministic computations, we can reason that:</p>
+
+<p><em>Given a non-deterministic computation <code>f</code> occurring inside the decision problem <code>D</code>, and returning a set of result <code>R</code>, a non-deterministic Turing machine is able to pick a value from <code>R</code> which leads to a “yes” answer for <code>D</code> (if it exists) in constant time.</em></p>
+
+<p><em>In the <code>List</code> Monad, the non-deterministic algorithmic complexity of the statement <code>y &lt;- f x</code> is therefore equal to the non-deterministic algorithmic complexity of f, however many results <code>f</code> may return.</em></p>
+
+<p>This gives us a way to estimate the non-deterministic complexity of an algorithm: we refactor the algorithm in Haskell in such as way that the <code>List</code> Monad bind operators becomes visible. Then we derive its complexity, by counting each bind operator as constant time assignments: O(1).</p>
+
+<p>We can do this for SAT, as well as any other algorithm. Take your favorite search-like algorithm, write it using the <code>List</code> Monad, then you can visually estimate its complexity on an fantasized non-deterministic Turing machine of the future. I am not sure it is terribly useful, but hey, it is still fun.</p>
+
+<h3 id="example-of-sat">Example of SAT</h3>
+
+<p>Let us look at the code of a complete (and completely naive!) SAT solver (*). Our solver takes as input an instance of a SAT problem <code>pb</code>, and returns if there exists an assignment of the variables that makes the formula True.</p>
+
+<p>Our implementation has been refactored to make each bind operator of the List Monad visible:</p>
+
+<pre><code class="language-haskell">sat :: SAT -&gt; Bool
+sat pb = or $ do
+  assignment &lt;- forM (allVars pb) $ \var -&gt; do
+    val &lt;- [True, False]
+    pure (var, val)
+  pure (evalSat assignment pb)
+</code></pre>
+
+<ul>
+  <li><code>allVars</code> extract all the variables from the SAT instance (normalised as a conjunction of disjunction)</li>
+  <li><code>evalSat</code> checks if the SAT instance is verified for a given assignment of the variables</li>
+</ul>
+
+<p>Assuming the algorithmic complexity of <code>allVars</code> and <code>evalSat</code> are linear, and counting each bind operation as O(1) assignments, we can clearly see that the non-deterministic complexity of the sat algorithm is linear as well (there is a linear number of calls to bind).</p>
+
+<p>The full code for this naive SAT evaluator is available at the end of the post.</p>
+
+<p><em>(*): A real SAT solver would explore the search space by cutting branches early. It would use a clever ordering for the variable assignment, would use constant propagation to identify dead-end as soon as possible, as well as other clever tricks such as <a href="https://en.wikipedia.org/wiki/Unit_propagation">unit propagation</a>.</em></p>
+
+<p><em>The goal of all these tricks is to reduce the exponential exploration space. Interestingly, if we could ever have a non-deterministic Turing machine, we would not need such tricks. In fact, they would only slow down the algorithm.</em></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The expressivity of Haskell and it’s do-notation gives us the ability to express different types of computations. Thanks to this, we can use Haskell to experience how programming would look like in a different world, in which we had a different kind of hardware to run our software.</p>
+
+<p>Thanks to this, we can better understand how computation would work on a non-deterministic Turing machine from our home, and therefore understand NP complexity better.</p>
+
+<h2 id="full-code-of-sat-evaluator">Full code of SAT evaluator</h2>
+
+<pre><code class="language-haskell">module SAT where
+
+import Control.Monad
+import qualified Data.Map as Map
+import qualified Data.Set as Set
+
+
+type Var = String
+type Assignment = [(Var, Bool)]
+
+data Term
+  = Pos { getVar :: String }
+  | Neg { getVar :: String }
+
+newtype SAT = SAT { conjunctions ::  [[Term]]}
+
+sat :: SAT -&gt; Maybe Assignment
+sat pb = headSafe $ do
+  assignment &lt;- forM (allVars pb) $ \var -&gt; do
+    val &lt;- [True, False]
+    pure (var, val)
+  guard (evalSat assignment pb)
+  pure assignment
+
+allVars :: SAT -&gt; [Var]
+allVars = Set.toList . Set.fromList . map getVar . concat . conjunctions
+
+evalSat :: Assignment -&gt; SAT -&gt; Bool
+evalSat assignment =
+  let env = Map.fromList assignment
+  in and . map (any (evalTerm env)) . conjunctions
+
+evalTerm :: Map.Map Var Bool -&gt; Term -&gt; Bool
+evalTerm env (Pos var) = env Map.! var
+evalTerm env (Neg var) = not (env Map.! var)
+
+------------------------------------------------------------
+
+headSafe :: [a] -&gt; Maybe a
+headSafe [] = Nothing
+headSafe xs = Just (head xs)
+</code></pre>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-09-04T00:00:00+00:00">September 4, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=List+Monad+connection+with+Non-deterministic+Polynomial+time+complexity%20%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html&title=List+Monad+connection+with+Non-deterministic+Polynomial+time+complexity" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F09%2F04%2Flist-monad-np-complexity.html&t=List Monad connection with Non-deterministic Polynomial time complexity" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/08/22/money-class-design-2.html" title="Money class design: why not having currencies as type parameters?">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Money class design: why not having currencies as type parameters?</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/09/13/monoids.html" title="Monoids: what they are, why they are useful, and what they teach us about software">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Monoids: what they are, why they are useful, and what they teach us about software</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,1073 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Code your own Quick Check - Double Ended Queue</title>
+<meta name="description" content="In the next posts, we will go through a small implementation challenge. The goal will be to implement our own limited version of QuickCheck, the famous generative testing framework of Haskell.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Code your own Quick Check">
+<meta property="og:url" content="/blog/2017/02/03/code-quick-check-1.html">
+
+
+  <meta property="og:description" content="In the next posts, we will go through a small implementation challenge. The goal will be to implement our own limited version of QuickCheck, the famous generative testing framework of Haskell.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Code your own Quick Check">
+  <meta name="twitter:description" content="In the next posts, we will go through a small implementation challenge. The goal will be to implement our own limited version of QuickCheck, the famous generative testing framework of Haskell.">
+  <meta name="twitter:url" content="/blog/2017/02/03/code-quick-check-1.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-02-03T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/02/03/code-quick-check-1.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Code your own Quick Check">
+    <meta itemprop="description" content="In the next posts, we will go through a small implementation challenge. The goal will be to implement our own limited version of QuickCheck, the famous generative testing framework of Haskell.">
+    <meta itemprop="datePublished" content="2017-02-03T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Code your own Quick Check
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-02-03T00:00:00+00:00">February 3, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html&text=Code+your+own+Quick+Check&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/02/03/code-quick-check-1.html&title=Code your own Quick Check"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/02/03/code-quick-check-1.html&t=Code your own Quick Check">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#introduction">Introduction</a></li><li><a href="#our-goal-for-today">Our goal for today</a></li><li><a href="#selecting-our-outputs">Selecting our outputs</a></li><li><a href="#generating-random-inputs">Generating random inputs</a></li><li><a href="#property">Property</a></li><li><a href="#testable-inputs">Testable inputs</a><ul><li><a href="#inventory">Inventory</a></li><li><a href="#our-problem">Our problem</a></li><li><a href="#base-case">Base case</a></li><li><a href="#induction-step">Induction step</a></li></ul></li><li><a href="#implementing-forall">Implementing forAll</a></li><li><a href="#implementing-rapidcheck">Implementing rapidCheck</a></li><li><a href="#enjoying-rapidcheck">Enjoying rapidCheck</a></li><li><a href="#conclusion-and-whats-next">Conclusion and what’s next</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the next posts, we will go through a small implementation challenge. The goal will be to implement our own limited version of <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>, the famous generative testing framework of Haskell.</p>
+
+<p>Whether or not you do know about the concept of generative testing, I advice you to have a look at the <a href="http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf">original publication of QuickCheck</a>. This is indeed a very good and quite enlightening read.</p>
+
+<p>Our goal will be to reproduce something close to the features described in this publication, all on our own. Through this exercise, we will gain some better understanding of the magic that happens inside QuickCheck.</p>
+
+<ul>
+  <li>The goal of today is to implement the basic features of QuickCheck</li>
+  <li>The next post will be focused on testing higher order functions</li>
+  <li>Our last post will be focused on shrinking counter examples</li>
+</ul>
+
+<p>We will name our own generative testing framework RapidCheck to avoid confusion when referring to the real QuickCheck.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>QuickCheck is a framework that allows to test properties that we think should hold on our functions. It is pretty versatile and can be used in many different contexts:</p>
+
+<ul>
+  <li>To test that the code your wrote does behave correctly</li>
+  <li>To investigate on the behaviour of some code you are reading</li>
+  <li>To test specifications against a working code</li>
+</ul>
+
+<p>QuickCheck is not a proof system and is not a replacement for example based testing either. QuickCheck is more like a nasty user which will try everything he can to break your software.</p>
+
+<p>Romeu Moura did a <a href="https://www.youtube.com/watch?v=5pwv3cuo3Qk">great talk</a> explaining what property-based testing is and is not about. I encourage you to have a look at it.</p>
+
+<h2 id="our-goal-for-today">Our goal for today</h2>
+
+<p>Our goal for today will be to implement a subset of our RapidCheck that supports checking some basic properties. We will keep the topic of testing higher order function for our next post.</p>
+
+<p>More practically, we give ourselves the goal to test the two following properties on the Greatest Common Divisor with RapidCheck, all by the end of this post.</p>
+
+<p>The <code>prop_gcd</code> is a valid property. Multiplying the Greatest Common Divisor of a and b with the Lowest Common Multiple of a and b should be equal to the produce of a and b. We expect this test to pass.</p>
+
+<pre><code class="language-hs">prop_gcd :: Integer -&gt; Integer -&gt; Bool
+prop_gcd a b = a * b == gcd a b * lcm a b
+
+rapidCheck prop_gcd
+&gt; Success
+</code></pre>
+
+<p>The <code>prop_gcd_bad</code> is an invalid property. The Greatest Common Divisor of two numbers might be equal to 1 if these numbers are coprime. We expect this test to fail (with high probability) and we expect RapidCheck to provide us a counterexample.</p>
+
+<pre><code class="language-hs">prop_gcd_bad :: Integer -&gt; Integer -&gt; Bool
+prop_gcd_bad a b = gcd a b &gt; 1
+
+rapidCheck prop_gcd_bad
+&gt; Failure {seed = -1437169021,
+           counterExample = ["1076253199","40866101"]}
+</code></pre>
+
+<p>How does the <code>rapidCheck</code> function knows how to test these properties? How does it recognize which kind of input to generate? These are the questions that will be answered throughout this post.</p>
+
+<p>We will use the same vocabulary used inside the original publication of QuickCheck. Our implementation will differ on several aspects from the one of the publication, in the spirit of simplifying things a bit.</p>
+
+<h2 id="selecting-our-outputs">Selecting our outputs</h2>
+
+<p>Let us start by addressing the simplest of our needs: returning useful results as output to the tests. Needless to say, because Property Based Testing is based on generating random inputs, returning “Test Failed” is not really helpful. The output should at the very least contain enough information to replay the failing scenario.</p>
+
+<p>We will select two useful pieces of information in case of failure:</p>
+
+<ul>
+  <li>The counter example itself (the failure inputs) as strings</li>
+  <li>The random seed used to generate the counter example</li>
+</ul>
+
+<p>This translates into the following Result type:</p>
+
+<pre><code class="language-hs">data Result
+  = Success                     -- In case of success, no additional information
+  | Failure {
+    seed :: Int,                -- The seed used to generate the counter example
+    counterExample :: [String]  -- The counter example (failing inputs to string)
+  } deriving (Show, Eq, Ord)    -- Useful instances to print and compare Results
+</code></pre>
+
+<p>To help dealing with the Failure case more easily, we create the following helper function <code>overFailure</code>. It takes a function, applies it on the Result if it is a Failure, and returns the updated value.</p>
+
+<pre><code class="language-hs">overFailure :: Result -&gt; (Result -&gt; Result) -&gt; Result
+overFailure Success _ = Success
+overFailure failure f = f failure
+</code></pre>
+
+<p>We also provide a Monoid instance for our result type. A Monoid instance is a type offering a default value, <code>mempty</code> in Haskell, and a binary associative operation, <code>mappend</code> in Haskell.</p>
+
+<p>For Result, we will select a meaning that will make it easier for us to collapse several test results into one single result:</p>
+
+<ul>
+  <li><code>mempty</code>: running no test case always results in Success</li>
+  <li><code>mappend</code>: if at least one test case fails, the whole test fails</li>
+</ul>
+
+<pre><code class="language-hs">instance Monoid Result where
+  mempty = Success
+  mappend lhs@Failure{} _ = lhs
+  mappend _ rhs = rhs
+</code></pre>
+
+<p>Note that our implementation is left biased: it will report the leftmost failure if both test cases fail. Applied to a list of several test cases, it will therefore report the first error found in the list.</p>
+
+<h2 id="generating-random-inputs">Generating random inputs</h2>
+
+<p>In order to be able to test properties over our functions, RapidCheck needs to be able to generate some random values. We model a generator of random input of type <code>a</code> by the type <code>Gen</code> parameterized on the type it generates.</p>
+
+<p>This <code>Gen</code> a is a wrapper around a function that takes a pseudo-random generator (an instance of <code>StdGen</code> from the <a href="https://hackage.haskell.org/package/random-1.1/docs/System-Random.html">System.Random</a> module) and returns an element <code>a</code>.</p>
+
+<p>We also provide an typeclass (a kind of interface) named <code>Arbitrary</code> for types for which a standard generator is defined.</p>
+
+<pre><code class="language-hs">newtype Gen a = Gen {
+  runGen :: StdGen -&gt; a
+}
+
+class Arbitrary a where
+  arbitrary :: Gen a
+</code></pre>
+
+<p>Note that the function wrapped in Gen is pure. Calling it twice with the same random generator will return the same result twice. It means that the caller of the function is responsible for providing an updated pseudo random generator to the function to get different results.</p>
+
+<p>This might seem awkward, but we have to remember that our goal is to output reproducible test cases for the API user. Being able to replay a failing scenario deterministically is an important feature. A pure function is the safest way for us to guaranty this property.</p>
+
+<h2 id="property">Property</h2>
+
+<p>The goal of our RapidCheck library is to check to properties on our code. Properties are predicates we can run generative test against, to verify if they hold. We identify several characteristics of a Property:</p>
+
+<ul>
+  <li>We need to test it, and generate a Result from it</li>
+  <li>This result is based on randomly generated inputs</li>
+</ul>
+
+<p>Presented differently, a Property is a computation that return a Result through a pseudo-random generation process. It means we can model a property as a wrapper around <code>Gen Result</code>:</p>
+
+<pre><code class="language-hs">newtype Property = Property {
+  getGen :: Gen Result
+}
+</code></pre>
+
+<p>To avoid systematic unwrapping of the <code>Property</code>, we provide the following helper function <code>runProp</code>. It just calls the generator function with the provided pseudo random generator <code>StdGen</code>.</p>
+
+<pre><code class="language-hs">runProp :: Property -&gt; StdGen -&gt; Result
+runProp prop rand = runGen (getGen prop) rand
+</code></pre>
+
+<p>This <code>Property</code> type might seem incomplete. In particular, there is no mention of the random inputs that drives the generation of the <code>Result</code>. Surely, this is a problem!</p>
+
+<p>Not if we think of a <code>Property</code> as the result of a construction process that integrates the generation of the random inputs together with the predicate we want to verify. The actual “construction process” of a Property is the subject of the next section.</p>
+
+<h2 id="testable-inputs">Testable inputs</h2>
+
+<p>The purpose of this section is to define the inputs of our rapidCheck function. Before we go further, let us go through an inventory phase, in which we will review what we already know and express on paper what we really want.</p>
+
+<h3 id="inventory">Inventory</h3>
+
+<p>Our ultimate goal is to test any property expressed as a function that returns something we could interpret as a Result. From now on, we will refer to such function as testable function. In particular, any function returning a Bool or a Result (like our prop_gcd function) should qualify.</p>
+
+<pre><code class="language-hs">prop_gcd :: Integer -&gt; Integer -&gt; Bool
+prop_gcd a b = a * b == gcd a b * lcm a b
+</code></pre>
+
+<p>Each of the argument of a testable function should have a random generator associated with it. We already know how to express this constraint: all arguments should implement the <code>Arbitrary</code> type.</p>
+
+<p>We also have a nice target abstraction for our testable functions, the type <code>Property</code> we introduced earlier. We want a way to transform such testable functions into a <code>Property</code>.</p>
+
+<p>For this transformation to make sense, the generator wrapped by the <code>Property</code> should represent the combined effect of the generators of each of the arguments of the original function.</p>
+
+<h3 id="our-problem">Our problem</h3>
+
+<p>Our problem is that there are theoretically no limits to the number of arguments this function could take. We could try to take a shortcut and provide overloads until we reached a maximum number of arguments, but we can do better.</p>
+
+<p>The solution is to break down our problem and think in terms of mathematical induction. This means finding a base case, a set of function with no arguments which we can convert to a Property, and identifying a induction step to grow the number of arguments supported one at a time.</p>
+
+<p>We define <code>Testable</code> as the typeclass that represents the functions that can be transformed into a Property (our testable function, or alternatively, something we can generate a Result from):</p>
+
+<pre><code class="language-hs">class Testable a where
+  property :: a -&gt; Property
+</code></pre>
+
+<p>Our goal is identify a base case of known Testable instances, and implement an induction step to grow this set of instances.</p>
+
+<h3 id="base-case">Base case</h3>
+
+<p>Based on our inventory, we know that functions with no arguments (constants) that return a result or a boolean are convertible to a property.</p>
+
+<p>These constants do not have any random inputs influencing them. As a consequence, a <code>Property</code> obtained from one such function should always produce the same consistent result. This is expressed in the code below:</p>
+
+<pre><code class="language-hs">-- Property is trivially convertible to Property
+instance Testable Property where
+  property = id
+
+-- Result is convertible to Property by creating
+-- a generator that always return this same result
+instance Testable Result where
+  property r = Property (Gen (const r))
+
+-- Bool can be converted to Result
+-- Result can be converted to a Property
+-- By composition we get that Bool is convertible to Property
+instance Testable Bool where
+  property = property . toResult where
+      toResult b = if b then Success
+                        else Failure { seed = 0, counterExample = []}
+</code></pre>
+
+<h3 id="induction-step">Induction step</h3>
+
+<p>The inputs of our induction step are an instance of a <code>Testable</code> function, named <code>testable</code> and a printable argument implementing <code>Arbitrary</code>. Our desired output is a testable instance for the function taking the additional argument as parameter.</p>
+
+<p>Let us write this desire, with the implementation left undefined:</p>
+
+<pre><code class="language-hs">instance
+  (Show a, Arbitrary a,        -- Given a type `a` supporting random generation
+   Testable testable)          -- And an already existing testable function
+  =&gt; Testable (a -&gt; testable)  -- The function (a -&gt; testable) is also testable
+  where
+    property = undefined       -- With the provided implementation
+</code></pre>
+
+<p>Now, let us assume the existence of a function named <code>forAll</code> that takes a generator and our function <code>a -&gt; testable</code> and return a new testable instance.</p>
+
+<p>Then we could define our instance as follows, by providing the generator of our argument a to the <code>forAll</code> function:</p>
+
+<pre><code class="language-hs">instance
+  (Show a, Arbitrary a,
+   Testable testable)
+  =&gt; Testable (a -&gt; testable)
+  where
+    property f = forAll arbitrary f
+
+forAll :: (Show a, Testable testable) =&gt; Gen a -&gt; (a -&gt; testable) -&gt; Property
+forAll = undefined
+</code></pre>
+
+<p>We just pushed the problem a bit further down the road. But the forAll really needs its next section for it alone.</p>
+
+<h2 id="implementing-forall">Implementing forAll</h2>
+
+<p>Before diving into the implementation of the forAll function, let us note that it is clearly more general than our Testable instance.</p>
+
+<p>It does not require a type to implement Arbitrary and instead asks for a generator of argument. This function is both at the heart of QuickCheck and a very important tool when dealing with random generation of inputs.</p>
+
+<p>This allows to define specialized random generator for the same argument. This in turns allows to test some properties that hold in specific equivalence classes only.</p>
+
+<p>Now, to the implementation.</p>
+
+<p>The code will rely on the use of the <code>split</code> function of the module <a href="https://hackage.haskell.org/package/random-1.1/docs/System-Random.html">System.Random</a> module. This function allows to create two <code>StdGen</code> pseudo random generator from a single one. It is important to note it is a pure function, meaning its result is deterministic.</p>
+
+<p>The <code>Property</code> created by <code>forAll</code> is a wrapper around a generator: it takes as input a <code>StdGen</code>, named <code>rand</code>, to output a <code>Result</code>. Inside the returned <code>Property</code>, we will split this pseudo random generator in two, named <code>rand1</code> and <code>rand2</code>.</p>
+
+<ul>
+  <li>We use <code>rand1</code> to generate the new argument <code>arg</code> to the testable function</li>
+  <li>We use <code>arg</code> to get <code>subProp</code>, which is already an instance of testable (by our induction hypothesis and the type of <code>forAll</code>)</li>
+  <li>We use <code>rand2</code> to run <code>subProp</code> and generate our result</li>
+  <li>In case of failure, we enrich the counter-example with the value of arg</li>
+</ul>
+
+<p>You can find the full implementation below:</p>
+
+<pre><code class="language-hs">forAll :: (Show a, Testable testable) =&gt; Gen a -&gt; (a -&gt; testable) -&gt; Property
+forAll argGen prop =
+  Property $ Gen $ \rand -&gt;             -- Create a new property that will
+    let (rand1, rand2) = split rand     -- Split the generator in two
+        arg = runGen argGen rand1       -- Use the first generator to produce an arg
+        subProp = property (prop arg)   -- Use the `a` to access the sub-property
+        result = runProp subProp rand2  -- Use the second generator to run it
+    in overFailure result $ \failure -&gt; -- Enrich the counter-example with `arg`
+        failure { counterExample = show arg : counterExample failure }
+</code></pre>
+
+<h2 id="implementing-rapidcheck">Implementing rapidCheck</h2>
+
+<p>The goal of rapidCheck is to take a <code>Testable</code> instance as parameter, and try its associated <code>Property</code> with different values of seeds, in an attempt to find a counter-example.</p>
+
+<p>We will first define a function <code>rapidCheckImpl</code> that takes as parameter a starting seed for our pseudo random generator, and a maximum number of attempts to try to find a counter-example:</p>
+
+<ul>
+  <li><code>runOne</code> will trigger one such attempt, with a seed provided as parameter. Upon failure, it will complete the error report with the seed.</li>
+  <li><code>runAll</code> will run all attempts and exploit the Monoid instance for Result to collapse these results together</li>
+</ul>
+
+<pre><code class="language-hs">rapidCheckImpl :: Testable prop =&gt; Int -&gt; Int -&gt; prop -&gt; Result
+rapidCheckImpl attemptNb startSeed prop = runAll (property prop)
+  where
+    runAll prop = foldMap (runOne prop) [startSeed .. startSeed + attemptNb - 1]
+    runOne prop seed =
+      let result = runProp prop (mkStdGen seed)
+      in overFailure result $ \failure -&gt; failure { seed = seed }
+</code></pre>
+
+<p>We can note that, once again, this function is side effect free. It will return a deterministic result.</p>
+
+<p>We finally introduce the functions <code>rapidCheck</code> to get the non-determinism needed to solve our problem. This function produces a side-effect to get the initial seed to feed <code>rapidCheckImpl</code>. We also add <code>rapidCheckWith</code>, as a variation of <code>rapidCheck</code> that accept the maximum number of attempts as parameter.</p>
+
+<pre><code class="language-hs">rapidCheck :: Testable prop =&gt; prop -&gt; IO Result
+rapidCheck = rapidCheckWith 100
+
+rapidCheckWith :: Testable prop =&gt; Int -&gt; prop -&gt; IO Result
+rapidCheckWith attemptNb prop = do
+  seed &lt;- randomIO
+  return $ rapidCheckImpl attemptNb seed prop
+</code></pre>
+
+<p>There they are, the only two functions with side effects of our RapidCheck module. It is quite remarkable how far we can push side effects away from the core implementation of a module whose main purpose is to generate random inputs to find counter-examples.</p>
+
+<h2 id="enjoying-rapidcheck">Enjoying rapidCheck</h2>
+
+<p>Now that we did all this work, it is time to enjoy. We will run our initial test cases and have a look at how it behaves.</p>
+
+<p>Both of our test cases takes two integers and returns a boolean. We know from the previous sections that a function with no parameters (a constant) returning a boolean implements Testable. What is missing for the whole function to be Testable is an Arbitrary instance for our Integer type:</p>
+
+<ul>
+  <li>We use the pure function next of System.Random to generate a Int</li>
+  <li>We convert this Int to an Integer (an arbitrary large number)</li>
+</ul>
+
+<p>Because we generated a Int, the random generator will not cover all the spectrum of values an Integer could have. We will ignore this here (*), as the only reason why we use an Integer was to avoid overflows:</p>
+
+<pre><code class="language-hs">instance Arbitrary Integer where
+  arbitrary = Gen $ \rand -&gt;
+    fromIntegral (fst (next rand))
+</code></pre>
+
+<p>We expect our first test case to pass as it verifies a valid property of our GCD:</p>
+
+<pre><code class="language-hs">prop_gcd :: Integer -&gt; Integer -&gt; Bool
+prop_gcd a b = a * b == gcd a b * lcm a b
+
+rapidCheck prop_gcd
+&gt; Success
+</code></pre>
+
+<p>Our second test case should fail with high probability. RapidCheck should be able to exhibit a counter example based on two coprime numbers. And it does:</p>
+
+<pre><code class="language-hs">prop_gcd_bad :: Integer -&gt; Integer -&gt; Bool
+prop_gcd_bad a b = gcd a b &gt; 1
+
+rapidCheck prop_gcd_bad
+&gt; Failure {seed = -1437169021,
+           counterExample = ["1076253199","40866101"]}
+</code></pre>
+
+<p>Note that if we had used Int instead of Integer, RapidCheck should be able to find a counter example to our valid prop_gcd properties. Because an Int has not an infinite precision, we expect RapidCheck to find integer overflow issues. And it does:</p>
+
+<pre><code class="language-hs">instance Arbitrary Int where
+  arbitrary = Gen $ \rand -&gt; fst (next rand)
+
+prop_gcd_overflow :: Int -&gt; Int -&gt; Bool
+prop_gcd_overflow a b = a * b == gcd a b * lcm a b
+
+rapidCheck prop_gcd_overflow
+&gt; Failure {seed = -881134321,
+           counterExample = ["171542757","1235104953"]}
+</code></pre>
+
+<p>_(*) In real code, we should avoid defining Arbitrary instances with bad statistical properties (what we did for the Integer). We always have the option to define custom generators and use forAll explicitly.</p>
+
+<p>We can also note that writing a random generator for arbitrary long integers is not that easy. Thankfully, QuickCheck integrates a great deal of already defined Arbitrary instances. Practically, we do not need to worry about writing a generator of Integer._</p>
+
+<h2 id="conclusion-and-whats-next">Conclusion and what’s next</h2>
+
+<p>In this post, we went over the basic building block of the QuickCheck library, by implementing our own Property Based Testing framework, RapidCheck.</p>
+
+<p>We used the same vocabulary as QuickCheck to better understand how the real library works. The details of implementations are not the exact reproduction of the original library though:</p>
+
+<ul>
+  <li>The <code>Gen</code> type is not a Monad in RapidCheck, to avoid the topic entirely. It also support less feature than the QuickCheck version.</li>
+  <li>The <code>Result</code> type is much simpler in RapidCheck to concentrate on the principles rather than trying to be exhaustive.</li>
+  <li>As a consequence, both <code>forAll</code> and <code>rapidCheck</code> functions, although quite similar in purpose, are quite different in terms of implementation.</li>
+</ul>
+
+<p>But we are not done yet. The next post will go into another magic property of QuickCheck. We will add to our RapidCheck the ability to do something quite remarkable: generating function to test higher order functions.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-02-03T00:00:00+00:00">February 3, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Code+your+own+Quick+Check%20%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html&title=Code+your+own+Quick+Check" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F02%2F03%2Fcode-quick-check-1.html&t=Code your own Quick Check" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/01/30/catamorph-dsl-cpp.html" title="Catamorph your DSL (C++ Port)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Catamorph your DSL (C++ Port)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/02/06/code-quick-check-2.html" title="Code your own Quick Check (Higher Order Functions)">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Code your own Quick Check (Higher Order Functions)</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

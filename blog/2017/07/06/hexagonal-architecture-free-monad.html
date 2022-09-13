@@ -1,0 +1,1265 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hexagonal Architecture and Free Monad: Two related design patterns? - Double Ended Queue</title>
+<meta name="description" content="In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Hexagonal Architecture and Free Monad: Two related design patterns?">
+<meta property="og:url" content="/blog/2017/07/06/hexagonal-architecture-free-monad.html">
+
+
+  <meta property="og:description" content="In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Hexagonal Architecture and Free Monad: Two related design patterns?">
+  <meta name="twitter:description" content="In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages.">
+  <meta name="twitter:url" content="/blog/2017/07/06/hexagonal-architecture-free-monad.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-07-06T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/07/06/hexagonal-architecture-free-monad.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hexagonal Architecture and Free Monad: Two related design patterns?">
+    <meta itemprop="description" content="In today’s post, we will explore the hexagonal architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages.">
+    <meta itemprop="datePublished" content="2017-07-06T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hexagonal Architecture and Free Monad: Two related design patterns?
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-07-06T00:00:00+00:00">July 6, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html&text=Hexagonal+Architecture+and+Free+Monad%3A+Two+related+design+patterns%3F&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/07/06/hexagonal-architecture-free-monad.html&title=Hexagonal Architecture and Free Monad: Two related design patterns?"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/07/06/hexagonal-architecture-free-monad.html&t=Hexagonal Architecture and Free Monad: Two related design patterns?">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#introduction--motivation">Introduction &amp; motivation</a></li><li><a href="#motivating-example">Motivating example</a><ul><li><a href="#business-rules">Business rules</a></li><li><a href="#external-services">External services</a></li><li><a href="#architecture-constraints">Architecture constraints</a></li></ul></li><li><a href="#hexagonal-architecture">Hexagonal Architecture</a><ul><li><a href="#dual-goals">Dual goals</a></li><li><a href="#principles">Principles</a></li></ul></li><li><a href="#applying-the-hexagonal-architecture">Applying the Hexagonal Architecture</a><ul><li><a href="#service-providers">Service providers</a></li><li><a href="#service-provided-api">Service provided (API)</a></li><li><a href="#plumbing">Plumbing</a></li></ul></li><li><a href="#drawbacks-of-the-hexagonal-architecture">Drawbacks of the Hexagonal Architecture</a><ul><li><a href="#somestimes-heavy">Somestimes heavy</a></li><li><a href="#not-declarative">Not declarative</a></li><li><a href="#other-caveats">Other caveats</a></li></ul></li><li><a href="#embedded-dsl-a-more-declarative-approach">Embedded DSL: a more declarative approach</a><ul><li><a href="#being-declarative-by-selecting-our-primitives">Being declarative by selecting our primitives</a></li><li><a href="#selecting-our-primitives-but-how">Selecting our primitives, but how?</a></li><li><a href="#a-high-level-definition-of-monads">A high level definition of Monads</a></li></ul></li><li><a href="#using-monads-to-select-our-primitives">Using Monads to select our primitives</a><ul><li><a href="#functions-without-side-effects">Functions without side effects</a></li><li><a href="#functions-with-io-side-effects">Functions with IO side effects</a></li><li><a href="#defining-our-own-language-monad">Defining our own language (Monad)</a></li><li><a href="#free-your-monad">Free your Monad</a></li><li><a href="#interpreters">Interpreters</a></li><li><a href="#you-know-the-basics">You know the basics</a></li></ul></li><li><a href="#free-monad-example-implementation">Free Monad: Example implementation</a><ul><li><a href="#step-1-identify-the-abstract-instructions">Step 1: Identify the abstract instructions</a></li><li><a href="#step-2-define-the-type-of-the-instructions">Step 2: Define the type of the instructions</a></li><li><a href="#step-3-make-it-a-monad">Step 3: Make it a Monad</a></li><li><a href="#step-4-write-your-business-logic">Step 4: Write your business logic</a></li><li><a href="#step-5-write-your-interpreters">Step 5: Write your interpreters</a></li><li><a href="#step-6-wrap-up-in-a-nice-api">Step 6: Wrap up in a nice API</a></li><li><a href="#step-7-enjoy--celebrate">Step 7: Enjoy &amp; Celebrate</a></li></ul></li><li><a href="#free-monad-vs-oop-hexagonal-architecture">Free Monad vs OOP Hexagonal Architecture</a><ul><li><a href="#complexity">Complexity</a></li><li><a href="#declarative-ness">Declarative-ness</a></li><li><a href="#rigidity-vs-safety">Rigidity vs Safety</a></li><li><a href="#domain-modelling">Domain modelling</a></li></ul></li><li><a href="#final-words">Final words</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p><em>You do <strong>not</strong> need to understand Monads to follow this post. This is not a Monad tutorial either, but it might help you getting some intuition on what is a Monad. Some knowledge of Haskell and C++ might help but are not pre-requisite.</em></p>
+
+<p>There is a lot of talk about <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Domain Driven Design</a> lately. This approach of design advocates that most of the software complexity we face today is due to our software not being aligned with the domain it attempts to model.</p>
+
+<p>If the software does not properly decompose the problem it was built to solve, or solves another problem, or simply does not speak the language of the problem, chances are high that the customer will not be happy with it.</p>
+
+<p>Domain Driven Design also comes with some design patterns (often referred as tactical pattern in DDD). One of those patterns that is often associated to Domain Driven Design is the <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal Architecture</a>.</p>
+
+<p>In today’s post, we will explore this architecture through an example, describe it, and relate it to Free Monads, a well-known and pretty popular pattern in typed functional programming languages to build Domain Specific Languages.</p>
+
+<h2 id="introduction--motivation">Introduction &amp; motivation</h2>
+
+<p>Paris developers got lucky lately. The capital of France hosted a bunch of high quality presentations featuring the Hexagonal Architecture:</p>
+
+<ul>
+  <li>The <a href="https://www.meetup.com/DDD-Paris/events/240715351/?eventId=240715351">Alistair in the Hexagon</a> meetup with <a href="https://twitter.com/TotherAlistair">Alistair Cockburn</a></li>
+  <li>A <a href="https://www.meetup.com/DDD-Paris/events/238799479/?eventId=238799479">full Afternoon dedicated to DDD</a> and refactoring toward DDD.</li>
+</ul>
+
+<p>These presentation were great. Technically, they largely focused on delivering design patterns for OOP languages. Some attendees got the feeling that paradigms such as FP could not really offer the same domain modeling as OOP.</p>
+
+<p>This is obviously not true. On the contrary, most Functional Programming languages are great at <strong>modelling domain specific problems</strong> by supporting the definition of embedded Domain Specific Languages (DSL) quite naturally.</p>
+
+<p>But it is true is that different paradigms lead to different solutions. Languages such as Haskell are not that good at applying patterns from the OOP world. Instead, they have patterns of their own: such as the Free Monad in place of the Hexagonal Architecture.</p>
+
+<p>In today’s post, we will explore the relations and differences between the Free Monad and the Hexagonal Architecture.</p>
+
+<h2 id="motivating-example">Motivating example</h2>
+
+<p>Any proper discussion about design needs a good example as illustration. We will use the same example as the <a href="https://www.meetup.com/DDD-Paris/events/238799479/?eventId=238799479">Domain Driven Design afternoon</a> presentation and build the domain logic of a <a href="https://github.com/emilybache/KataTrainReservation">train reservation application</a>.</p>
+
+<h3 id="business-rules">Business rules</h3>
+
+<p>The goal is to implement the domain of train reservation. We should offer an API to reserve a given number of seats at a given date.</p>
+
+<p>The rules of the reservation of a train are the following:</p>
+
+<ul>
+  <li>We cannot reserve seats in a train if it bumps up the occupancy over 70%</li>
+  <li>All the reserved seats should be in the same coach (we cannot separate families)</li>
+  <li>Preferably, we should avoid bumping the occupancy of a coach over 80%</li>
+</ul>
+
+<h3 id="external-services">External services</h3>
+
+<p>Our application is only responsible for providing this business logic. Some other services already implement the booking and browsing of the trains:</p>
+
+<ul>
+  <li>One service offers the capability to search for trains by date, and access the typology of the train (available seats, by coaches)</li>
+  <li>One service offers the capability to book a bunch of seats in a coach in a given train. This service might deny the request (due to race conditions)</li>
+</ul>
+
+<p>Our application will have to integrate to an monitoring infrastructure. We will simulate this by adding an external logging service.</p>
+
+<h3 id="architecture-constraints">Architecture constraints</h3>
+
+<p>We want our application to separate the domain logic from the technicalities of the communication with the external services and the infrastructure:</p>
+
+<ul>
+  <li>The business logic cannot depend on the real services</li>
+  <li>A wrapping layer should take care of the plumbing to the real services</li>
+</ul>
+
+<p>These rules are deliberately built to be in line with the tenets of Domain Driven Design and the Hexagonal Architecture, the topic of the next section.</p>
+
+<h2 id="hexagonal-architecture">Hexagonal Architecture</h2>
+
+<p>In this section, we will introduce the basics of the Hexagonal Architecture. We will keep it minimal and the curious reader is encouraged to look at the <a href="http://alistair.cockburn.us/Hexagonal+architecture">original article</a> and additional resources.</p>
+
+<h3 id="dual-goals">Dual goals</h3>
+
+<p>The Hexagonal Architecture has two connected goals.</p>
+
+<p>From a DDD perspective, it aims at structuring the code such that it offers a shell in which the code speaks the language of the domain and is not immediately bothered by technicalities. These technical aspects are kept separated.</p>
+
+<p>From a evolution perspective, it aims at structuring the code such that it makes it safe and easy to switch technology stacks by minimising the amount of rework of the code that implements the business logic.</p>
+
+<h3 id="principles">Principles</h3>
+
+<p>The core business domain code is kept isolated from the implementation of the service on a particular technology stack.</p>
+
+<p>The domain code communicates with the <em>real world</em> by using <strong>ports</strong> (interfaces in OOP). All the services on which the core business domain depends are abstracted by these ports, named after the capabilities they offer from the domain point of view.</p>
+
+<p>There are no layers below or above the Hexagon. Instead, there is a layer around the hexagon consisting in adapters and code plugging these <strong>adapters</strong> to the ports the hexagon defines (dependency injection).</p>
+
+<h2 id="applying-the-hexagonal-architecture">Applying the Hexagonal Architecture</h2>
+
+<p>We will now illustrate how the Hexagonal Architecture translates in terms of code to implement our service. To keep things short, we will only focus on the architecture of the application. The full code will be provided at the end.</p>
+
+<h3 id="service-providers">Service providers</h3>
+
+<p>As described in the previous section, the core domain depends on service providers. We abstract each of them behind dedicated interfaces, named after the capability they offer from the point of view of the core domain.</p>
+
+<p>We name these interfaces using the naming scheme advocated by <a href="http://tpierrain.blogspot.fr/">Thomas Pierrain</a>: we will use the <strong>I</strong> of the interface name to form a sentence that explains the capability offered by the service.</p>
+
+<ul>
+  <li>IReserveTrains allows to reserve a set of seats in a coach of a given train.</li>
+  <li>ISearchTrains allows to:
+    <ul>
+      <li>Retrieve all the trains departing around a provided date-time</li>
+      <li>Get the typology of a given train (coaches and seats available)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Here is how it would translate in OOP (using C++):</p>
+
+<pre><code class="language-cpp">struct ISearchTrains : Interface&lt;ISearchTrains&gt;
+{
+    virtual std::vector&lt;TrainId&gt; trains_around(DateTime const&amp;) = 0;
+    virtual TrainTypology get_typology(TrainId const&amp;) = 0;
+};
+
+struct IReserveTrains : Interface&lt;IReserveTrains&gt;
+{
+    virtual std::optional&lt;ConfirmedReservation&gt; reserve(ReservationAttempt const&amp;) = 0;
+};
+</code></pre>
+
+<p>We can abstract the logging service the exact same way, by providing an interface that models this capability:</p>
+
+<pre><code class="language-cpp">struct ILog : Interface&lt;ILog&gt;
+{
+    virtual void log(std::string const&amp;) = 0;
+};
+</code></pre>
+
+<h3 id="service-provided-api">Service provided (API)</h3>
+
+<p>As described in the previous section, our hexagon also offers a port for the service the core domain offers (basically, what our application does). We will modeled this service with an interface <code>IFindTheBestPlaces</code>:</p>
+
+<pre><code class="language-cpp">struct IFindTheBestPlaces : Interface&lt;IFindTheBestPlaces&gt;
+{
+    virtual std::optional&lt;ConfirmedReservation&gt; reserve(ReservationRequest const&amp;) = 0;
+};
+</code></pre>
+
+<p>Clients of our applications will only depend on this interface. The implementation of the service will stay hidden in the Hexagon, behind the adapter layer.</p>
+
+<p>Instantiating this implementation require implementations for all the service providers it depends on (ISearchTrains, IReserveTrains, ILog). These implementations are taken as argument of the constructor:</p>
+
+<pre><code class="language-cpp">class FindTheBestPlaces : public IFindTheBestPlaces
+{
+public:
+    FindTheBestPlaces(IReserveTrains&amp;, ISearchTrains&amp;, ILog&amp;);
+    std::optional&lt;ConfirmedReservation&gt; reserve(ReservationRequest const&amp;) override;
+    
+private:
+    IReserveTrains&amp; _iReserveTrains;
+    ISearchTrains&amp; _iSearchTrains;
+    ILog&amp; _iLog;
+};
+</code></pre>
+
+<h3 id="plumbing">Plumbing</h3>
+
+<p>The plumbing is done inside the factory function that creates the <code>IFindTheBestPlaces</code> service. It injects the real implementation of the service providers (<code>ISearchTrains</code>, <code>IReserveTrains</code>, <code>ILog</code>) inside the <code>FindTheBestPlaces</code> concrete API implementation.</p>
+
+<p>All the details of this plumbing are therefore hidden from the user:</p>
+
+<pre><code class="language-cpp">std::unique_ptr&lt;IFindTheBestPlaces&gt; find_best_places_service()
+{
+    ISearchTrains&amp; iSearchTrains = ...;
+    IReserveTrains&amp; iReserveTrains = ...;
+    ILog&amp; iLog = ...;
+    return std::make_unique&lt;FindTheBestPlaces&gt;(iReserveTrains, iSearchTrains, iLog);
+}
+</code></pre>
+
+<p>A similar plumbing goes into the unit tests of the core business logic. Each time a port is used inside a code under test, a mock, fake, stub must be provided.</p>
+
+<p>A similar plumbing also happens in the code living inside the Hexagon. <code>ISearchTrains</code>, <code>IReserveTrains</code> and <code>ILog</code> must be carried to all classes and functions that need them (outside of the context of using a dependency injection framework).</p>
+
+<h2 id="drawbacks-of-the-hexagonal-architecture">Drawbacks of the Hexagonal Architecture</h2>
+
+<p>Applying the Hexagonal Architecture to our train reservation application allowed us to decouple the implementation of the service providers from the core business logic.</p>
+
+<p>The code in the Hexagon is less likely (there are limits to everything) to need rework upon changing the technology stack or communication protocols used to exchange with the service providers. It solves our initial problem.</p>
+
+<p>But there are obviously drawbacks in using this architectural pattern. These drawbacks should not be understood as advice against the Hexagonal Architecture. But we have to be aware of the costs of techniques we use before applying them.</p>
+
+<h3 id="somestimes-heavy">Somestimes heavy</h3>
+
+<p>The Hexagonal Architecture is essentially a pattern of dependency injection, a pretty heavy technique, which leads to mocks in tests and the multiplication of interfaces.</p>
+
+<p>The overhead of having to inject the interfaces is there. It can sometimes represent a good chunk of the code or the unit tests. Each class that needs to access the services will need to be injected the implementation of these services.</p>
+
+<h3 id="not-declarative">Not declarative</h3>
+
+<p>The hexagonal shell is not visible in the code. There is no clear indication in the code that some code is inside the hexagon. It is only a matter of convention between developers.</p>
+
+<p>As a result of having only conventions, there is no strong insurance against a developer using the dependencies directly, instead of going through the ports, or adding a new dependencies without the associated port (it happens, we all have seen it).</p>
+
+<h3 id="other-caveats">Other caveats</h3>
+
+<p>Abstracting the services providers in the business logic does not abstract away the knowledge of know how many of these services there are.</p>
+
+<p>Having <code>IReserveTrains</code>, <code>IGetTypologies</code> and <code>ILog</code> as ports shows part of the infrastructure inside the business logic code (the Hexagon). This is not much but it represents a source of coupling still. It can be solved by reworking the interfaces.</p>
+
+<h2 id="embedded-dsl-a-more-declarative-approach">Embedded DSL: a more declarative approach</h2>
+
+<p>We have seen how the Hexagonal Architecture allowed us to separate the code that implements the domain core logic, from the code that deals with the infrastructure or the technicalities of the communication with other services.</p>
+
+<p>We will now describe another approach, more adapted to typed functional programming languages, that aims at tacking the same problem, with different trade-offs.</p>
+
+<h3 id="being-declarative-by-selecting-our-primitives">Being declarative by selecting our primitives</h3>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Structure_and_Interpretation_of_Computer_Programs?oldid=737448219">Structure and Interpretation of Computer Programs</a> describes the basic building blocks of a programming language in the first sentences of the first chapter:</p>
+
+<ul>
+  <li><strong>Primitives</strong>: the simplest elements a language is built upon</li>
+  <li><strong>Means of combination</strong>: used to build compound elements from simpler ones</li>
+  <li><strong>Means of abstraction</strong>: used to abstract compound elements as single unit</li>
+</ul>
+
+<p>Most often, the primitives of the language of our business domain are <strong>not</strong> the primitives our general purpose programming language. This is why we write well-named functions, classes or interfaces: the build the right abstractions.</p>
+
+<p>But sometimes, it is not enough.</p>
+
+<p>Creating an Embedded Domain Specific Language (EDSL) in a language such as Haskell will allow us to keep much of the powerful means of combination and abstraction of our language, but will allow us to <strong>pick our own primitives</strong>.</p>
+
+<p>Picking our own primitives will allow us to build our domain language at a much deeper level than function and classes. We will get a more declarative and safer equivalent of the Hexagonal Architecture, to decouple our business logic from the “real world”.</p>
+
+<h3 id="selecting-our-primitives-but-how">Selecting our primitives, but how?</h3>
+
+<p>It depends. In some host language (the language in which we build our embedded DSL), some approaches are more idiomatic and appropriate than others. Data and macros are the way to go in Clojure, while Monads will be prefered in Haskell.</p>
+
+<p>Because we choose Haskell in this post, we will select an approach based on the concept of Monad (and Free Monad in particular). It is especially effective in languages having a very expressive type system such as Haskell, Idris or Scala.</p>
+
+<h3 id="a-high-level-definition-of-monads">A high level definition of Monads</h3>
+
+<p>We will not go into the conceptual definition of a Monad. It is an abstraction for a recurring pattern in Category theory, much like an interface or a design pattern in a programming language, but we will not this here.</p>
+
+<p>Instead, we can consider a Monad as a way to define a small language inside our programming language. Inside this language, we can choose to <strong>modify the rules of composition, evaluation and the available primitives</strong>.</p>
+
+<p>In short, it is like a customized environment of execution. Inside a Monad, the rules of the host language can be changed as we see fit. This allows us to speak a different tongue, closer to the language of the domain we are trying to model, and decoupled from the technicalities of the implementation.</p>
+
+<h2 id="using-monads-to-select-our-primitives">Using Monads to select our primitives</h2>
+
+<p>In this section, we will explain how Monads can be used to offer a more declarative alternative to the Hexagonal Architecture. The next section will then show how to implement such a Monad.</p>
+
+<h3 id="functions-without-side-effects">Functions without side effects</h3>
+
+<p>Let us start with <strong>pure</strong> functions, which are function that lives outside of any Monad. You can find below the prototype of a function computing the length of a string:</p>
+
+<pre><code class="language-hs">-- Compute the length of a `String` and returns it as an `Int`
+length :: String -&gt; Int
+</code></pre>
+
+<p>This Haskell function, by the very declaration of its type, is limited to <strong>pure computations</strong>, with no side-effects allowed such as:</p>
+
+<ul>
+  <li>Sending a request to the Search Train service</li>
+  <li>Calling a function that would itself call the Search Train service</li>
+</ul>
+
+<p>In other words, the primitives the length function has access to, are limited to those that do not perform side-effects. This seems to align particularly well with our need to create a functional core in the Hexagonal Architecture, but as we will see, this is too restrictive.</p>
+
+<h3 id="functions-with-io-side-effects">Functions with IO side effects</h3>
+
+<p>In Haskell, we can tag a function as living in the <code>IO</code> Monad, by prefixing its return type by <code>IO</code>. Inside this Monad, a function is allowed to do any side effect it wants (printing something, accessing a file, sending a HTTP request, etc):</p>
+
+<pre><code class="language-hs">-- Cannot do anything but pure computations
+reserve :: ReservationRequest -&gt; ConfirmedReservation
+
+-- Can do anything it wants, such as sending a HTTP request
+reverseWithIO :: ReservationRequest -&gt; IO ConfirmedReservation
+</code></pre>
+
+<p>In other words, the primitives the <code>reserveWithIO</code> function has access to, contain all those that perform arbitrary side-effects.</p>
+
+<p>Tagging a function with a Monad allows to <strong>select or discard the primitives available inside a piece of code, declaratively</strong>.</p>
+
+<h3 id="defining-our-own-language-monad">Defining our own language (Monad)</h3>
+
+<p>Inside the <code>IO</code> Monad, we can do anything. This is <strong>too permissive</strong>. We would like to forbid direct access to the implementation of the service providers in the Hexagon.</p>
+
+<p>Outside of any Monad, we cannot do any side effects, directly or indirectly. This is too restrictive. Our business logic needs to access the service providers.</p>
+
+<p>The solution is to define our own Monad, our own environment of execution with our own rules, which we will name <code>ReservationExpr</code>:</p>
+
+<pre><code class="language-hs">-- The `ReservationExpr` is a Monad with the appropriate restrictions:
+reserve :: ReservationRequest -&gt; ReservationExpr ConfirmedReservation
+</code></pre>
+
+<p>Inside this Monad, we will offer only the side effects needed to connect to the external services we want, by defining our own primitives to do it. By construction, <em>these primitives will be the only way to access the service provider</em>, the real world.</p>
+
+<p>This effectively defines a DSL that is <strong>declarative</strong> (the Monad is clearly visible) and <strong>safe</strong> (we cannot bypass the primitives). We will now see how it also allows to solve our dependency injection concerns.</p>
+
+<h3 id="free-your-monad">Free your Monad</h3>
+
+<p>As in the Hexagonal Architecture, we want to decouple the <strong>intent</strong> to use a service from its actual implementation inside our DSL. In other words, the primitives of our new language will <strong>only express what we want to do, and not how</strong>.</p>
+
+<p>By varying the how behind the what, we can make our primitives do different things, much like an interface allows to vary the implementations. Our primitives will for instance connect to external services in production settings, but not during tests.</p>
+
+<p>To do this, we will build our <code>ReservationExpr</code> Monad such that the code that lives inside it will <strong>emit abstract instructions</strong> upon evaluation, describing the connection to these external services instead of directly connecting to them.</p>
+
+<p>For instance, the code inside our Monad will emit instructions such as:</p>
+
+<pre><code>SearchTrains at 11/06/2017-11:00
+=&gt; Bind result to variable `trainId`
+
+RetrieveTypology of Train with ID `trainId`
+=&gt; Bind result to variable `trainTypology`
+
+Call pure function `belowOccupancyThreshold` on `trainTypology`
+=&gt; Bind result to `isValid`
+</code></pre>
+
+<p>We call this kind of Monad a Free Monad, as it only describes a sequence of operations, <strong>free of any hardcoded interpretations</strong>.</p>
+
+<h3 id="interpreters">Interpreters</h3>
+
+<p>Functions tagged with our ReservationExpr Monad will just emit abstract instructions (an <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">Abstract Syntax Tree</a> to be exact) upon evaluation, instead of executing the code they contain. This effectively buys us one level of indirection.</p>
+
+<p>These instructions can then be <strong>interpreted</strong> differently in different contexts. Inside a production context, we can make them trigger connections to the real world. Inside a test context, we can make them use an in-memory test database.</p>
+
+<p>We do this by defining several functions that each transforms these abstract instructions into different real instructions of our host language (yes, much like compilers do for assembler). We call these functions <strong>interpreters</strong>.</p>
+
+<p>We can build as many interpreters as we wish. We just pick the one we want depending on the context. For instance, for the same abstract instruction “SearchTrain at datetime D” and depending on the interpreter, we could:</p>
+
+<ul>
+  <li>Send an HTTP request (on a production environment)</li>
+  <li>Lookup inside an in-memory DB (for integration tests)</li>
+  <li>Return a fixed value (for a specific unit test)</li>
+  <li>Log the call to the function (for simulations)</li>
+</ul>
+
+<h3 id="you-know-the-basics">You know the basics</h3>
+
+<p>If you understood this section, you understand how Free Monads help defining EDSLs, which are declarative and controlled environment to express domain specific logic.</p>
+
+<p>Inside the EDSL, the business logic is decoupled from a lot of technical concerns such as external dependencies, or even the evaluation strategy. This is done by relying on primitives of a language that we developer have control on.</p>
+
+<p>The rest of the post will demonstrate how <strong>simple and concise</strong> it is to define our own EDSL, by using Free Monads in Haskell.</p>
+
+<h2 id="free-monad-example-implementation">Free Monad: Example implementation</h2>
+
+<p>This section explains how to create our <code>ReservationExpr</code> Monad easily and concisely. It is described in such a way that only a small amount of Haskell knowledge is needed.</p>
+
+<p>If you are not interested in Haskell or never touched it, you should skip this section.</p>
+
+<h3 id="step-1-identify-the-abstract-instructions">Step 1: Identify the abstract instructions</h3>
+
+<p>The first step to define our EDSL is to identify its primitives, the low level abstractions needed to express our business logic. We identify six of them:</p>
+
+<ul>
+  <li><code>SeachTrain T</code>: searching for trains around the datetime T</li>
+  <li><code>GetTypology T</code>: retrieving the typology for the train with reference T</li>
+  <li><code>Reserve T C S</code>: reserving the seats S in the coach C of the train T</li>
+  <li><code>Log M</code>: logging the message M (represented as a string)</li>
+  <li><code>Pure C</code>: running a pure computation C (to implement our business logic)</li>
+  <li><code>Bind I C</code>: binding the result of instruction I to the next computation C (*)</li>
+</ul>
+
+<p>The last two instructions <code>Pure</code> and <code>Bind</code> are the two instructions needed in every Free Monad. They basically allow you to use the pure part of Haskell inside the EDSL.</p>
+
+<p><em>(*): For non Haskell, do not worry if you do not understand Bind. Just think of it as a kind of glorified C++ / Java / C# semicolon and you will be fine.</em></p>
+
+<h3 id="step-2-define-the-type-of-the-instructions">Step 2: Define the type of the instructions</h3>
+
+<p>The abstract instructions have a semantic that could be encoded by functions. Searching for the trains at date-time T could be implemented by a <code>searchTrain</code> function living in the <code>ReservationExpr</code> Monad:</p>
+
+<pre><code class="language-hs">-- Search for a train:
+-- * At a given DateTime (example: 2017-07-01 14h38)
+-- * Returning a list of TrainId
+searchTrain :: DateTime -&gt; ReservationExpr [TrainId]
+</code></pre>
+
+<p>Similarly, every single of our primitives could be encoded as functions:</p>
+
+<pre><code class="language-hs">searchTrain :: DateTime -&gt; ReservationExpr [TrainId]
+getTypology :: TrainId -&gt; ReservationExpr (Maybe TrainTypology)
+reserve :: Reservation -&gt; ReservationExpr (Maybe Reservation)
+log :: String -&gt; ReservationExpr ()
+</code></pre>
+
+<p>Now, these functions cannot contain direct calls to external services. Instead, they should emit abstract instructions (for an interpreter to translate them later).</p>
+
+<p>This is easy enough: we just take the functions above, capitalise them (first letter to upper case) to get type constructors, and group these constructors into a type named after our Monad: <code>ReservationExpr</code>.</p>
+
+<pre><code class="language-hs">data ReservationExpr a where
+  SearchTrain :: DateTime -&gt; ReservationExpr [TrainId]
+  GetTypology :: TrainId -&gt; ReservationExpr (Maybe TrainTypology)
+  Reserve :: Reservation -&gt; ReservationExpr (Maybe Reservation)
+  Log :: String -&gt; ReservationExpr ()
+  Pure :: ta -&gt; ReservationExpr ta
+  Bind :: ReservationExpr ta -&gt; (ta -&gt; ReservationExpr tb) -&gt; ReservationExpr tb
+</code></pre>
+
+<p><code>ReservationExpr</code> a is the abstract type for an instruction which, upon evaluation, will return a value of type a. It consists of primitive instructions such as <code>SearchTrain</code>, which will return a list of train ids upon evaluation.</p>
+
+<p>Thanks to <code>Pure</code> and <code>Bind</code>, the primitive instructions can be composed into bigger computations. So <code>ReservationExpr a</code> is also the abstract type of computations inside the <code>ReservationExpr</code> Free Monad, which return a value of type <code>a</code>.</p>
+
+<h3 id="step-3-make-it-a-monad">Step 3: Make it a Monad</h3>
+
+<p>Haskell will need a bit of boilerplate code to be satisfied and make our <code>ReservationExpr</code> a recognized Monad.</p>
+
+<pre><code class="language-hs">instance Functor ReservationExpr where
+  fmap fn expr = expr &gt;&gt;= Pure . fn
+
+instance Applicative ReservationExpr where
+  pure = Pure
+  fExpr &lt;*&gt; aExpr = fExpr &gt;&gt;= \f -&gt; fmap f aExpr
+
+instance Monad ReservationExpr where
+  (&gt;&gt;=) = Bind
+</code></pre>
+
+<p>If you do not understand these lines, it is fine. It is enough to copy-paste them and search and replace in them to define your own Free Monad.</p>
+
+<h3 id="step-4-write-your-business-logic">Step 4: Write your business logic</h3>
+
+<p>We now are all set. We can define our business logic in our EDSL based on the abstract instructions we defined above. Here is an example of such a code:</p>
+
+<pre><code class="language-hs">reserve :: ReservationRequest -&gt; ReservationExpr ReservationResult
+reserve request = do
+  trains &lt;- SearchTrain (_dateTime request) -- Search for trains at date-time
+  forM trains $ \train -&gt;                   -- Loop on all the trains
+    typology &lt;- GetTypology train           -- Get the typology of a train
+    ...                                     -- Implement the reservation rules
+    Log ("Confirming reservation")          -- Logging stuff
+    confirmed &lt;- Request reservation        -- Trying to reserve the train
+    ...                                     -- More stuff
+</code></pre>
+
+<p>Upon evaluation, this code will translate into a tree of instructions, ready to be read by an interpreter. Therefore, all the code that lives inside the <code>ReservationExpr</code> Monad is itself <strong>free of side effects</strong>. It <strong>only builds an AST</strong>.</p>
+
+<h3 id="step-5-write-your-interpreters">Step 5: Write your interpreters</h3>
+
+<p>A <code>ReservationExpr a</code> is an Abstract Syntax Tree that upon evaluation will produce a value of type <code>a</code>. Any interpreter we define on this AST, whatever its implementation, will have to do exactly that.</p>
+
+<p>This means that our <code>ReservationExpr</code> Monad, through its types, forces the interpreters to comply with the rules expressed inside the DSL. The type system will make sure that <em>SearchTrain must return a list of train ids</em> or else will reject the code.</p>
+
+<p>This has two important consequences:</p>
+
+<ul>
+  <li>You get tons of help by the type system to write the interpreters</li>
+  <li>You can encode very powerful invariant in the DSL, using the type system</li>
+</ul>
+
+<p>We can therefore write our production settings interpreter by (almost) just pattern matching on the AST and following the type hints of the Haskell compiler.</p>
+
+<pre><code class="language-hs">evalReservation :: ReservationExpr ty -&gt; IO ty
+evalReservation = evalCmd
+  where
+    evalCmd :: ReservationExpr ty -&gt; IO ty
+    evalCmd (Log msg) = putStrLn msg
+    evalCmd (Pure val) = pure val
+    evalCmd (Bind val next) = evalCmd val &gt;&gt;= evalCmd . next
+    evalCmd (SearchTrain time) = searchTrainAt time
+    evalCmd (GetTypology trainId) = getTypologyOf trainId
+    evalCmd (Reserve command) = confirmCommand command
+</code></pre>
+
+<p>This <code>evalReservation</code> <strong>transforms abstract instructions into real world IO</strong> calls. It effectively fills the role of <ins>dependency injection</ins> in the Hexagonal Architecture.</p>
+
+<p>But we are not limited to this interpreter. We can build an interpreter to run our instructions into a in-memory database model (the <code>State</code> monad):</p>
+
+<pre><code class="language-hs">-- Run the computation using a InMemoryDb of trains and typologies
+-- * Simulates real world behaviors with fake data
+-- * Can simulate the behavior of successive interacting requests
+evalWithFakeDB :: ReservationExpr ty -&gt; State InMemoryDb ty
+</code></pre>
+
+<p>And we can do more. We can write interpreters to log the function calls, return constant values, and more… There is no limits but your imagination.</p>
+
+<h3 id="step-6-wrap-up-in-a-nice-api">Step 6: Wrap up in a nice API</h3>
+
+<p>As in the case of the Hexagonal Architecture, we can provide a wrapper around our API to hide the details of the implementation of the service.</p>
+
+<p>In the case of the Free Monad, that would be hiding the construction of the AST (done in <code>reserveImpl</code>) and the interpreter we use, all behind a single function call:</p>
+
+<pre><code class="language-hs">-- Wrapper around the reserveImpl function, living in ReservationExpr
+reserve :: ReservationRequest -&gt; IO ReservationResult
+reserve = evalReservation . reserveImpl
+</code></pre>
+
+<p>Similarly, we can provide wrapper for the in-memory DB interpreter, to help the writing of our integration tests:</p>
+
+<pre><code class="language-hs">reserveWithFakeDb :: ReservationRequest -&gt; State InMemoryDb ReservationResult
+reserveWithFakeDb = evalWithFakeDB . reserveImpl
+</code></pre>
+
+<h3 id="step-7-enjoy--celebrate">Step 7: Enjoy &amp; Celebrate</h3>
+
+<p>There is nothing much to do. Following this pattern, we provided a safe and decoupled EDSL for our business logic code.</p>
+
+<p>Code expressed in this EDSL is truly decoupled from the external world by the Free Monad, hidden from the external world by the wrapping layer around the API, and incapable of directly communicate with the external world.</p>
+
+<h2 id="free-monad-vs-oop-hexagonal-architecture">Free Monad vs OOP Hexagonal Architecture</h2>
+
+<p>Having gone through this post, the similarities between the Hexagonal Architecture and the Free Monad pattern should be quite clear.</p>
+
+<p>Both approaches rely on creating a <em>“context bubble”</em>, decoupled from the real world by an abstraction, and plugged back to the real world by an adaptation layer. But there are some important differences too.</p>
+
+<h3 id="complexity">Complexity</h3>
+
+<p>I think there is little argument that the Free Monad is a more complex pattern than the Hexagonal Architecture. Interfaces are a much easier concept to grasp than Monads for the vast majority of developers, which makes it easier to build the initial architecture.</p>
+
+<p>But on the other hand, the Free Monad provides a better guidance to the developers: it is much more explicit and declarative. Developers do not have to rely on documentation (if any) to find their way in the architecture, making their life easier.</p>
+
+<p>It ultimately boils down to what is more idiomatic. Interfaces are pretty common in OOP, while Monads and Free Monads are a pretty classic pattern in Haskell.</p>
+
+<h3 id="declarative-ness">Declarative-ness</h3>
+
+<p>The Free Monad is by its very nature much more declarative than the Hexagonal Architecture. I think this is a no-contest.</p>
+
+<p>Any code written inside a Free Monad is only providing a recipe (the what). How the recipe will be translated in terms of real world instruction is completely decoupled from the recipe and left for the interpreter to decide.</p>
+
+<p>The interpreter can choose to evaluate the code differently than how it looks. It might bulk the request to external services, cache them, parallelise some evaluation safely (knowing it is pure) and more (see Haxl for a great example of this by Facebook).</p>
+
+<p>Technical aspects are therefore more decoupled in the Free Monad than in the Hexagonal Architecture. The Hexagonal Architecture is still bound by the standard rules of evaluation of the language and can only abstracts the real world calls.</p>
+
+<h3 id="rigidity-vs-safety">Rigidity vs Safety</h3>
+
+<p>Both pattern aim at creating an environment where code is more constraint than usual code, allowed to perform any kind of side effects (such as code living in the IO Monad).</p>
+
+<p>The difference lies in how each pattern enforce this. The Hexagonal Architecture does not enforce any guaranty, while the Free Monad does. In truth, both approaches have their benefits.</p>
+
+<p>Being more constraint makes the Free Monad able to offer stronger guaranties (the code must comply with the architecture, and the interpreter can therefore leverage this) but also makes the architecture more rigid.</p>
+
+<p>As a result, jumping right on the Free Monad from the start of a project, while still exploring the problem, is likely not a good idea. But jumping too soon on the Hexagonal Architecture is also a risk (I learned it some years ago).</p>
+
+<p>Both patterns erect walls between the real world and the domain logic. This is what they do. And it should be quite obvious that this is not a very good idea to try to erect walls too soon, before even knowing what we want to protect.</p>
+
+<h3 id="domain-modelling">Domain modelling</h3>
+
+<p>The Free Monad offers a different kind of domain modelling than the Hexagonal Architecture, by separating the following aspects of the domain:</p>
+
+<ul>
+  <li>The recipe describing the business logic</li>
+  <li>The rules the recipe must follow, encoded with types in the DSL</li>
+  <li>The transcription of the recipe to the real world</li>
+</ul>
+
+<p>This separation allows us to profit more from domain modelling. We can for instance enforce some invariants of the domain directly inside the type system of the DSL.</p>
+
+<p>We can also abstract some technical aspects some more. For instance, error handling can be done inside the interpreter, stopping the evaluation of an expression without having to rely on exception going through the business logic code.</p>
+
+<h2 id="final-words">Final words</h2>
+
+<p>The Free Monad is a kind of Hexagonal Architecture on steroid. More declarative and stronger at enforcing the separation of concern, the Free Monad is also more rigid and a potentially riskier choice at the start of project.</p>
+
+<p>The Free Monad shines by providing a stronger decoupling between the recipe describing the business logic and the actual evaluation of the recipe, allowing different evaluation of the code and domain specific optimizations.</p>
+
+<p>Ultimately though, both Hexagonal Architecture and Free Monad are patterns whose complexity is tied to the idioms of the languages they are used in.</p>
+
+<ul>
+  <li>The Hexagonal Architecture is a better fit in OOP</li>
+  <li>The Free Monad is likely a better fit for Haskell</li>
+  <li>For languages such as Scala, both approaches are available</li>
+</ul>
+
+<p>If anything, I hope this post showed how Functional Programming languages such as Haskell have their own pattern, which make them great at modelling a problem.</p>
+
+<p>You can find the code in Haskell in the <a href="https://github.com/QuentinDuval/HaskellTrainReservationKata">following Git Hub repository</a>.</p>
+
+<hr />
+
+<p>Acknowledgments to the speakers of the <a href="https://www.meetup.com/DDD-Paris/events/238799479/?eventId=238799479">Afternoon dedicated to DDD</a>: <a href="https://twitter.com/tpierrain">Thomas Pierrain</a>, <a href="https://twitter.com/jgrodziski">Jérémie Grodziski</a> and <a href="https://www.meetup.com/DDD-Paris/members/40215522/">Bruno Boucard</a> whose Kata was a great inspiration for this post.</p>
+
+<p>Acknowledgments to the speakers of the <a href="https://www.meetup.com/DDD-Paris/events/240715351/?eventId=240715351">Alistair in the Hexagon</a> meetup: <a href="https://twitter.com/tpierrain">Thomas Pierrain</a> and of course <a href="https://twitter.com/TotherAlistair">Alistair Cockburn</a> for their great and illustrated explanation of the Hexagonal Architecture.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-07-06T00:00:00+00:00">July 6, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Hexagonal+Architecture+and+Free+Monad%3A+Two+related+design+patterns%3F%20%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html&title=Hexagonal+Architecture+and+Free+Monad%3A+Two+related+design+patterns%3F" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F07%2F06%2Fhexagonal-architecture-free-monad.html&t=Hexagonal Architecture and Free Monad: Two related design patterns?" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/07/01/idris-bowling-kata.html" title="Idris dependent typing challenge: Bowling Kata">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Idris dependent typing challenge: Bowling Kata</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/07/28/idris-transducers.html" title="Implementing Clojure-like Transducers in Idris: definitions & concepts">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Implementing Clojure-like Transducers in Idris: definitions & concepts</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

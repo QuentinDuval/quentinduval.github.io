@@ -1,0 +1,1095 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Code your own Quick Check (Shrink) - Double Ended Queue</title>
+<meta name="description" content="In the previous posts, we started to implement our own QuickCheck in Haskell, which we named RapidCheck, based on the original publication on QuickCheck.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Code your own Quick Check (Shrink)">
+<meta property="og:url" content="/blog/2017/02/10/code-quick-check-3.html">
+
+
+  <meta property="og:description" content="In the previous posts, we started to implement our own QuickCheck in Haskell, which we named RapidCheck, based on the original publication on QuickCheck.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Code your own Quick Check (Shrink)">
+  <meta name="twitter:description" content="In the previous posts, we started to implement our own QuickCheck in Haskell, which we named RapidCheck, based on the original publication on QuickCheck.">
+  <meta name="twitter:url" content="/blog/2017/02/10/code-quick-check-3.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-02-10T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/02/10/code-quick-check-3.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Code your own Quick Check (Shrink)">
+    <meta itemprop="description" content="In the previous posts, we started to implement our own QuickCheck in Haskell, which we named RapidCheck, based on the original publication on QuickCheck.">
+    <meta itemprop="datePublished" content="2017-02-10T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Code your own Quick Check (Shrink)
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-02-10T00:00:00+00:00">February 10, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html&text=Code+your+own+Quick+Check+%28Shrink%29&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/02/10/code-quick-check-3.html&title=Code your own Quick Check (Shrink)"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/02/10/code-quick-check-3.html&t=Code your own Quick Check (Shrink)">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#motivation">Motivation</a></li><li><a href="#meaning-of-shrinking">Meaning of shrinking</a></li><li><a href="#enhancing-arbitrary">Enhancing Arbitrary</a></li><li><a href="#the-shrink-tree">The shrink tree</a></li><li><a href="#arbitrary-example">Arbitrary example</a></li><li><a href="#plugging-the-shrinking-in-testable">Plugging the shrinking in Testable</a></li><li><a href="#first-try-visiting-the-shrink-tree-inside-forall">First try: visiting the shrink tree inside forAll</a><ul><li><a href="#shrinking-implementation">Shrinking implementation</a></li><li><a href="#plugging-shrinking-in-forall">Plugging shrinking in forAll</a></li><li><a href="#resulting-behavior">Resulting behavior</a></li></ul></li><li><a href="#second-try-visiting-the-shrink-tree-outside-forall">Second try: visiting the shrink tree outside forAll</a><ul><li><a href="#result-tree">Result tree</a></li><li><a href="#building-the-result-tree">Building the result tree</a></li><li><a href="#wrapping-up">Wrapping up</a></li></ul></li><li><a href="#enjoying-shrinking">Enjoying shrinking</a></li><li><a href="#conclusion">Conclusion</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the previous posts, we started to implement our own QuickCheck in Haskell, which we named RapidCheck, based on the <a href="http://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf">original publication on QuickCheck</a>.</p>
+
+<p>The first post went over the basic concepts needed to build such a module, while our last post focused on how we can write generator for arbitrary functions. You might want to read them before continuing:</p>
+
+<ul>
+  <li><a href="/blog/2017/02/03/code-quick-check-1.html">Code you own QuickCheck</a></li>
+  <li><a href="/blog/2017/02/06/code-quick-check-2.html">Code you own QuickCheck (Higher Order Functions)</a></li>
+</ul>
+
+<p>In today’s post, we will complete the implementation of our RapidCheck module, by adding the ability to shrink counter examples to make them more manageable.</p>
+
+<p>This post will present two different strategies to implement this shrinking process. The first attempt will show the simplest solution that might come into mind. Although it will achieve the desired shrinking, we will explain in what sense it is badly designed. Identifying these defects will lead us to a second, much better solution to the problem.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>In our first post, we went over the process of building the basic blocks of our RapidCheck implementation. One of our success criteria was for our implementation to successfully find a counter example to following invalid property:</p>
+
+<pre><code class="language-hs">prop_gcd_bad :: Integer -&gt; Integer -&gt; Bool
+prop_gcd_bad a b = gcd a b &gt; 1
+
+rapidCheck prop_gcd_bad
+&gt; Failure {seed = -1437169021,
+           counterExample = ["1076253199","40866101"]}
+</code></pre>
+
+<p>While this counter example is perfectly valid, it is unnecessarily complex. This property could have failed with much smaller numbers:</p>
+
+<pre><code class="language-hs">gcd 1 1
+&gt; 1
+
+gcd 0 0
+&gt; 0
+</code></pre>
+
+<p>The goal for today is to modify the implementation of our RapidCheck implementation to implement shrinking, one of the most amazing feature of QuickCheck.</p>
+
+<p>At the end of this post, our implementation should be able to come up with much smaller counter examples for prop_bad_gcd:</p>
+
+<pre><code class="language-hs">rapidCheck prop_gcd_bad
+&gt; Failure {seed = 1034882204061803680,
+           counterExample = ["1","0"]}
+</code></pre>
+
+<h2 id="meaning-of-shrinking">Meaning of shrinking</h2>
+
+<p>Our goal is to provide simpler counter examples to the user of the RapidCheck module, ideally a minimal test case. But what do we mean by “simpler” or “minimal”?</p>
+
+<p>The general notion has to do with information. We want to remove noise from the test case. We want to get rid of artefacts that do not participate to the error. We want our arguments to contain only the information needed to make our test case fail.</p>
+
+<p>We can therefore understand shrinking as the process of removing information from our arguments until we get to the point where all the information contained in these arguments is necessary for the test case to fail.</p>
+
+<h2 id="enhancing-arbitrary">Enhancing Arbitrary</h2>
+
+<p>The first step toward being able to provide simpler counter examples is to figure out a way to reduce the amount of information of each of the arguments that lead to the property to fail.</p>
+
+<p>To know where to start, we will enumerate some of the things we know and want about this shrinking process:</p>
+
+<ul>
+  <li>Quantifying information, thus reducing it, highly depends on the considered type</li>
+  <li>It involves search: there is no known universal solution to find a minimal test case</li>
+  <li>Shrinking might not make sense for all values (zero) or types (functions)</li>
+  <li>We would like equal values to shrink in a similar deterministic way</li>
+</ul>
+
+<p>To sum up, we need a way to express an optional process that is neither random nor generic, and involves non-determinism. This is exactly what the shrink function of the Arbitrary type class has to offer:</p>
+
+<pre><code class="language-hs">type Shrinker a = a -&gt; [a]
+
+class Arbitrary a where
+  arbitrary :: Gen a
+  shrink :: Shrinker a
+  shrink = const []
+</code></pre>
+
+<ul>
+  <li>The list allows non-determinism: each output represents a different “path”</li>
+  <li>If the test case is already minimal, we can return an empty list</li>
+  <li>The default implementation helps for types that do not support shrinking</li>
+</ul>
+
+<h2 id="the-shrink-tree">The shrink tree</h2>
+
+<p>To find the simplest counter arguments, several sequential calls to shrink might be needed. These recursive applications of shrink build a tree, whose root is the initial value that led to a counter example.</p>
+
+<p>We will assume that this tree is built such that the children are ordered in such a way that it maximize the chances to find the smallest counter example. This assumption means we must be very careful in the ordering of the elements returned by shrink.</p>
+
+<p>If this assumption holds, we can therefore explore the tree by finding the first children that makes the property fail, and dive deeper into this branch. If no children makes the property fail, the visit stops and we return our smaller counter example.</p>
+
+<h2 id="arbitrary-example">Arbitrary example</h2>
+
+<p>Now that we know what is expected from the shrink function, we can enrich the Arbitrary Integer instance to provide an implementation for it. Our implementation will stay very close to the one provided in <a href="https://hackage.haskell.org/package/QuickCheck-2.9.2/docs/Test-QuickCheck-Arbitrary.html">Test.QuickCheck.Arbitrary</a>:</p>
+
+<ul>
+  <li>We first try to remove the sign of negative integers</li>
+  <li>Then we try zero, the simplest possible integer value</li>
+  <li>Finally, we proceed with a right recursive dichotomy</li>
+</ul>
+
+<pre><code class="language-hs">instance Arbitrary Integer where
+  arbitrary = Gen $ \rand -&gt; fromIntegral $ fst (next rand)
+  shrink n
+    | n == 0 = []
+    | otherwise = [abs n | n &lt; 0] ++ 0 : rightDichotomy where
+      rightDichotomy =
+            takeWhile
+              (\m -&gt; abs m &lt; abs n)
+              [ n - i | i &lt;- tail (iterate (`quot` 2) n)]
+</code></pre>
+
+<p>The behavior of this Arbitrary Integer instance is better explained through examples:</p>
+
+<pre><code class="language-hs">shrink 2048
+&gt; [0,1024,1536,1792,1920,1984,2016,2032,2040,2044,2046,2047]
+
+shrink (-2048)
+&gt; [2048,0,-1024,-1536,-1792,-1920,-1984,-2016,-2032,-2040,-2044,-2046,-2047]
+</code></pre>
+
+<h2 id="plugging-the-shrinking-in-testable">Plugging the shrinking in Testable</h2>
+
+<p>We know our <code>Arbitrary</code> type class has a new member shrink. We would like this ability to shrink to be automatically used inside the <code>Testable</code> properties that are made of shrinkable arguments.</p>
+
+<p>From our first post, we know that the <code>Testable</code> properties are defined in terms of an induction on the number of arguments. We will need to enrich this induction to include shrinking.</p>
+
+<p>To do so, we add a shrinker argument to <code>forAll</code>, the function that implements the induction step. For now, we keep the implementation unchanged:</p>
+
+<pre><code class="language-hs">forAll :: (Show a, Testable testable)
+          =&gt; Gen a -&gt; Shrink a -&gt; (a -&gt; testable) -&gt; Property
+forAll argGen shrink prop = ...
+</code></pre>
+
+<p>We can then adapt the <code>Testable</code> induction step to call <code>forAll</code> function one more argument:</p>
+
+<pre><code class="language-hs">instance
+  (Show a, Arbitrary a, Testable testable)
+  =&gt; Testable (a -&gt; testable)
+  where
+    property = forAll arbitrary shrink
+</code></pre>
+
+<p>We now reached the point where we need to implement the forAll function to plug all the pieces together. The next sections will present two different implementations:</p>
+
+<ul>
+  <li>We will start by the simplest implementation (and make it work)</li>
+  <li>We will then go for a better implementation (and make it work faster)</li>
+</ul>
+
+<h2 id="first-try-visiting-the-shrink-tree-inside-forall">First try: visiting the shrink tree inside forAll</h2>
+
+<p>Our first implementation will consist in slightly adapting our <code>forAll</code> function to handle the shrinking. For reference, the current implementation of this function is listed below:</p>
+
+<pre><code class="language-hs">forAll :: (Show a, Testable testable) =&gt; Gen a -&gt; (a -&gt; testable) -&gt; Property
+forAll argGen prop =
+  Property $ Gen $ \rand -&gt;             -- Create a new property that will
+    let (rand1, rand2) = split rand     -- Split the generator in two
+        arg = runGen argGen rand1       -- Use the first generator to produce an arg
+        subProp = property (prop arg)   -- Use the `a` to access the sub-property
+        result = runProp subProp rand2  -- Use the second generator to run it
+    in overFailure result $ \failure -&gt; -- Enrich the counter-example with `arg`
+        failure { counterExample = show arg : counterExample failure }
+</code></pre>
+
+<p>We will enrich the lambda given to <code>overFailure</code> and inside this lambda, we will shrink the value arg of the initial counter example.</p>
+
+<h3 id="shrinking-implementation"><code>Shrinking</code> implementation</h3>
+
+<p>Our shrinking process will take a function <code>a -&gt; Result</code> to test the property against an argument of type <code>a</code>. This a will take different value as we visit the shrink tree.</p>
+
+<p>Our <code>shrinking</code> function will also need the root of the shrink tree and the shrink function, to get the children of a given node. We get the following prototype:</p>
+
+<pre><code class="language-hs">shrinking :: (Show a) =&gt; Shrink a -&gt; a -&gt; (a -&gt; Result) -&gt; Result
+shrinking = undefined
+</code></pre>
+
+<p>From a list of potential counter-example, we can write a search function that will return the first one that makes the property fail:</p>
+
+<pre><code class="language-hs">findFailing :: [a] -&gt; (a -&gt; Result) -&gt; Maybe (a, Result)
+findFailing smaller runSub =
+  let results = map runSub smaller
+  in find (isFailure . snd) (zip smaller results)
+</code></pre>
+
+<p>Applied to the output of shrink, the first match will provide us with the next branch of the shrink tree to explore. With that in mind, we can finish the implementation of the shrinking function:</p>
+
+<pre><code class="language-hs">shrinking :: (Show a) =&gt; Shrink a -&gt; a -&gt; (a -&gt; Result) -&gt; Result
+shrinking shrink arg runSub =
+  let children = shrink arg                 -- Get the children of the current branch
+      result = findFailing children runSub  -- Look for the first failure
+  in case result of
+      Nothing -&gt; Success
+      Just (shrunk, failure) -&gt;             -- In case a failure is found
+        shrinking shrink shrunk runSub      -- Try to shrink further the child
+        &lt;&gt;                                  -- OR (in case it fails)
+        addToCounterExample shrunk failure  -- Add child to the counter example
+</code></pre>
+
+<h3 id="plugging-shrinking-in-forall">Plugging <code>shrinking</code> in <code>forAll</code></h3>
+
+<p>We want the shrunk arguments to be used in place of the original randomly generated argument, and not trigger a full random test case again. So we must use the same random generator used to initially run the sub-properties for the shrinking.</p>
+
+<p>Inside forAll, we can therefore add the shrinking inside the lambda given to overFailure. The shrinking uses the same runSub function (bound to the same seed) to search for a smaller counter example:</p>
+
+<pre><code class="language-hs">forAll :: (Show a, Testable testable)
+          =&gt; Gen a -&gt; Shrink a -&gt; (a -&gt; testable) -&gt; Property
+forAll argGen shrink prop =
+  Property $ Gen $ \rand -&gt;             -- Create a new property that will
+    let (rand1, rand2) = split rand     -- Split the generator in two
+        arg = runGen argGen rand1       -- Use the first generator to produce an arg
+        runSub = evalSubProp prop rand2 -- Factorize a runner for the sub-property
+        result = runSub arg             -- Run the sub-property with value `arg`
+    in overFailure result $ \failure -&gt; -- In case of failure,
+        shrinking shrink arg runSub     -- Attempt to shrink the counter example
+        &lt;&gt;                              -- OR (in case the shrinking failed)
+        addToCounterExample arg failure -- Add the argument to the counter example
+</code></pre>
+
+<p>This implementation makes use of the <code>evalSubProp</code> function, to get the (a -&gt; Result) function required to explore the shrink tree:</p>
+
+<pre><code class="language-hs">evalSubProp :: Testable t =&gt; (a -&gt; t) -&gt; StdGen -&gt; a -&gt; Result
+evalSubProp prop rand = (`runProp` rand) . property . prop
+</code></pre>
+
+<h3 id="resulting-behavior">Resulting behavior</h3>
+
+<p>This implementation works in the sense that it will shrinking the counter example as we expect it would:</p>
+
+<pre><code class="language-hs">rapidCheck prop_gcd_bad
+&gt; Failure {seed = 1034882204061803680,
+           counterExample = ["1","0"]}
+</code></pre>
+
+<p>But our implementation of <code>forAll</code> is deceptively simple. It looks like it tries to shrink the arguments sequentially, starting from the last argument of the property. But it is not what happens.</p>
+
+<p>Our <code>forAll</code> is part of the induction process that builds a Property from a list of arguments from the last to the first of a <code>Testable</code> property. Since our <code>forAll</code> implementation now includes visiting the shrink tree, finding a counter example for an argument (this includes shrinking this same argument) also involves visiting the shrink tree of all subsequent arguments.</p>
+
+<p>To illustrate this, let us take the following invalid property:</p>
+
+<pre><code class="language-hs">prop_gcd_bad :: Integer -&gt; Integer -&gt; Bool
+prop_gcd_bad a b = gcd a b &gt; 1
+</code></pre>
+
+<ul>
+  <li>Finding an initial counter example for a involves evaluating the sub-properties <code>prop_gcd_bad</code> is built from. This includes shrinking argument b.</li>
+  <li>Shrinking a also involves re-evaluating the sub-properties <code>prop_gcd_bad</code> is built from. This also automatically includes shrinking the argument b.</li>
+</ul>
+
+<p>So we shrunk argument b twice, and this will only grow with the number of arguments participating in the property.</p>
+
+<p>So this is quite a waste. And there is nothing we can do about it: it is a natural consequence of a design that integrates visiting the shrink tree inside forAll.</p>
+
+<h2 id="second-try-visiting-the-shrink-tree-outside-forall">Second try: visiting the shrink tree outside <code>forAll</code></h2>
+
+<p>We know from our previous design that we need to search for better counter example outside of the <code>forAll</code> function. In this second design, the <code>forAll</code> function will only be responsible to build a search tree, for the rapidCheck function to explore it.</p>
+
+<h3 id="result-tree">Result tree</h3>
+
+<p>To achieve this, we will have to modify our <code>Property</code> type to return a <code>Result</code> tree instead of a single <code>Result</code>.</p>
+
+<pre><code class="language-hs">data Tree a = Tree
+  { treeVal :: a
+  , children :: [Tree a] }
+  deriving (Functor)
+  
+newtype Property = Property { getGen :: Gen (Tree Result) }
+</code></pre>
+
+<p>In this design, our <code>rapidCheck</code> function is responsible for navigating the tree and seeking a better counter example (in case of failure). The only modification needed in <code>rapidCheckImpl</code> is a call to <code>visitResultTree</code>:</p>
+
+<pre><code class="language-hs">rapidCheckImpl :: Testable prop =&gt; Int -&gt; Int -&gt; prop -&gt; Result
+rapidCheckImpl attemptNb startSeed prop = runAll (property prop)
+  where
+    runAll prop = foldMap (runOne prop) [startSeed .. startSeed + attemptNb - 1]
+    runOne prop seed =
+      let result = visitResultTree (runProp prop (mkStdGen seed))
+      in overFailure result $ \failure -&gt; failure { seed = seed }
+</code></pre>
+
+<p>Implementing the visitResultTree function is quite straightforward. We find the first children that preserves the failure, and dive deeper into it:</p>
+
+<pre><code class="language-hs">visitResultTree :: Tree Result -&gt; Result
+visitResultTree (Tree Success _) = Success
+visitResultTree (Tree failure children) =
+  let simplerFailure = find (isFailure . treeVal) children
+  in maybe failure visitResultTree simplerFailure
+</code></pre>
+
+<h3 id="building-the-result-tree">Building the result tree</h3>
+
+<p>Since a Property now returns a result tree, we need to adapt our forAll function accordingly to return a result tree instead of a single result.</p>
+
+<p>Each argument inductively added by forAll to the Property will return a tree to the “father” forAll. For forAll to output a tree, we need a way to collapse a tree of tree of results into a tree of results.</p>
+
+<p>This collapse must be very carefully designed to prioritize the shrinking of the outer argument over the shrinking of the inner arguments. Otherwise, the outer arguments would almost never be visited and thus shrunk. This is the job of joinTree:</p>
+
+<pre><code class="language-hs">joinTree :: Tree (Tree Result) -&gt; Tree Result
+joinTree (Tree (Tree innerArgResult innerArgShrinks) outerArgShrinks) =
+  Tree innerArgResult
+       (map joinTree outerArgShrinks ++ innerArgShrinks)
+</code></pre>
+
+<p>The creation of the tree of tree of results involves a bit of code:</p>
+
+<ul>
+  <li>We first need to create a shrink tree of all outer argument values</li>
+  <li>For each outer argument value, we evaluate the sub-property result tree</li>
+  <li>We enrich the sub-property result tree with the outer argument value</li>
+  <li>At the end, we join our tree of result tree into a result tree</li>
+</ul>
+
+<pre><code class="language-hs">resultTree :: (Show a, Testable t) =&gt; Shrink a -&gt; a -&gt; (a -&gt; t) -&gt; Property
+resultTree shrinker arg prop =
+  Property $ Gen $ \rand -&gt;
+    let shrinkTree = buildTree shrinker arg   -- Build the shrink tree
+        resultTree = fmap toResult shrinkTree -- Transform it to a result tree
+        toResult x =                          -- To compute a result tree
+          addCounterExample x $               -- Add the outer arg to all failures
+            runProp (property (prop x)) rand  -- Inside the sub result tree
+    in joinTree resultTree                    -- At the end, join the result tree
+</code></pre>
+
+<p>This code makes use of the following helper functions:</p>
+
+<ul>
+  <li><code>buildTree</code> creates a potentially infinite shrink tree from a root value</li>
+  <li><code>addCounterExample</code> add a counter example across a whole result tree</li>
+</ul>
+
+<pre><code class="language-hs">buildTree :: Shrink a -&gt; a -&gt; Tree a
+buildTree shrinker = build where
+  build x = Tree x (map build (shrinker x))
+
+addCounterExample :: (Show a) =&gt; a -&gt; Tree Result -&gt; Tree Result
+addCounterExample arg = fmap (\r -&gt; overFailure r addToFailure)
+  where addToFailure f = f { counterExample = show arg : counterExample f }
+</code></pre>
+
+<h3 id="wrapping-up">Wrapping up</h3>
+
+<p>To finish up the implementation, we only need to adapt our <code>forAll</code> to do the necessary plumbing:</p>
+
+<ul>
+  <li>Split the pseudo random generator in two: <code>rand1</code> and <code>rand2</code></li>
+  <li>Use <code>rand1</code> to generate the root value of the shrink tree of the outer argument</li>
+  <li>Use <code>rand2</code> to evaluate the next result tree of the chain</li>
+</ul>
+
+<pre><code class="language-hs">forAll :: (Show a, Testable t) =&gt; Gen a -&gt; Shrink a -&gt; (a -&gt; t) -&gt; Property
+forAll argGen shrink prop =
+  Property $ Gen $ \rand -&gt;               -- Create a new property that will
+    let (rand1, rand2) = split rand       -- Split the generator in two
+        arg = runGen argGen rand1         -- Use the first generator to produce an arg
+        tree = resultTree shrink arg prop -- Enrich the sub-property result tree
+    in runProp tree rand2 
+</code></pre>
+
+<p>This is it: we know have an implementation that will shrink the outer arguments of a given property first, before proceeding with the inner arguments.</p>
+
+<h2 id="enjoying-shrinking">Enjoying shrinking</h2>
+
+<p>Now that our implementation works, we can play a bit with it. We will run it on our invalid property, and check that the results are satisfying:</p>
+
+<pre><code class="language-hs">rapidCheck prop_gcd_bad
+&gt; Failure {seed = 1034882204061803680,
+           counterExample = ["1","0"]}
+</code></pre>
+
+<p>We can add traces in our property to check how it behaves. The following is an excerpt of log traces of the a and b values used to find a counter example. The full file is only 63 lines long:</p>
+
+<pre><code>925396436 234647012
+925436450 1835767207
+0         1835767207
+462718225 1835767207
+0         1835767207
+231359113 1835767207
+...
+4         1835767207
+0         1835767207
+2         1835767207
+0         1835767207
+1         1835767207
+0         1835767207
+1         0
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this post, we went over how we could add shrinking to provide better counter examples to invalid properties.</p>
+
+<p>We completed the code of our RapidCheck module with a shrinking mechanism and tried two different implementations of it. The mistakes done in the first implementation allowed us to understand the second implementation better. The full code of our RapidCheck module is available in this <a href="https://gist.github.com/deque-blog/78c7d575505a25dbd3bcb34816e00a4d">GitHub Gist</a>.</p>
+
+<p>This second implementation is not quite the same as the one used in <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>, due to the numerous additional features it supports. But this journey should still guide (the most adventurous of) you quite a bit in understanding the code behind the fabulous QuickCheck.</p>
+
+<p>I hope you enjoyed the journey as much as I did, and that you learned something reading these last few posts.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-02-10T00:00:00+00:00">February 10, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Code+your+own+Quick+Check+%28Shrink%29%20%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html&title=Code+your+own+Quick+Check+%28Shrink%29" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F02%2F10%2Fcode-quick-check-3.html&t=Code your own Quick Check (Shrink)" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/02/06/code-quick-check-2.html" title="Code your own Quick Check (Higher Order Functions)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Code your own Quick Check (Higher Order Functions)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/02/14/quick-check-experiments.html" title="Experimenting with QuickCheck on a DSL">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Experimenting with QuickCheck on a DSL</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

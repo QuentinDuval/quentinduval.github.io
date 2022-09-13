@@ -1,0 +1,1184 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Catamorph your DSL (C++ Port) - Double Ended Queue</title>
+<meta name="description" content="In the previous posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST from the operations we want to perform on it.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Catamorph your DSL (C++ Port)">
+<meta property="og:url" content="/blog/2017/01/30/catamorph-dsl-cpp.html">
+
+
+  <meta property="og:description" content="In the previous posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST from the operations we want to perform on it.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Catamorph your DSL (C++ Port)">
+  <meta name="twitter:description" content="In the previous posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST from the operations we want to perform on it.">
+  <meta name="twitter:url" content="/blog/2017/01/30/catamorph-dsl-cpp.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-01-30T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/01/30/catamorph-dsl-cpp.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Catamorph your DSL (C++ Port)">
+    <meta itemprop="description" content="In the previous posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST from the operations we want to perform on it.">
+    <meta itemprop="datePublished" content="2017-01-30T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Catamorph your DSL (C++ Port)
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-01-30T00:00:00+00:00">January 30, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html&text=Catamorph+your+DSL+%28C%2B%2B+Port%29&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/01/30/catamorph-dsl-cpp.html&title=Catamorph your DSL (C++ Port)"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/01/30/catamorph-dsl-cpp.html&t=Catamorph your DSL (C++ Port)">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#boost-to-the-rescue">Boost to the rescue</a></li><li><a href="#arithmetic-expressions-in-c-boost">Arithmetic expressions in C++ Boost</a></li><li><a href="#factory-functions-and-accessors">Factory functions and accessors</a></li><li><a href="#our-c-catamorphism">Our C++ catamorphism</a><ul><li><a href="#functor-instance">Functor Instance</a></li><li><a href="#catamorphism">Catamorphism</a></li></ul></li><li><a href="#pretty-printing-our-expressions-in-c">Pretty printing our expressions in C++</a></li><li><a href="#eval-and-dependencies">Eval and dependencies</a></li><li><a href="#composable-c-optimisations">Composable C++ optimisations</a></li><li><a href="#partial-evaluation">Partial evaluation</a></li><li><a href="#conclusion">Conclusion</a><ul><li><a href="#whats-the-catch">What’s the catch?</a></li><li><a href="#on-catamorphims-in-c">On catamorphims in C++</a></li></ul></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the previous posts, we went over the process of building a DSL for arithmetic operations and we introduced the concept of Catamorphism as a way to decouple the traversal of the AST from the operations we want to perform on it.</p>
+
+<p>We saw how it could help us compose operations before traversing the AST of our DSL, leading to more efficient composition and better testability.</p>
+
+<p>Unless you are quite familiar with catamorphisms, you might want first to read these previous posts before this one:</p>
+
+<ul>
+  <li><a href="/blog/2017/01/17/catamorph-dsl-intro.html">Catamorph your DSL: Introduction</a></li>
+  <li><a href="/blog/2017/01/20/catamorph-dsl-deep-dive.html">Catamorph your DSL: Deep Dive</a></li>
+  <li><a href="/blog/2017/01/23/catamorph-dsl-tradeoffs.html">Catamorph your DSL: Trade-offs</a></li>
+</ul>
+
+<p>All these previous posts were based on Haskell. Because Haskell is such a special (wonderful) language, the last post started to explore whether this concept would port as nicely in other languages.</p>
+
+<p>We translated our Haskell code into Clojure, a functional language that put much less emphasis on types as Haskell. We saw that this concept translated to a post-order depth first search. The resulting Clojure code was both short and elegant.</p>
+
+<p>This post will be focused on exploring the limits of the applicability of this concept some more, by trying to bring it into C++.</p>
+
+<h2 id="boost-to-the-rescue">Boost to the rescue</h2>
+
+<p>We could implement our DSL in C++ with only the STL available, using Design Patterns such as the Visitors. To keep the code short and concise, we will however rely boost as well. All the code that follows will assume the following Boost header inclusions:</p>
+
+<pre><code class="language-cpp">#include &lt;boost/algorithm/string/join.hpp&gt;
+#include &lt;boost/range/algorithm.hpp&gt;
+#include &lt;boost/range/adaptors.hpp&gt;
+#include &lt;boost/range/numeric.hpp&gt;
+#include &lt;boost/variant.hpp&gt;
+</code></pre>
+
+<p>In particular, <em>boost::variant</em> will be one of the cornerstone of the design, as it allows to avoid the Visitor design pattern. You might want to have a look at the documentation of <em>boost::variant</em> before proceeding.</p>
+
+<p>The rest of the header are mostly for convenience. We could do without it, but at the expense of some more code to write.</p>
+
+<h2 id="arithmetic-expressions-in-c-boost">Arithmetic expressions in C++ Boost</h2>
+
+<p>There are many ways we could represent our expression DSL in C++. We could choose to use the Visitor design pattern for example. The solution below is based instead of boost::variant for convenience.</p>
+
+<p>The recursive expression_r implements our open recursive data type. This type is implemented as a boost::variant on:</p>
+
+<ul>
+  <li><em>nb</em> which represents an integer constant</li>
+  <li><em>id</em> which represents a variable identifier</li>
+  <li><em>add_op</em> which represents an addition operation</li>
+  <li><em>mul_op</em> which represents an multiplication operation</li>
+</ul>
+
+<p>The <em>add_op</em> and <em>mul_op</em> operations are themselves factorized as a single tagged op data type. Two tags represent the two operations, <em>add_tag</em> and <em>mul_tag</em>.</p>
+
+<pre><code class="language-cpp">using nb = int;
+using id = std::string;
+
+struct add_tag {};
+struct mul_tag {};
+
+template&lt;typename Tag, typename R&gt;
+struct op
+{
+   op() = default;
+
+   template&lt;typename Range&gt;
+   explicit op (Range const&amp; rng) : m_rands(rng.begin(), rng.end()) {}
+   
+   std::vector&lt;R&gt; const&amp; rands() const { return m_rands; }
+   
+private:
+   std::vector&lt;R&gt; m_rands;
+};
+
+template&lt;typename R&gt; using add_op = op&lt;add_tag, R&gt;;
+template&lt;typename R&gt; using mul_op = op&lt;mul_tag, R&gt;;
+
+template&lt;typename R&gt;
+using expression_r = boost::variant&lt;int, id, add_op&lt;R&gt;, mul_op&lt;R&gt;&gt;;
+</code></pre>
+
+<p>To get our recursive expression, we will use the same trick as we used in Haskell: we will compute the fixed point of the type recursion.</p>
+
+<p>As in Haskell, C++ is not able to create infinite types. The Fix wrapper type of Haskell needed to circumvent this limitation is replaced by the boost::recursive_wrapper. The overall design is the same:</p>
+
+<pre><code class="language-cpp">struct expression
+   : boost::recursive_wrapper&lt;expression_r&lt;expression&gt;&gt;
+{
+   using boost::recursive_wrapper&lt;expression_r&lt;expression&gt;&gt;::recursive_wrapper;
+};
+</code></pre>
+
+<p><em>Note: this naive implementation triggers deep copies at each level of our AST. This might lead to a quadratic behaviour in the depth of our tree when playing with transformations on our AST. A production ready implementation would have to handle these aspects we voluntarily left out for simplicity. We will come back to this issue in the conclusion.</em></p>
+
+<h2 id="factory-functions-and-accessors">Factory functions and accessors</h2>
+
+<p>The trouble with constructors of class templates in C++ is that they require their explicit templates to be listed in the code. The usual trick is to define factory functions outside of the class to automatically deduce the template parameters.</p>
+
+<p>We will define some factory functions to help us write code more easily. These functions are somehow similar to the “smart constructors” of Haskell:</p>
+
+<pre><code class="language-cpp">expression cst(int i) { return expression(i); };
+
+expression var(id id) { return expression(id); };
+
+expression add(std::vector&lt;expression&gt; const&amp; rands)
+{
+   return expression(add_op&lt;expression&gt;{ rands });
+}
+
+expression mul(std::vector&lt;expression&gt; const&amp; rands)
+{
+   return expression(mul_op&lt;expression&gt;{ rands });
+}
+</code></pre>
+
+<p>Having introduced this layer of “named constructors” allows us create expression more succinctly and to better declare our intent:</p>
+
+<pre><code class="language-cpp">expression e = add({
+    cst(1),
+    cst(2),
+    mul({cst(0), var("x"), var("y")}),
+    mul({cst(1), var("y"), cst(2)}),
+    add({cst(0), var("x")})
+    });
+</code></pre>
+
+<p>Similarly, to “pattern match” on our boost::variant, we will introduce some helper accessors functions. Indeed, the trouble with boost::get is that it requires explicit templates to be listed in the code. Dedicated and correctly named functions will simplify the pattern matching greatly by removing noisy templates from our code:</p>
+
+<pre><code class="language-cpp">template &lt;typename T&gt;
+int const* get_as_cst(expression_r&lt;T&gt; const&amp; e)
+{
+   return boost::get&lt;int&gt;(&amp;e);
+}
+
+template &lt;typename T&gt;
+id const* get_as_var(expression_r&lt;T&gt; const&amp; e)
+{
+   return boost::get&lt;id&gt;(&amp;e);
+}
+
+template &lt;typename T&gt;
+add_op&lt;T&gt; const* get_as_add(expression_r&lt;T&gt; const&amp; e)
+{
+   return boost::get&lt;add_op&lt;T&gt;&gt;(&amp;e);
+}
+
+template &lt;typename T&gt;
+mul_op&lt;T&gt; const* get_as_mul(expression_r&lt;T&gt; const&amp; e)
+{
+   return boost::get&lt;mul_op&lt;T&gt;&gt;(&amp;e);
+}
+</code></pre>
+
+<p><em>Note: boost::variant also offers visitors to handle pattern matching as an alternative to boost::get. But as our interpreters will not need to exhaustively match all cases, sticking to boost::get ends up being less code. This is ultimately a matter of taste: we could have done the other choice instead.</em></p>
+
+<h2 id="our-c-catamorphism">Our C++ catamorphism</h2>
+
+<p>Now that we have our expression_r type, we will need to write the equivalent of the catamorphism function cata of Haskell. This function will be responsible for lifting local AST transformations into operations on the whole AST.</p>
+
+<p>The details on how to build a catamorphism from an open recursive type were already covered in the previous post on catamorphism in Haskell. This section will only aim at translating this code into C++.</p>
+
+<h3 id="functor-instance">Functor Instance</h3>
+
+<p>The first step is to make our expression_r type an instance of a Functor. In C++, one way to do it is to implement fmap for our type:</p>
+
+<p>The map argument represents the transformation to apply
+Constants and variable matches are left unchanged by this transformation
+For operations, we recursively apply the transformation on the sub-expressions
+We use boost::ranges to make the code more succinct:</p>
+
+<pre><code class="language-cpp">template&lt;typename A, typename M&gt;
+auto fmap(M map, expression_r&lt;A&gt; const&amp; e)
+{
+   using B = decltype(map(std::declval&lt;A&gt;()));
+   using Out = expression_r&lt;B&gt;;
+   
+   if (auto* o = get_as_add(e))
+      return Out(add_op&lt;B&gt;(o-&gt;rands() | transformed(map)));
+      
+   if (auto* o = get_as_mul(e))
+      return Out(mul_op&lt;B&gt;(o-&gt;rands() | transformed(map)));
+   
+   if (auto* i = get_as_cst(e)) return Out(*i);
+   if (auto* v = get_as_var(e)) return Out(*v);
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<h3 id="catamorphism">Catamorphism</h3>
+
+<p>Next, we need to write the catamorphism function, whose goal is to apply fmap at each level of our expression, starting from the lower levels.</p>
+
+<p>The details behind the inner workings of this function are provided in a previous post on Haskell. We only translate here this definition to C++:</p>
+
+<ul>
+  <li>We replace function composition in Haskell by nested function call in C++</li>
+  <li>We use get to extract the expression from the recursive_wrapper</li>
+</ul>
+
+<p>Some of the types listed below are deduced automatically. We left them in the code to show what is going on under the cover:</p>
+
+<pre><code class="language-cpp">template&lt;typename Out, typename Algebra&gt;
+Out cata(Algebra f, expression const&amp; ast)
+{
+   return f(
+      fmap(
+         [f](expression const&amp; e) -&gt; Out { return cata&lt;Out&gt;(f, e); },
+         ast.get()));
+}
+</code></pre>
+
+<p>One noticeable drawback of this implementation is the need to provide the output type of the <em>cata</em> function explicitly. This could probably be dealt with.</p>
+
+<h2 id="pretty-printing-our-expressions-in-c">Pretty printing our expressions in C++</h2>
+
+<p>We now have everything to start implementing our first interpreter, our expression pretty printer. It is noticeably more verbose than in both Haskell and Clojure, but not that much. I was quite surprised by the overall concision:</p>
+
+<ul>
+  <li><em>print_alg</em> handles pattern matching and the two trivial cases</li>
+  <li><em>print_op</em> handles the operations by joining the sub-expression strings, prepends the operation and wraps the whole with parentheses</li>
+</ul>
+
+<pre><code class="language-cpp">template&lt;typename Tag&gt;
+std::string print_op(op&lt;Tag, std::string&gt; const&amp; e, std::string const&amp; op_repr)
+{
+   return std::string("(") + op_repr + " " + boost::algorithm::join(e.rands(), " ") + ")";
+}
+
+std::string print_alg(expression_r&lt;std::string&gt; const&amp; e)
+{
+   if (auto* o = get_as_add(e)) return print_op(*o, "+");
+   if (auto* o = get_as_mul(e)) return print_op(*o, "*");
+   if (auto* i = get_as_cst(e)) return std::to_string(*i);
+   if (auto* v = get_as_var(e)) return *v;
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<p>At call site, the code is not that verbose either. The main drawback is the need to specify the output type of the catamorphism (std::string in this case):</p>
+
+<pre><code class="language-cpp">expression e = add({
+  cst(1),
+  cst(2),
+  mul({cst(0), var("x"), var("y")}),
+  mul({cst(1), var("y"), cst(2)}),
+  add({cst(0), var("x")})
+  });
+
+std::cout &lt;&lt; cata&lt;std::string&gt;(print_alg, e) &lt;&lt; '\n';
+
+//Will output:
+"(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
+</code></pre>
+
+<p>Now, this is not the most efficient code that we could come up with. It does create quite a lot of intermediary strings. This is the subject for another time.</p>
+
+<h2 id="eval-and-dependencies">Eval and dependencies</h2>
+
+<p>We can as translate to C++ our next two most straightforward interpreters, <em>eval</em> and <em>dependencies</em>. The <em>eval</em> function needs an environment holding the value of the variables in the arithmetic expression. To make it simple and keep the code short, we will:</p>
+
+<ul>
+  <li>Rely on a std::map from id to integer to model this environment</li>
+  <li>Ignore errors such as an unbound variable in the environment</li>
+</ul>
+
+<p>In addition, and to compensate for the absence of currying in Haskell, our eval function returns a lambda:</p>
+
+<pre><code class="language-cpp">using env = std::map&lt;id, nb&gt;;
+
+auto eval_alg(env const&amp; env)
+{
+   return [&amp;env] (expression_r&lt;int&gt; const&amp; e)
+   {
+      if (auto* o = get_as_add(e))
+         return boost::accumulate(o-&gt;rands(), 0, std::plus&lt;int&gt;());
+         
+      if (auto* o = get_as_mul(e))
+         return boost::accumulate(o-&gt;rands(), 1, std::multiplies&lt;int&gt;());
+      
+      if (auto* v = get_as_var(e)) return env.find(*v)-&gt;second;
+      if (auto* i = get_as_cst(e)) return *i;
+      throw_missing_pattern_matching_clause();
+   };
+}
+
+int eval(env const&amp; env, expression const&amp; expr)
+{
+   return cata&lt;int&gt;(eval_alg(env), expr);
+}
+</code></pre>
+
+<p>The <em>dependencies</em> functions lists all the variables of the expression. It sub-expressions are transformed to a set of variable identifiers, which are combined (set union) while climbing up the AST.</p>
+
+<pre><code class="language-cpp">template&lt;typename Tag&gt;
+std::set&lt;id&gt; join_sets(op&lt;Tag, std::set&lt;id&gt;&gt; const&amp; op)
+{
+   std::set&lt;id&gt; out;
+   for (auto r: op.rands())
+      out.insert(r.begin(), r.end());
+   return out;
+}
+
+std::set&lt;id&gt; dependencies_alg(expression_r&lt;std::set&lt;id&gt;&gt; const&amp; e)
+{
+   if (auto* o = get_as_add(e)) return join_sets(*o);
+   if (auto* o = get_as_mul(e)) return join_sets(*o);
+   if (auto* v = get_as_var(e)) return {*v};
+   return {};
+}
+
+std::set&lt;id&gt; dependencies(expression const&amp; e)
+{
+   return cata&lt;std::set&lt;id&gt;&gt;(dependencies_alg, e);
+}
+</code></pre>
+
+<h2 id="composable-c-optimisations">Composable C++ optimisations</h2>
+
+<p>Until now, the main advantage of introducing Catamorphism was to specify local transformations, which the cata function could lift to operations on the whole AST of our arithmetic DSL.</p>
+
+<p>We will now leverage on the other advantage of Catamorphism, the ability to compose them efficiently, to implement our arithmetic AST optimization functions.</p>
+
+<p>We left out the detailed implementation of the has_zero and optimize_op functions in the snippet below. The detailed implementation of these functions is available on GitHub.</p>
+
+<p>This allows us to concentrate on the real value added by Catamorphisms, composability of transformations:</p>
+
+<ul>
+  <li><em>opt_add_alg</em> is only concerned in optimising additions</li>
+  <li><em>opt_add_mul</em> is only concerned in optimising additions</li>
+  <li><em>optimize_alg</em> is only concerned in combining these algebra into one</li>
+</ul>
+
+<p>This leads to the following code:</p>
+
+<pre><code class="language-cpp">expression opt_add_alg(expression_r&lt;expression&gt; const&amp; e)
+{
+   if (auto* op = get_as_add(e))
+      return optimize_op(*op, 0, std::plus&lt;int&gt;());
+   return e;
+}
+
+expression opt_mul_alg(expression_r&lt;expression&gt; const&amp; e)
+{
+   if (auto* op = get_as_mul(e))
+   {
+      if (has_zero(op-&gt;rands()))
+         return cst(0);
+      return optimize_op(*op, 1, std::multiplies&lt;int&gt;());
+   }
+   return e;
+}
+
+expression optimize_alg(expression_r&lt;expression&gt; const&amp; e)
+{
+   return opt_mul_alg(opt_add_alg(e).get());
+}
+</code></pre>
+
+<p>Note that how the <em>optimize_alg</em> function is able to combine the two algebra by composing them. The call to get allows to unwrap the expression of the first algebra, before calling the second algebra. We can give it a try:</p>
+
+<pre><code class="language-cpp">expression e = add({
+  cst(1),
+  cst(2),
+  mul({cst(0), var("x"), var("y")}),
+  mul({cst(1), var("y"), cst(2)}),
+  add({cst(0), var("x")})
+});
+
+//Initial expression
+std::cout &lt;&lt; cata&lt;std::string&gt;(print_alg, e) &lt;&lt; '\n';
+
+//Will output
+"(+ 1 2 (* 0 x y) (* 1 y 2) (+ 0 x))"
+
+//Optimized expression
+auto o = cata&lt;expression&gt;(optimize_alg, e);
+std::cout &lt;&lt; cata&lt;std::string&gt;(print_alg, o) &lt;&lt; '\n';
+  
+//Will output
+"(+ (* y 2) x 3)"
+</code></pre>
+
+<h2 id="partial-evaluation">Partial evaluation</h2>
+
+<p>Our last remaining challenge is to implement the partial evaluation of an arithmetic expression.</p>
+
+<p>The partial_eval_alg simply replaces variables bound in the evaluation environment with their respective value. As for our evaluation function, our partial evaluation returns a lambda to compensate for the lack of currying in C++.</p>
+
+<pre><code class="language-cpp">auto partial_eval_alg(env const&amp; env)
+{
+   return [&amp;env] (expression_r&lt;expression&gt; const&amp; e) -&gt; expression
+   {
+      if (auto* v = get_as_var(e))
+      {
+         auto it = env.find(*v);
+         if (it != env.end()) return cst(it-&gt;second);
+         return var(*v);
+      }
+      return e;
+   };
+}
+</code></pre>
+
+<p>We can combine this function with our optimization functions to obtain a fully fledged partial application that simplifies expression in one single tree traversal.</p>
+
+<pre><code class="language-cpp">expression partial_eval(env const&amp; env, expression const&amp; e)
+{
+   return cata&lt;expression&gt;(
+      [&amp;env](expression_r&lt;expression&gt; const&amp; e) -&gt; expression {
+         return optimize_alg(partial_eval_alg(env)(e).get());
+      },
+      e);
+}
+</code></pre>
+
+<p>We can also re-implement our evaluation function in terms of our partial evaluation:</p>
+
+<ul>
+  <li>If the resulting expression, after optimizations, is a constant, we output it.</li>
+  <li>Otherwise, we can use our dependency function to output the missing variables</li>
+</ul>
+
+<p>This leads to the following evaluation function, which handles errors much nicer than our previous one:</p>
+
+<pre><code class="language-cpp">int eval_2(env const&amp; env, expression const&amp; e)
+{
+  auto reduced = partial_eval(env, e);
+  if (auto* i = get_as_cst(reduced.get()))return *i;
+  throw_missing_variables(dependencies(reduced));
+}
+</code></pre>
+
+<p>We can give it a try to convince ourselves that it works:</p>
+
+<pre><code class="language-cpp">expression e = add({
+  cst(1),
+  cst(2),
+  mul({cst(0), var("x"), var("y")}),
+  mul({cst(1), var("y"), cst(2)}),
+  add({cst(0), var("x")})
+});
+
+//Environment of evaluation
+env full_env = {
+    {"x", 1},
+    {"y", 2}
+};
+
+//Evaluations
+std::cout &lt;&lt; eval(full_env, e3) &lt;&lt; '\n';
+std::cout &lt;&lt; eval_2(full_env, e3) &lt;&lt; '\n';
+
+//Will output
+8
+8
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this post, we managed to port the Catamorphism notion in C++ to build a series of arithmetic DSL interpreters made of:</p>
+
+<ul>
+  <li>Composable local operations (our different algebra)</li>
+  <li>Decoupled from the traversal of the AST (handled by cata)</li>
+  <li>Avoiding any kind of mutations on our AST</li>
+</ul>
+
+<p>The complete resulting code is about three times the length of the equivalent Haskell or Clojure code (320 lines give or take), which is quite good overall. But there is a catch: this implementation is unrealistically simplistic. This is the topic of the next section.</p>
+
+<h3 id="whats-the-catch">What’s the catch?</h3>
+
+<p>Our simplistic memory management did exhibit some problematic quadratic behaviour in terms of copy. Addressing this concern would require some manual work: C++ offers no standard support for immutable data structure with structural sharing in its standard library, so we would probably have to rely on move semantics.</p>
+
+<p>We also had some remaining issues regarding type deduction, which would require some more tricks to improve. The biggest issue is however dealing with the long error messages GCC outputs upon the simplest type error. Try removing the .get() in the catamorphism function, or messing up with the types of an algebra function, and you shall see. Concepts could probably help there.</p>
+
+<p>So I do not think that the 320 lines of C++ code do quite compare in maturity with the 120 corresponding lines in Haskell.</p>
+
+<h3 id="on-catamorphims-in-c">On catamorphims in C++</h3>
+
+<p>This concludes our study of the applicability of Catamorphism in C++. Overall, I felt like this design quite not as natural as it was in Haskell or Clojure. It sometimes felt like going against the idiomatic use of the language, which is not a good sign.</p>
+
+<p>I recently read some good articles on the functional paradigm bursting in into C++ (like this series of posts on http://www.modernescpp.com).</p>
+
+<p>Although this is true that C++ made great leaps in this direction by encouraging higher order functions usage with the addition of lambdas, it felt awkward using them in this context.</p>
+
+<p>But the main difficulty in porting this concept to C++ is that it is implicitly based on efficient persistent data structure to exist in the language. And the support for immutable data and persistent data structures in C++ is simply not there.</p>
+
+<p>To summarize, implementing catamorphisms in C++ was quite a fun exercise (except for the compilation error messages spanning over 2 or more screens), but it did not feel like it fits C++ as it does for Haskell or Clojure.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-01-30T00:00:00+00:00">January 30, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Catamorph+your+DSL+%28C%2B%2B+Port%29%20%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html&title=Catamorph+your+DSL+%28C%2B%2B+Port%29" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F01%2F30%2Fcatamorph-dsl-cpp.html&t=Catamorph your DSL (C++ Port)" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/01/26/catamorph-dsl-clojure.html" title="Catamorph your DSL (Clojure)">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Catamorph your DSL (Clojure)</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/02/03/code-quick-check-1.html" title="Code your own Quick Check">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Code your own Quick Check</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>

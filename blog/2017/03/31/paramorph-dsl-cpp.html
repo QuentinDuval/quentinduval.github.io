@@ -1,0 +1,1049 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Paramorph your DSL (C++) - Double Ended Queue</title>
+<meta name="description" content="Let’s dive in the implementation of paramorphisms in C++, a strictly more powerful recursion scheme than catamorphism, all motivated by an example.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Double Ended Queue">
+<meta property="og:title" content="Paramorph your DSL (C++)">
+<meta property="og:url" content="/blog/2017/03/31/paramorph-dsl-cpp.html">
+
+
+  <meta property="og:description" content="Let’s dive in the implementation of paramorphisms in C++, a strictly more powerful recursion scheme than catamorphism, all motivated by an example.">
+
+
+
+
+
+  <meta name="twitter:site" content="@quduval">
+  <meta name="twitter:title" content="Paramorph your DSL (C++)">
+  <meta name="twitter:description" content="Let’s dive in the implementation of paramorphisms in C++, a strictly more powerful recursion scheme than catamorphism, all motivated by an example.">
+  <meta name="twitter:url" content="/blog/2017/03/31/paramorph-dsl-cpp.html">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-03-31T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="/blog/2017/03/31/paramorph-dsl-cpp.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Double Ended Queue Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--<link rel="stylesheet" href="/assets/css/overrides.css">-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+<!-- highlight.js support -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/idea.min.css"/>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/github.min.css"/>
+<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/styles/default.min.css">-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/clojure.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/elixir.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/haskell.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/languages/idris.min.js"></script>-->
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- end highlight.js support -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+        
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/blog">
+          Double Ended Queue
+          <span class="site-subtitle">Functions In, Fictions Out</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="/archives/">Archives</a>
+            </li><li class="masthead__menu-item">
+              <a href="/categories/">Categories</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+      
+      
+      
+      
+    
+    
+    
+      <!--Future idea to search on the side bar-->
+<!--
+<button class="search__toggle" type="button">
+    <span class="visually-hidden">Toggle search</span>
+    <i class="fas fa-search"></i>
+</button>
+-->
+
+<nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Recent posts</span>
+            <ul>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/09/05/statistical-gender-bias.html">Statistical gender bias</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/19/perplexity.html">Understanding perplexity and its relation to cross-entropy and compression</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/06/16/lm-joint-probability.html">Auto-regressive language models don't necessarily sample the most probable sentences</a></li>
+                
+                    <li class="sidebar__item"><a href="/blog/2022/05/24/cycling-drag-force.html">How wind affects your speed on a bike</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Categories</span>
+            <ul>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#functional-programming">functional-programming</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#modern-cpp">modern-cpp</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#software-design">software-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#system-design">system-design</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#random-rambling">random-rambling</a></li>
+                
+                    
+                    <li class="sidebar__item"><a href="/categories/#machine-learning">machine-learning</a></li>
+                
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+      <nav class="nav__list">
+    <ul class="nav__items">
+        <li>
+            <span class="nav__sub-title">Contact info</span>
+            <ul class="author__urls social-icons">
+                <li><a href="/" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span></a></li>
+                <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+                <li><a href="https://scholar.google.com/citations?user=XTaVGqYAAAAJ" rel="nofollow noopener noreferrer"><i class="ai ai-google-scholar-square" aria-hidden="true"></i><span class="label">Google Scholar</span></a></li>
+                <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+    
+    
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Paramorph your DSL (C++)">
+    <meta itemprop="description" content="Let’s dive in the implementation of paramorphisms in C++, a strictly more powerful recursion scheme than catamorphism, all motivated by an example.">
+    <meta itemprop="datePublished" content="2017-03-31T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Paramorph your DSL (C++)
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2017-03-31T00:00:00+00:00">March 31, 2017</time>
+      </span>
+    
+
+    
+
+    <!--
+    <span class="page__meta-sep"></span>
+    <span>Quentin Duval</span>
+    -->
+
+    
+  </p>
+
+
+
+    
+
+
+
+
+<span id="share-buttons-light-prompt" style="color: silver;">Share on: </span>
+<div id="share-buttons-light">
+    <div class="twitter"  title="Share this on Twitter"     onclick="window.open('https://twitter.com/intent/tweet?url=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html&text=Paramorph+your+DSL+%28C%2B%2B%29&via=','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg>-->
+        <span class="fab fa-fw fa-twitter share-light share-light-twitter"></span>
+    </div>
+    <div class="facebook" title="Share this on Facebook"    onclick="window.open('http://www.facebook.com/share.php?u=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg>-->
+        <span class="fab fa-fw fa-facebook share-light share-light-facebook"></span>
+    </div>
+    <div class="linkedin" title="Share this on Linkedin"    onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html','popup','width=600,height=600'); return false;">
+        <!--<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg>-->
+        <span class="fab fa-fw fa-linkedin share-light share-light-linkedin"></span>
+    </div>
+    <a class="reddit" title="Share this on Reddit" href="http://www.reddit.com/submit?url=/blog/2017/03/31/paramorph-dsl-cpp.html&title=Paramorph your DSL (C++)"
+        onclick="gtag('event', 'Reddit', {'event_category':'Post Shared','event_label':'Reddit'}); window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;">
+        <span class="fab fa-fw fa-reddit share-light share-light-reddit"></span>
+    </a>
+
+    <a title="Share this on Hacker News"
+        href="http://news.ycombinator.com/submitlink?u=/blog/2017/03/31/paramorph-dsl-cpp.html&t=Paramorph your DSL (C++)">
+        <span class="fab fa-fw fa-hacker-news share-light share-light-hacker-news"></span>
+    </a>
+</div>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Table of content</h4></header>
+              <ul class="toc__menu"><li><a href="#reminder-our-arithmetic-dsl">Reminder: our arithmetic DSL</a></li><li><a href="#reminder-recursion-schemes">Reminder: recursion schemes</a><ul><li><a href="#open-recursion-on-types">Open recursion on types</a></li><li><a href="#functor-instance">Functor instance</a></li><li><a href="#generic-tree-traversal">Generic tree traversal</a></li></ul></li><li><a href="#the-use-case-that-breaks-the-pattern">The use case that breaks the pattern</a><ul><li><a href="#infix-notation">Infix notation</a></li><li><a href="#a-first-attempt">A first attempt</a></li><li><a href="#improving-parenthesizing">Improving parenthesizing</a></li></ul></li><li><a href="#from-catamorphism-to-paramorphism">From catamorphism to paramorphism</a><ul><li><a href="#paramorphisms">Paramorphisms</a></li><li><a href="#paramorphism-implementation">Paramorphism implementation</a></li><li><a href="#example-implementing-the-infix-notation">Example: implementing the infix notation</a></li></ul></li><li><a href="#conclusion">Conclusion</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <p>In previous posts, we went over the process of building a DSL for arithmetic operations and introduced the concept of Catamorphism as a way to <strong>decouple the traversal of an AST</strong> from the operations we want to perform on it.</p>
+
+<p>We saw how it could help us compose operations before traversing the AST of our DSL, leading to <strong>more efficient composition and better testability</strong>.</p>
+
+<p>We first did this exercise in Haskell, introducing the concept of Catamorphism through its wonderful type system before exploring the limits of its applicability in C++. The full series of post is available below for reference:</p>
+
+<ul>
+  <li><a href="/blog/2017/01/17/catamorph-dsl-intro.html">Catamorph your DSL: Introduction</a></li>
+  <li><a href="/blog/2017/01/20/catamorph-dsl-deep-dive.html">Catamorph your DSL: Deep Dive</a></li>
+  <li><a href="/blog/2017/01/23/catamorph-dsl-tradeoffs.html">Catamorph your DSL: Trade-offs</a></li>
+  <li><a href="/blog/2017/01/26/catamorph-dsl-clojure.html">Catamorph your DSL: Clojure</a></li>
+  <li><a href="/blog/2017/01/30/catamorph-dsl-cpp.html">Catamorph your DSL: C++ Port</a></li>
+</ul>
+
+<p>This post will build on top of the <a href="/blog/2017/01/30/catamorph-dsl-cpp.html">Catamorph your DSL: C++ Port</a>. We will introduce, through a motivated use case, another very close and useful recursion scheme, Paramorphisms, and try to implement them in C++.</p>
+
+<h2 id="reminder-our-arithmetic-dsl">Reminder: our arithmetic DSL</h2>
+
+<p>Our Arithmetic DSL allows to build expression composed of operations like addition and multiplication of integer constants and integers variables. An arithmetic expression is one of the following:</p>
+
+<ul>
+  <li>A constant value (and integer for simplicity)</li>
+  <li>A variable (identified by a string for simplicity)</li>
+  <li>An addition of a vector of sub-expressions</li>
+  <li>A multiplication of a vector of sub-expressions</li>
+</ul>
+
+<p>Because an AST alone is not very useful, we added several interpreters on our DSL to play with it:</p>
+
+<ul>
+  <li><code>prn</code> to pretty print our Arithmetic expressions</li>
+  <li><code>eval</code> to compute the value of an expression, given the value of all variables</li>
+  <li><code>optimize</code> to simplify and optimize our expression</li>
+  <li><code>partial</code> to partially evaluate our expression, given the value of some variables</li>
+  <li><code>dependencies</code> to retrieve not yet resolved variables from our expression</li>
+</ul>
+
+<h2 id="reminder-recursion-schemes">Reminder: recursion schemes</h2>
+
+<p>Looking at our interpreters, we noticed in our previous post that they all had in common the need to traverse the full AST. We used Catamorphisms to factorize this concern out of our interpreters.</p>
+
+<p>This section is a short overview of what Catamorphism are for and how we implemented them in C++. You can skip it if you feel comfortable with the notion already.</p>
+
+<h3 id="open-recursion-on-types">Open recursion on types</h3>
+
+<p>To use Catamorphisms, we first need to generalize our Arithmetic <code>expression</code> and make it an open recursive data type: <code>expression_r</code> templated on a parameter type <code>R</code>, which represents the type of the sub-expressions.</p>
+
+<pre><code class="language-cpp">using nb = int;
+using id = std::string;
+
+struct add_tag {};
+struct mul_tag {};
+
+template&lt;typename Tag, typename R&gt;
+struct op
+{
+   op() = default;
+
+   template&lt;typename Range&gt;
+   explicit op (Range const&amp; rng) : m_rands(rng.begin(), rng.end()) {}
+   
+   std::vector&lt;R&gt; const&amp; rands() const { return m_rands; }
+   
+private:
+   std::vector&lt;R&gt; m_rands;
+};
+
+template&lt;typename R&gt; using add_op = op&lt;add_tag, R&gt;;
+template&lt;typename R&gt; using mul_op = op&lt;mul_tag, R&gt;;
+
+template&lt;typename R&gt;
+using expression_r = boost::variant&lt;int, id, add_op&lt;R&gt;, mul_op&lt;R&gt;&gt;;
+</code></pre>
+
+<p>An expression of our DSL is then defined such as the template parameter <code>R</code> is itself an expression. In more formal terms, <code>expression</code> is the fixed point of the <code>expression_r</code> type. We can compute it using CRTP and <code>boost::recursive_wrapper</code>.</p>
+
+<pre><code class="language-cpp">struct expression
+   : boost::recursive_wrapper&lt;expression_r&lt;expression&gt;&gt;
+{
+   using boost::recursive_wrapper&lt;expression_r&lt;expression&gt;&gt;::recursive_wrapper;
+};
+</code></pre>
+
+<h3 id="functor-instance">Functor instance</h3>
+
+<p>We made our <code>expression_r</code> type an instance of a Functor by implementing a <code>fmap</code> function for our type. Note that by Functor here, we mean the <a href="https://en.wikipedia.org/wiki/Functor">mathematical construct</a>, and not function objects.</p>
+
+<p>The transformation map given to fmap applies on the template parameter of the <code>expression_r</code> and may modify its type. In other words, <code>fmap</code> allows to transform the sub-expressions.</p>
+
+<pre><code class="language-cpp">template&lt;typename A, typename M&gt;
+auto fmap(M map, expression_r&lt;A&gt; const&amp; e)
+{
+   using B = decltype(map(std::declval&lt;A&gt;()));
+   using Out = expression_r&lt;B&gt;;
+   
+   if (auto* o = get_as_add(e))
+      return Out(add_op&lt;B&gt;(o-&gt;rands() | transformed(map)));
+      
+   if (auto* o = get_as_mul(e))
+      return Out(mul_op&lt;B&gt;(o-&gt;rands() | transformed(map)));
+   
+   if (auto* i = get_as_cst(e)) return Out(*i);
+   if (auto* v = get_as_var(e)) return Out(*v);
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<p><em>Note: because the function provided to fmap can have different types as input and output, the type of the template parameter of expression_r can change under fmap, and with it, the nature of the recursion.</em></p>
+
+<h3 id="generic-tree-traversal">Generic tree traversal</h3>
+
+<p>We then defined the <code>cata</code> function, which implements the Catamorphism recursion scheme. It takes what we will call an <code>algebra</code> as parameter, and returns a transformation on a whole AST. The <code>algebra</code> is a function that takes an <code>expression_r</code> templated on <code>Out</code>, and outputs an Out value.</p>
+
+<pre><code class="language-cpp">// Catamorphism algebra
+Out catamorphism_algebra(expression_r&lt;Out&gt; const&amp; e);
+</code></pre>
+
+<p>The result of <code>cata</code> on the algebra (curried) is a function that applies on a full expression and returns an <code>Out</code> value:</p>
+
+<pre><code class="language-cpp">template&lt;typename Out, typename Algebra&gt;
+Out cata(Algebra f, expression const&amp; ast)
+{
+   return f(
+      fmap(
+         [f](expression const&amp; e) -&gt; Out { return cata&lt;Out&gt;(f, e); },
+         ast.get()));
+}
+</code></pre>
+
+<p>For instance, the following <code>print_alg</code> algebra transforms an <code>expression_r</code> templated on string into a string. Its goal is to implement a “pretty print” of the expression at one stage of the expression alone.</p>
+
+<pre><code class="language-cpp">template&lt;typename Tag&gt;
+std::string print_op(op&lt;Tag, std::string&gt; const&amp; e, std::string const&amp; op_repr)
+{
+   return std::string("(") + op_repr + " " + boost::algorithm::join(e.rands(), " ") + ")";
+}
+
+std::string print_alg(expression_r&lt;std::string&gt; const&amp; e)
+{
+   if (auto* o = get_as_add(e)) return print_op(*o, "+");
+   if (auto* o = get_as_mul(e)) return print_op(*o, "*");
+   if (auto* i = get_as_cst(e)) return std::to_string(*i);
+   if (auto* v = get_as_var(e)) return *v;
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<p>Given to <code>cata</code>, it will become an function that transforms a complete expression into a string, basically being promoted to operate on all stages of the expression.</p>
+
+<pre><code class="language-cpp">expression e = add({
+   cst(1),
+   cst(2),
+   mul({cst(0), var("x"), var("y")}),
+   mul({cst(1), var("y"), add({cst(2), var("x")})}),
+   add({cst(0), var("x")})
+   });
+
+std::cout &lt;&lt; para&lt;std::string&gt;(print_infix, e) &lt;&lt; std::endl;
+
+// Outputs =&gt;
+1 + 2 + 0 * x * y + 1 * y * (2 + x) + 0 + x
+</code></pre>
+
+<h2 id="the-use-case-that-breaks-the-pattern">The use case that breaks the pattern</h2>
+
+<p>Every single technique we use in Software Engineering has its limits. Outside of these limits, the technique will either not apply or might not be the best tool for the job. Catamorphisms are no exception to this rule.</p>
+
+<p>Because Catamorphisms are a way to factorize a particular recursion scheme, it cannot apply for recursions that do not follow the given pattern. We will now explore one use case that demonstrates these limits.</p>
+
+<h3 id="infix-notation">Infix notation</h3>
+
+<p>Let us imagine that the client of our arithmetic DSL does not like the prefix notation of our pretty print function. Instead, he would like the arithmetic expressions to be pretty printed in infix notation. For example, <code>1 + y + x * 3</code> instead of <code>(+ 1 y (* x 3))</code>.</p>
+
+<p>Now, and contrary to the prefix notation which follows a pretty simple parenthesizing scheme, pretty printing in infix notation requires us to be careful. A wrong use of parentheses could change the meaning of the expression.</p>
+
+<h3 id="a-first-attempt">A first attempt</h3>
+
+<p>As a first approximation, we could use the following strategy for the placement of the parentheses in our infix notation:</p>
+
+<ul>
+  <li>Systematically surround the arguments of a multiplication with parentheses</li>
+  <li>Never surround the arguments of an addition with parentheses</li>
+</ul>
+
+<p>Implementing the pretty printer that follows this strategy can be done using Catamorphisms. We use Boost to make the code simpler:</p>
+
+<pre><code class="language-cpp">std::string print_infix_op_bad(op&lt;add_tag, std::string&gt; const&amp; e)
+{
+   return boost::algorithm::join(e.rands(), " + ");
+}
+
+std::string with_parens(std::string const&amp; s)
+{
+   return std::string("(") + s + ")";
+}
+
+std::string print_infix_op_bad(op&lt;mul_tag, std::string&gt; const&amp; e)
+{
+   return boost::algorithm::join(e.rands() | transformed(with_parens), " * ");
+}
+
+std::string print_infix_bad(expression_r&lt;std::string&gt; const&amp; e)
+{
+   if (auto* o = get_as_add(e)) return print_infix_op_bad(*o);
+   if (auto* o = get_as_mul(e)) return print_infix_op_bad(*o);
+   if (auto* i = get_as_cst(e)) return std::to_string(*i);
+   if (auto* v = get_as_var(e)) return *v;
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<p>We can try this first implementation on our test arithmetic expression:</p>
+
+<pre><code class="language-cpp">expression e = add({
+   cst(1),
+   cst(2),
+   mul({cst(0), var("x"), var("y")}),
+   mul({cst(1), var("y"), add({cst(2), var("x")})}),
+   add({cst(0), var("x")})
+   });
+
+std::cout &lt;&lt; cata&lt;std::string&gt;(print_infix_bad, e) &lt;&lt; std::endl;
+
+// Outputs =&gt;
+1 + 2 + (0) * (x) * (y) + (1) * (y) * (2 + x) + 0 + x
+</code></pre>
+
+<p>What we get is is a correct result: the pretty printed expression has indeed the right meaning. But there are so much unneeded parentheses that the expression is really hard to read. We have to do much better.</p>
+
+<h3 id="improving-parenthesizing">Improving parenthesizing</h3>
+
+<p>To get better results, we need our infix notation to avoid adding useless pairs of parentheses. We know how to fix this: a multiplication only needs to add parentheses around sub-expressions that correspond to additions.</p>
+
+<p>Unfortunately, Catamorphisms are not a powerful enough recursion scheme to implement this logic. The algebra given to the Catamorphism has no access to the sub-expressions, only their resulting string.</p>
+
+<p>As a consequence, there is no way to know whether the expression was previously an addition (except by parsing it, which would truly be awful). The Catamorphism has failed us here: we need to turn to a different recursion scheme.</p>
+
+<h2 id="from-catamorphism-to-paramorphism">From catamorphism to paramorphism</h2>
+
+<p>The previous use case demonstrated us that we need the information on whether a sub-expression is an addition when dealing with the multiplication.</p>
+
+<p>We will turn to the recursion scheme known as <a href="https://en.wikipedia.org/wiki/Paramorphism">Paramorphism</a>, which is like a Catamorphism but with added contextual information.</p>
+
+<h3 id="paramorphisms">Paramorphisms</h3>
+
+<p>Paramorphisms are pretty close to Catamorphisms. The goal is identical: it turns a local transformation on an open recursive data structure into a global transformation on the fixed point of this data structure.</p>
+
+<p>The difference is the prototype of the algebra given as parameter to the recursion scheme. Instead of taking the open recursive type parameterized on the output type of the transformation, the algebra takes a an open recursive type parameterized on a pair:</p>
+
+<ul>
+  <li>The first element of the pair is the output of the sub-expression transformation</li>
+  <li>The second element of the pair is the sub-expression before the transformation</li>
+</ul>
+
+<p>In more concrete terms, and applied to our arithmetic expression, here are the prototypes for the algebra of catamorphism and paramorphism:</p>
+
+<pre><code class="language-cpp">// CATAMORPHISM
+Out catamorphism_algebra(
+  expression_r&lt;Out&gt; const&amp; e);
+
+// PARAMORPHISM
+Out paramorphism_algebra(
+  expression_r&lt;std::pair&lt;Out, expression const*&gt;&gt; const&amp; e);
+</code></pre>
+
+<p>The second element of the pair is the contextual information. In our specific case, it will provide us with the information about the sub-expression needed to make the right parenthesizing choice.</p>
+
+<h3 id="paramorphism-implementation">Paramorphism implementation</h3>
+
+<p>We will now implement the <code>para</code> function, whose goal is to transform a local algebra into a global transformation on an arithmetic expression.</p>
+
+<p>The implementation is very similar to the one of the Catamorphism. The only modification concerns the lambda provided to the <code>fmap</code> function, which needs to return a pair instead of a single value:</p>
+
+<pre><code class="language-cpp">template&lt;typename Out, typename Algebra&gt;
+Out para(Algebra f, expression const&amp; ast)
+{
+   return f(
+      fmap(
+         [f](expression const&amp; e) -&gt; std::pair&lt;Out, expression const*&gt; {
+            return { para&lt;Out&gt;(f, e), &amp;e };
+         },
+         ast.get()));
+}
+</code></pre>
+
+<h3 id="example-implementing-the-infix-notation">Example: implementing the infix notation</h3>
+
+<p>We now have enough contextual information to implement our infix notation properly. For each sub-expression of addition and multiplication, our algebra has access to:</p>
+
+<ul>
+  <li>The pretty printed sub-expression (first argument of the pair)</li>
+  <li>The sub-expression itself (second argument of the pair)</li>
+</ul>
+
+<p>We can therefore implement the pretty printing of the multiplication such that it adds parentheses around addition sub-expressions only.</p>
+
+<pre><code class="language-cpp">std::string print_op_infix(op&lt;add_tag, std::pair&lt;std::string, expression const*&gt;&gt; const&amp; e)
+{
+   auto fst = [](auto const&amp; e) { return e.first; }; 
+   return boost::algorithm::join(e.rands() | transformed(fst), " + ");
+}
+
+std::string print_op_infix(op&lt;mul_tag, std::pair&lt;std::string, expression const*&gt;&gt; const&amp; e)
+{
+   auto wrap_addition = [](auto const&amp; sub_expr) {
+      if (get_as_add(sub_expr.second-&gt;get()))
+         return with_parens(sub_expr.first);
+      return sub_expr.first;
+   };
+   return boost::algorithm::join(e.rands() | transformed(wrap_addition), " * ");
+}
+
+std::string print_infix(expression_r&lt;std::pair&lt;std::string, expression const*&gt;&gt; const&amp; e)
+{
+   if (auto* o = get_as_add(e)) return print_op_infix(*o);
+   if (auto* o = get_as_mul(e)) return print_op_infix(*o);
+   if (auto* i = get_as_cst(e)) return std::to_string(*i);
+   if (auto* v = get_as_var(e)) return *v;
+   throw_missing_pattern_matching_clause();
+}
+</code></pre>
+
+<p>We can try this second implementation on our test arithmetic expression. This result is clearly much better. The resulting infix notation has no unnecessary parentheses left:</p>
+
+<pre><code class="language-cpp">expression e = add({
+   cst(1),
+   cst(2),
+   mul({cst(0), var("x"), var("y")}),
+   mul({cst(1), var("y"), add({cst(2), var("x")})}),
+   add({cst(0), var("x")})
+   });
+
+std::cout &lt;&lt; para&lt;std::string&gt;(print_infix, e) &lt;&lt; std::endl;
+
+// Outputs =&gt;
+1 + 2 + 0 * x * y + 1 * y * (2 + x) + 0 + x
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>This was the second post dedicated to the implementation of the recursion schemes often used in Haskell into C++.</p>
+
+<p>Through a motivating use case, we discovered the limits of the Catamorphism recursion scheme, and learned about a new strictly more powerful one: Paramorphism.</p>
+
+<p>Although typically unused in C++, we managed to provide a concise implementation of it. The result is clearly not as short and beautiful than in Haskell, but has the merit to show that it is not outside of the expressiveness range of C++.</p>
+
+<p>You can access the full code of the DSL, along with all its associated interpreters, in <a href="https://gist.github.com/deque-blog/d683c26256d9724fc9edadab45c2cc08">this Gist</a> or alternatively in <a href="http://ideone.com/hhCNvK">Ideone</a>.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2017-03-31T00:00:00+00:00">March 31, 2017</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+  
+    <a href="https://twitter.com/intent/tweet?via=quduval&text=Paramorph+your+DSL+%28C%2B%2B%29%20%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  
+    <!--
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+    -->
+    
+    <a href="https://www.reddit.com/submit?url=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html&title=Paramorph+your+DSL+%28C%2B%2B%29" class="btn" style="background-color: #ff4500; color: white" title=" Reddit"><i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> Reddit</span></a>
+
+    <a href="http://news.ycombinator.com/submitlink?u=%2Fblog%2F2017%2F03%2F31%2Fparamorph-dsl-cpp.html&t=Paramorph your DSL (C++)" class="btn" style="background-color: #ff6600; color: white"  title=" Hackernews"><i class="fab fa-fw fa-hacker-news" aria-hidden="true"></i><span> Hacker News</span></a>
+
+</section>
+
+      
+<div class="post_navi_hr">&nbsp;</div>
+<hr class="post_navi_hr">
+<div class="post_navi"><a class="post_navi-item nav_prev" href="/blog/2017/03/10/building-clojure-game-3.html" title="Building a Clojurescript Game Logic">
+    <div class="post_navi-arrow">&lt;</div><div class="post_navi-label">Previous Post</div><div><span class="post_navi-title">Building a Clojurescript Game Logic</span></div>
+  </a><a class="post_navi-item nav_next" href="/blog/2017/04/04/std-permuration-complexity.html" title="Lost in std::is_permutation complexity">
+    <div class="post_navi-arrow">&gt;</div><div class="post_navi-label">Next Post</div><div><span class="post_navi-title">Lost in std::is_permutation complexity</span></div>
+  </a></div>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="giscus-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/09/05/statistical-gender-bias.html" rel="permalink">Statistical gender bias
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">I recently stumbled on a debate where J. Peterson argues that the gender pay gap is mostly not due to gender bias. Let’s see what’s wrong with his argument.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-09-05T00:00:00+00:00">September 5, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/19/perplexity.html" rel="permalink">Understanding perplexity and its relation to cross-entropy and compression
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Modern conditional and unconditional language models often report their perplexity as validation metrics. Let’s see what it means.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-19T00:00:00+00:00">June 19, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/06/16/lm-joint-probability.html" rel="permalink">Auto-regressive language models don’t necessarily sample the most probable sentences
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Have you even tried to sample greedily from a language model. It’s not a good idea. Let’s discuss why.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-06-16T00:00:00+00:00">June 16, 2022</time>
+      
+        &bull; machine-learning
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/blog/2022/05/24/cycling-drag-force.html" rel="permalink">How wind affects your speed on a bike
+</a>
+      
+    </h2>
+    
+        <p class="archive__item-excerpt" itemprop="description">Let’s look at how the wind affect your speed on a bike, the diminishing impact of power, and why you feel the drag suddenly passed a certain speed.
+</p>
+    
+    
+<p class="page__meta">
+
+  
+    
+    <span class="page__meta-date">
+      <i class="far fa-calendar-alt" aria-hidden="true"></i>
+      
+      <time datetime="2022-05-24T00:00:00+00:00">May 24, 2022</time>
+      
+        &bull; random-rambling
+      
+    </span>
+  
+
+  
+
+  
+</p>
+
+  </article>
+</div>
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+          <li><a href="https://github.com/QuentinDuval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/quduval" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/quentin-duval-53ba6576/" rel="nofollow noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Double Ended Queue. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'G-RRHHYN266B']);
+  
+    _gaq.push(['_gat._anonymizeIp']);
+  
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function () {
+    var commentContainer = document.querySelector('#giscus-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://giscus.app/client.js');
+    script.setAttribute('data-repo', 'quentinduval/quentinduval.github.io');
+    script.setAttribute('data-repo-id', 'MDEwOlJlcG9zaXRvcnk3MzUyMDE3Nw==');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDOBGHUMc4CBKf3');
+    script.setAttribute('data-mapping', 'url');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-theme', 'light');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+  
+
+
+
+
+
+  </body>
+</html>
